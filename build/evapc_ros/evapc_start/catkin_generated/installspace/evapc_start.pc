@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/install
+
+Name: evapc_start
+Description: Description of evapc_start
+Version: 0.0.6
+Cflags: 
+Libs: -L/home/zhang/catkin_ws/install/lib 
+Requires: 

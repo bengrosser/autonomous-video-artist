@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/devel
+
+Name: gazebo_msgs
+Description: Description of gazebo_msgs
+Version: 2.4.13
+Cflags: -I/home/zhang/catkin_ws/devel/include
+Libs: -L/home/zhang/catkin_ws/devel/lib 
+Requires: message_runtime std_msgs trajectory_msgs geometry_msgs sensor_msgs std_srvs

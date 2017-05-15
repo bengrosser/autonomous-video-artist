@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/devel
+
+Name: evarobot_slam
+Description: Description of evarobot_slam
+Version: 0.0.6
+Cflags: 
+Libs: -L/home/zhang/catkin_ws/devel/lib 
+Requires: 
