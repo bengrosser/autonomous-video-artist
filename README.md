@@ -21,9 +21,9 @@ in each of them.
 
 On PC:
 
-1. Git clone the repository, DON'T change the name of the folder. 
+1. Git clone the repository. 
 
-    $git clone https://gitlab.engr.illinois.edu/xzhan140/catkin_ws
+    $git clone https://github.com/bengrosser/autonomous-video-artist
 
 2. Rename the folder name from turtlebot to catkin_ws. We are using CMake, all the code must be in the catkin_ws folder.
 
@@ -35,10 +35,14 @@ On PC:
 
     $catkin_make
 
-5. Run the code
+5. Source the setup bash
+
+    $source devel/setup.bash
+
+6. Run the code
 
     $rosrun turtlebot navigation
 
-6. To stop the robot just press ctrl+c to break the process
+7. To stop the robot just press ctrl+c to break the process
 
 
