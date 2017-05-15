@@ -25,6 +25,7 @@ class AutoNav
         //std::list<int> frontSamples;
         bool move_forward;
         bool bump;
+        int which_bumper;
         
 
     public:
@@ -120,7 +121,22 @@ class AutoNav
                         velocity.publish(decision);
                     }
                     start = ros::Time::now();
-                    decision.angular.z = DRIVE_ANGULARSPEED;
+                    //choose right and left by bumper
+                    int direction = 1;
+                    if(which_bumper == 1){
+                        int tmp = rand()%2;
+                        if(tmp == 0)
+                            direction = 1;
+                        else
+                            direction = -1;
+                    }
+                    else if(which_bumper == 0){
+                        direction = -1;
+                    }
+                    else{
+                        direction = 1;
+                    }
+                    decision.angular.z = DRIVE_ANGULARSPEED*direction;
                     decision.linear.x = 0;
                     while(ros::Time::now() - start < ros::Duration(3.0)){
                         velocity.publish(decision);
@@ -133,8 +149,15 @@ class AutoNav
                     decision.linear.x=DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
                 }
-                else
+                else{
+                    int direction = rand()%2;
+                    //choose right and left randomly
+                    /*if(direction == 0)
+                        decision.angular.z = DRIVE_ANGULARSPEED;
+                    else
+                        decision.angular.z = -DRIVE_ANGULARSPEED;*/
                     decision.angular.z = DRIVE_ANGULARSPEED;
+                }
                 if(DRIVE)
                     velocity.publish(decision);
             }
@@ -144,12 +167,14 @@ class AutoNav
             if(msg.state){
                 bump = true;
                 std::cout<<"bump true"<<std::endl;
-                sleep(5);
+                which_bumper = msg.bumper;
+                //sleep(5);
             }
             /*else{
                 bump = false;
                 std::cout<<"bump false"<<std::endl;
             }*/
+            
         }
 };
 
