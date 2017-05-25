@@ -1,6 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
- #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:54:32 2017
+ #Creation Date : 24-05-2017 
+ #Last Modified : Thu May 25 14:23:31 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -152,7 +153,8 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 white = cv2.line(white, (end_y, end_x), (j,i), color, 2)
-    cv2.imwrite("result.jpg", white)
+    # cv2.imwrite("result.jpg", white)
+    return white
 
 
 
@@ -166,34 +168,39 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 
 
+#Test with static images
 #It is very important to convert the colors from BGR to Gray
-img = cv2.imread("reference.jpg")
-img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-img_blur = gaussian_blur(img.copy())
-sobelx, sobely = sobel_filter(img_blur)
-gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-visualize(img_blur, gradient_intensity, raw_direction_indegree)
+# img = cv2.imread("reference.jpg")
+# img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+# img_blur = gaussian_blur(img.copy())
+# sobelx, sobely = sobel_filter(img_blur)
+# gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+# visualize(img_blur, gradient_intensity, raw_direction_indegree)
 
-# camera = cv2.VideoCapture("walk.mp4")
-# counter = 0
-# fourcc = cv2.VideoWriter_fourcc(*'avc1')
-# out = cv2.VideoWriter('output.avi',fourcc, 25.0, (480,270))
-# while True:
-    # grabbed, frame = camera.read()
-    # print np.shape(frame)
-    # if grabbed:
-        # cv2.imshow('image', frame)
-        # detectLines(frame.copy())
-        # dense_montionEffects(frame, counter, out)
-        # counter += 1
-        # feature_detection(frame)
-        # img1 = cv2.imread("exp.jpg")TypeError: Required argument 'outImg' (pos 6) not found
-        # img2 = cv2.imread("exp1.jpg")
-        # feature_matching(img1, img2)
-        # canny(frame.copy())
-        # contours(frame.copy())
-    # else:
-        # print("No video feed available")
+
+#Now test with videos
+#Using the recommended format from the documents
+camera = cv2.VideoCapture("2001.mp4")
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+while True:
+    grabbed, frame = camera.read()
+    if grabbed:
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        img_blur = gaussian_blur(img.copy())
+        sobelx, sobely = sobel_filter(img_blur)
+        gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+        result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
+        out.write(result)
+
+        cv2.imshow('result', result)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    else:
+        print("No video feed available")
+camera.release()
+out.release()
+cv2.destroyAllWindows()
 
 
 
