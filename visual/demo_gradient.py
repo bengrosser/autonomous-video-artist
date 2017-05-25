@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 15:42:10 2017
+ #Last Modified : Thu May 25 15:46:27 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -124,7 +124,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
     white = np.zeros((x,y,3), np.uint8)
     # colors = np.random.randint(0,255,(6,3))
     colors = np.array([[0,190,200],[200,70,70],[90,230,140],[120,80,220],[220,0,80],[200,200,60]])
-    print colors
+    # print colors
     for i in range(x):
         for j in range(y):
             white[i][j] = (255,0,0)
@@ -155,8 +155,8 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 white = cv2.line(white, (end_y, end_x), (j,i), color, 2)
-    cv2.imwrite("result.jpg", white)
-    # return white
+    # cv2.imwrite("result.jpg", white)
+    return white
 
 
 
@@ -172,7 +172,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 #Test with static images
 #It is very important to convert the colors from BGR to Gray
-# img = cv2.imread("referecne.jpg")
+# img = cv2.imread("reference.jpg")
 # cv2.imshow("image", img)
 # cv2.waitKey(0)
 # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -182,8 +182,8 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 # visualize(img_blur, gradient_intensity, raw_direction_indegree)
 
 
-Now test with videos
-Using the recommended format from the documents
+# Now test with videos
+# Using the recommended format from the documents
 camera = cv2.VideoCapture("clip2.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
