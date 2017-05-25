@@ -186,7 +186,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 # Using the recommended format from the documents
 camera = cv2.VideoCapture("clip2.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+out = cv2.VideoWriter('output.avi',fourcc, 25.0, (960,540))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
