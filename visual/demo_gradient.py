@@ -172,6 +172,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 #It is very important to convert the colors from BGR to Gray
 img = cv2.imread("reference.jpg")
 cv2.imshow("image", img)
+cv2.waitKey(0)
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img_blur = gaussian_blur(img.copy())
 sobelx, sobely = sobel_filter(img_blur)
