@@ -1,6 +1,6 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
- #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:49:43 2017
+ #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:54:32 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -152,7 +152,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 white = cv2.line(white, (end_y, end_x), (j,i), color, 2)
-    cv2.imwrite("hahah.jpg", white)
+    cv2.imwrite("result.jpg", white)
 
 
 
