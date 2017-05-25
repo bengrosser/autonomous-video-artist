@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 14:23:31 2017
+ #Last Modified : Thu May 25 14:34:15 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -180,7 +180,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 #Now test with videos
 #Using the recommended format from the documents
-camera = cv2.VideoCapture("2001.mp4")
+camera = cv2.VideoCapture("clip.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
 while True:
