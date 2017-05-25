@@ -123,8 +123,8 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
     print "start process the frame"
     x, y = np.shape(img) 
     white = np.zeros((x,y,3), np.uint8)
-    # colors = np.random.randint(0,255,(6,3))
-    colors = np.array([[0,190,200],[200,70,70],[90,230,140],[120,80,220],[220,0,80],[200,200,60]])
+    #colors = np.random.randint(0,255,(6,3))
+    colors = np.array([[0,190,200],[200,70,70],[51,204,233],[120,80,220],[220,0,80],[200,200,60]])
     # print colors
     for i in range(x):
         for j in range(y):
@@ -187,16 +187,17 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 # Using the recommended format from the documents
 camera = cv2.VideoCapture("clip3.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi',fourcc, 25.0, (960,540))
+out = cv2.VideoWriter('output_canny.avi',fourcc, 25.0, (960,540))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        # cv2.imshow("frame", frame)
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        img_blur = gaussian_blur(img.copy())
-        sobelx, sobely = sobel_filter(img_blur)
-        gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-        result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
+        #cv2.imshow("frame", frame)
+        #img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        #img_blur = gaussian_blur(img.copy())
+        #sobelx, sobely = sobel_filter(img_blur)
+        #gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+        #result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
+        result = cv2.Canny(frame, 100, 200)
         out.write(result)
         # cv2.imshow('result', result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
