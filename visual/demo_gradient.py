@@ -120,6 +120,7 @@ def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
 #Based on the intensity of the pixel and the direction of the gradient
 #we can visualize the intermediate results from the canny edge algorithm
 def visualize(img, gradient_intensity, raw_direction_indegree): 
+    print "start process the frame"
     x, y = np.shape(img) 
     white = np.zeros((x,y,3), np.uint8)
     # colors = np.random.randint(0,255,(6,3))
@@ -184,7 +185,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 # Now test with videos
 # Using the recommended format from the documents
-camera = cv2.VideoCapture("clip2.mp4")
+camera = cv2.VideoCapture("clip3.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.avi',fourcc, 25.0, (960,540))
 while True:
@@ -202,6 +203,7 @@ while True:
             break
     else:
         print("No video feed available")
+        break
 camera.release()
 out.release()
 cv2.destroyAllWindows()
