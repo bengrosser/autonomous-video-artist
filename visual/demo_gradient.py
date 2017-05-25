@@ -1,6 +1,6 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
- #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:48:06 2017
+ #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:49:43 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -71,7 +71,7 @@ def get_gradients(sobelx, sobely):
     raw_direction_indegree = np.rad2deg(raw_direction_inradiant)
     for x in np.nditer(raw_direction_indegree, op_flags=['readwrite']):
         if math.isnan(x):
-            x[...] = 90Ryan Lochte
+            x[...] = 90
         if is_neg_zero(x):
             x[...] = -1
         if x == 0:
