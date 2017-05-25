@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 14:35:53 2017
+ #Last Modified : Thu May 25 14:37:17 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -186,7 +186,7 @@ out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        cv2.imshow(frame)
+        cv2.imshow(frame, "frame")
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         img_blur = gaussian_blur(img.copy())
         sobelx, sobely = sobel_filter(img_blur)
