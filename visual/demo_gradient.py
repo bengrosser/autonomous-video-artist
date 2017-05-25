@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 14:39:58 2017
+ #Last Modified : Thu May 25 14:45:11 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -153,8 +153,8 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 white = cv2.line(white, (end_y, end_x), (j,i), color, 2)
-    # cv2.imwrite("result.jpg", white)
-    return white
+    cv2.imwrite("result.jpg", white)
+    # return white
 
 
 
@@ -170,23 +170,24 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 #Test with static images
 #It is very important to convert the colors from BGR to Gray
-# img = cv2.imread("reference.jpg")
-# img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-# img_blur = gaussian_blur(img.copy())
-# sobelx, sobely = sobel_filter(img_blur)
-# gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-# visualize(img_blur, gradient_intensity, raw_direction_indegree)
+img = cv2.imread("reference.jpg")
+cv2.imshow("image", img)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+img_blur = gaussian_blur(img.copy())
+sobelx, sobely = sobel_filter(img_blur)
+gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+visualize(img_blur, gradient_intensity, raw_direction_indegree)
 
 
 #Now test with videos
 #Using the recommended format from the documents
-camera = cv2.VideoCapture("clip.mp4")
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
-while True:
-    grabbed, frame = camera.read()
-    if grabbed:
-        cv2.imshow("frame", frame)
+# camera = cv2.VideoCapture("clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+# while True:
+    # grabbed, frame = camera.read()
+    # if grabbed:
+        # cv2.imshow("frame", frame)
         # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # img_blur = gaussian_blur(img.copy())
         # sobelx, sobely = sobel_filter(img_blur)
@@ -197,11 +198,11 @@ while True:
         # cv2.imshow('result', result)
         # if cv2.waitKey(1) & 0xFF == ord('q'):
             # break
-    else:
-        print("No video feed available")
-camera.release()
-out.release()
-cv2.destroyAllWindows()
+    # else:
+        # print("No video feed available")
+# camera.release()
+# out.release()
+# cv2.destroyAllWindows()
 
 
 
