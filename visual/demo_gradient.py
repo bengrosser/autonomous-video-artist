@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 15:46:27 2017
+ #Last Modified : Thu May 25 15:47:43 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -190,15 +190,14 @@ out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        cv2.imshow("frame", frame)
+        # cv2.imshow("frame", frame)
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         img_blur = gaussian_blur(img.copy())
         sobelx, sobely = sobel_filter(img_blur)
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
         out.write(result)
-
-        cv2.imshow('result', result)
+        # cv2.imshow('result', result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
