@@ -1,13 +1,11 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
- #Creation Date : 24-05-2017
- #Last Modified : Wed May 24 18:34:05 2017
+ #Creation Date : 24-05-2017 #Last Modified : Thu May 25 13:48:06 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
 # This is a demo that shows and visualizes the procedure of how computer determines the edges
 # in modern computer vision libraries
-
 
 import cv2
 import numpy as np
@@ -73,7 +71,7 @@ def get_gradients(sobelx, sobely):
     raw_direction_indegree = np.rad2deg(raw_direction_inradiant)
     for x in np.nditer(raw_direction_indegree, op_flags=['readwrite']):
         if math.isnan(x):
-            x[...] = 90
+            x[...] = 90Ryan Lochte
         if is_neg_zero(x):
             x[...] = -1
         if x == 0:
@@ -169,12 +167,12 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 
 #It is very important to convert the colors from BGR to Gray
-img = cv2.imread("memory.jpg")
+img = cv2.imread("reference.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 img_blur = gaussian_blur(img.copy())
 sobelx, sobely = sobel_filter(img_blur)
 gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-visualize(img_blur, gradient_inte/Users/frankshammer42nsity, raw_direction_indegree)
+visualize(img_blur, gradient_intensity, raw_direction_indegree)
 
 # camera = cv2.VideoCapture("walk.mp4")
 # counter = 0

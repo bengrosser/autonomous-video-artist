@@ -16,6 +16,19 @@ def showPic(img):
     plt.show()
 
 
+def canny(img):
+    edges = cv2.Canny(img,100,200)
+    showPic(edges)
+
+
+def contours(img):
+    imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    ret,thresh = cv2.threshold(imgray,127,255,0)
+    image, contours, hierarchy = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    img = cv2.drawContours(img, contours, -1, (0,255,0), 3)
+    showPic(img)
+
+
 def detectLines(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     edges = cv2.Canny(gray, 50, 150, apertureSize = 3)
@@ -144,8 +157,8 @@ def feature_matching(img1, img2):
 
 camera = cv2.VideoCapture("walk.mp4")
 counter = 0
-fourcc = cv2.VideoWriter_fourcc(*'avc1')
-out = cv2.VideoWriter('output.avi',fourcc, 25.0, (480,270))
+# fourcc = cv2.VideoWriter_fourcc(*'avc1')
+# out = cv2.VideoWriter('output.avi',fourcc, 25.0, (480,270))
 
 
 
@@ -155,12 +168,14 @@ while True:
     if grabbed:
         # cv2.imshow('image', frame)
         # detectLines(frame.copy())
-        dense_montionEffects(frame, counter, out)
-        counter += 1
+        # dense_montionEffects(frame, counter, out)
+        # counter += 1
         # feature_detection(frame)
         # img1 = cv2.imread("exp.jpg")TypeError: Required argument 'outImg' (pos 6) not found
         # img2 = cv2.imread("exp1.jpg")
         # feature_matching(img1, img2)
+        canny(frame.copy())
+        # contours(frame.copy())
     else:
         print("No video feed available")
 
