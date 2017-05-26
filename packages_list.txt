@@ -1,0 +1,8 @@
+***Make sure that your PC has Ubuntu 14.04 OS installed***
+
+To run this code, you need to install some packages on your PC. 
+
+1. Required ros package. Here is a good reference from turtlebot tutorial: http://wiki.ros.org/turtlebot/Tutorials/indigo/PC%20Installation
+
+2. PCL library 1.8. Here is a good reference: https://github.com/hsean/Capstone-44-Object-Segmentation/wiki/PCL-1.8:-Ubuntu-14.04-Installation-Guide
+
