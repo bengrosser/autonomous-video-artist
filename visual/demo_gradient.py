@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Thu May 25 15:47:43 2017
+ #Last Modified : Fri May 26 19:36:01 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -173,7 +173,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 #Test with static images
 #It is very important to convert the colors from BGR to Gray
-# img = cv2.imread("reference.jpg")
+# img = cv2.imread("exp.jpg")
 # cv2.imshow("image", img)
 # cv2.waitKey(0)
 # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -191,15 +191,12 @@ out = cv2.VideoWriter('output_canny.avi',fourcc, 25.0, (960,540))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        #cv2.imshow("frame", frame)
-        #img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        #img_blur = gaussian_blur(img.copy())
-        #sobelx, sobely = sobel_filter(img_blur)
-        #gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-        #result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
-        result = cv2.Canny(frame, 100, 200)
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        img_blur = gaussian_blur(img.copy())
+        sobelx, sobely = sobel_filter(img_blur)
+        gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+        result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
         out.write(result)
-        # cv2.imshow('result', result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
