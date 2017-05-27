@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Fri May 26 19:36:01 2017
+ #Last Modified : Fri May 26 19:39:34 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -187,7 +187,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 # Using the recommended format from the documents
 camera = cv2.VideoCapture("clip3.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output_canny.avi',fourcc, 25.0, (960,540))
+out = cv2.VideoWriter('output.avi',fourcc, 25.0, (960,540))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
