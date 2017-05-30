@@ -27,7 +27,7 @@ On PC:
 
         $ git clone https://github.com/bengrosser/autonomous-video-artist
 
-2. Create a workspace for catkin on your PC. 
+2. Create a workspace for catkin on your PC. If you are interested in it, here is a catkin tutorial: http://wiki.ros.org/catkin/Tutorials.
 
         $ source /opt/ros/indigo/setup.bash
 
