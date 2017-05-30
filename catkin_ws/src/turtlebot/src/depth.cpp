@@ -12,7 +12,6 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
     //std::cout<<"image width: "<<msg->width<<std::endl; //640
     //image width 640, image height 480
     try{
-    std::cout<<"in try"<<std::endl;
         cv_bridge::CvImageConstPtr cv_ptr;
         cv_ptr = cv_bridge::toCvShare(msg);
 
