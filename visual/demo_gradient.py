@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Fri May 26 19:39:34 2017
+ #Last Modified : Tue May 30 12:17:24 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -185,9 +185,9 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
 
 # Now test with videos
 # Using the recommended format from the documents
-camera = cv2.VideoCapture("clip3.mp4")
+camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('output.avi',fourcc, 25.0, (960,540))
+out = cv2.VideoWriter('matrix_output.avi',fourcc, 23.975850, (142,60))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
