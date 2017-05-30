@@ -25,33 +25,33 @@ On PC:
 
 1. Git clone the repository. 
 
-    $ git clone https://github.com/bengrosser/autonomous-video-artist
+        $ git clone https://github.com/bengrosser/autonomous-video-artist
 
 2. Create a workspace for catkin on your PC. 
 
-    $ source /opt/ros/indigo/setup.bash
+        $ source /opt/ros/indigo/setup.bash
 
-    $ mkdir -p ~/catkin_ws/src
+        $ mkdir -p ~/catkin_ws/src
 
-    $ cd ~/catkin_ws/src
+        $ cd ~/catkin_ws/src
 
-    $ cd ~/catkin_ws/
+        $ cd ~/catkin_ws/
 
-    $ catkin_make
+        $ catkin_make
 
-3. Replace the ~/catkin_ws/src file with autonomous-video-artist/catkin_ws/src .
+3. Replace the ~/catkin_ws/src folder with autonomous-video-artist/catkin_ws/src .
 
 4. Change the directory to the repository folder
 
-    $cd catkin_ws
+        $cd catkin_ws
 
 5. Compile the code
 
-    $catkin_make
+        $catkin_make
 
 6. Source the setup bash
 
-    $source devel/setup.bash
+        $source devel/setup.bash
 
 7. Run the code
 
