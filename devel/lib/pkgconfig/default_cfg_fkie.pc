@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: default_cfg_fkie
-Description: Description of default_cfg_fkie
-Version: 0.7.2
-Cflags: 
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: multimaster_msgs_fkie roslaunch roslib rospy

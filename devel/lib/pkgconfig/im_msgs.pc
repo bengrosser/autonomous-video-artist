@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: im_msgs
-Description: Description of im_msgs
-Version: 0.0.2
-Cflags: -I/home/zhang/catkin_ws/devel/include
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: 

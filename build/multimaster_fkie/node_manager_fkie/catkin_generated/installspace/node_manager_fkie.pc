@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/install
-
-Name: node_manager_fkie
-Description: Description of node_manager_fkie
-Version: 0.7.2
-Cflags: 
-Libs: -L/home/zhang/catkin_ws/install/lib 
-Requires: multimaster_msgs_fkie master_discovery_fkie diagnostic_msgs
