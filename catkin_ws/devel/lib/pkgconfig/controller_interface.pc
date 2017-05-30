@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/devel
+
+Name: controller_interface
+Description: Description of controller_interface
+Version: 0.9.4
+Cflags: -I/home/zhang/catkin_ws/src/ros_control/controller_interface/include
+Libs: -L/home/zhang/catkin_ws/devel/lib 
+Requires: roscpp hardware_interface pluginlib

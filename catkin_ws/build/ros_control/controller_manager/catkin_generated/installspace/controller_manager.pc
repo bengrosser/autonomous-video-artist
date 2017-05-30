@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/install
+
+Name: controller_manager
+Description: Description of controller_manager
+Version: 0.9.4
+Cflags: -I/home/zhang/catkin_ws/install/include
+Libs: -L/home/zhang/catkin_ws/install/lib -lcontroller_manager
+Requires: controller_interface controller_manager_msgs hardware_interface realtime_tools pluginlib

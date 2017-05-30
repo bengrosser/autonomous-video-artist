@@ -1,0 +1,21 @@
+(cl:defpackage multimaster_msgs_fkie-msg
+  (:use )
+  (:export
+   "<SYNCSERVICEINFO>"
+   "SYNCSERVICEINFO"
+   "<LINKSTATESSTAMPED>"
+   "LINKSTATESSTAMPED"
+   "<MASTERSTATE>"
+   "MASTERSTATE"
+   "<SYNCMASTERINFO>"
+   "SYNCMASTERINFO"
+   "<SYNCTOPICINFO>"
+   "SYNCTOPICINFO"
+   "<ROSMASTER>"
+   "ROSMASTER"
+   "<LINKSTATE>"
+   "LINKSTATE"
+   "<CAPABILITY>"
+   "CAPABILITY"
+  ))
+

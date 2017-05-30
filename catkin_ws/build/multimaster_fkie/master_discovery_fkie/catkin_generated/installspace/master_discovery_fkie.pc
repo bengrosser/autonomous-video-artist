@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/install
+
+Name: master_discovery_fkie
+Description: Description of master_discovery_fkie
+Version: 0.7.2
+Cflags: 
+Libs: -L/home/zhang/catkin_ws/install/lib 
+Requires: multimaster_msgs_fkie

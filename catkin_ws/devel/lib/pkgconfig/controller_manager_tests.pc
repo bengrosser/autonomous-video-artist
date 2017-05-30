@@ -1,0 +1,8 @@
+prefix=/home/zhang/catkin_ws/devel
+
+Name: controller_manager_tests
+Description: Description of controller_manager_tests
+Version: 0.9.4
+Cflags: -I/home/zhang/catkin_ws/src/ros_control/controller_manager_tests/include
+Libs: -L/home/zhang/catkin_ws/devel/lib -lcontroller_manager_tests
+Requires: controller_manager controller_interface control_toolbox
