@@ -1,9 +1,4 @@
 #include <ros/ros.h>
-//#include <pcl_ros/point_cloud.h>
-//#include <pcl/point_types.h>
-//#include <pcl/filters/passthrough.h>
-//#include <pcl/filters/voxel_grid.h>
-//#include <pcl/filters/radius_outlier_removal.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
@@ -73,50 +68,6 @@ class AutoNav
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }
 
-
-            /*double CROP_XRADIUS, CROP_YMIN, CROP_YMAX, CROP_ZMIN, CROP_ZMAX, DOWNSAMPLING;
-            int SAMPLE_NUM;
-
-            node.getParamCached("crop_xradius", CROP_XRADIUS);
-            node.getParamCached("crop_ymin", CROP_YMIN);
-            node.getParamCached("crop_ymax", CROP_YMAX);
-            node.getParamCached("crop_zmin", CROP_ZMIN);
-            node.getParamCached("crop_zmax", CROP_ZMAX);
-            node.getParamCached("height_downsampling", DOWNSAMPLING);
-            node.getParamCached("sample_num", SAMPLE_NUM);
-
-            pcl::PassThrough<pcl::PointXYZ> crop;
-            pcl::VoxelGrid<pcl::PointXYZ> downsample;
-            pcl::PointCloud<pcl::PointXYZ>::Ptr downsampled (new pcl::PointCloud<pcl::PointXYZ>);
-            pcl::PointCloud<pcl::PointXYZ>::Ptr frontView(new pcl::PointCloud<pcl::PointXYZ>);
-
-            downsample.setInputCloud(cloud);
-            if(DOWNSAMPLING >= 0)
-                downsample.setLeafSize((float)DOWNSAMPLING, (float)DOWNSAMPLING, (float)DOWNSAMPLING);
-            downsample.filter(*downsampled);
-
-            //crop the point cloud
-            crop.setInputCloud(downsampled);
-            crop.setFilterFieldName("x");
-            crop.setFilterLimits(-CROP_XRADIUS, CROP_XRADIUS);
-            crop.filter(*frontView);
-
-            crop.setInputCloud(frontView);
-            crop.setFilterFieldName("y");
-            crop.setFilterLimits(CROP_YMIN, CROP_YMAX);
-            crop.filter(*frontView);
-
-            crop.setInputCloud(frontView);
-            crop.setFilterFieldName("z");
-            crop.setFilterLimits(CROP_ZMIN, CROP_ZMAX);
-            crop.filter(*frontView);
-
-            
-            if(frontView->size()>0){
-                move_forward = false;
-            }
-            else
-                move_forward = true;*/
             panorama.publish(*downsampled);
             front.publish(*frontView);
         }
