@@ -59,7 +59,7 @@ On PC:
     
         $rosrun turtlebot navigation
 
-    To run the test code for depth image:
+    To run the test code for depth image with visualization:
 
         $rosrun turtlebot depth
 
