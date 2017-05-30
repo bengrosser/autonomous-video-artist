@@ -12,6 +12,7 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
     //std::cout<<"image width: "<<msg->width<<std::endl; //640
     //image width 640, image height 480
     try{
+    //std::cout<<"in try"<<std::endl;
         cv_bridge::CvImageConstPtr cv_ptr;
         cv_ptr = cv_bridge::toCvShare(msg);
 
@@ -22,6 +23,8 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
             depth_img = cv_bridge::toCvShare(msg)->image;
         else if(enc.compare("32FC1") == 0)
             cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
+
+        
         //get raw distance value
         uint16_t z_raw = depth_img.at<uint16_t>(320,240);
         float z_mean = z_raw*0.001;
@@ -33,20 +36,30 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
         std::cout<<"max value: "<<mmax<<". min value"<<mmin<<std::endl;
         int num = countNonZero(depth_img);
         std::cout<<"number of points with non-zero depth: "<<num<<"/307200"<<std::endl;
+        float percent  = ((double)num)/307200.0;
+        std::cout<<"show the percentage: "<<percent<<std::endl;
         /*cv::imshow("foo", depth_img);
         cv::waitKey(1);*/
         //
 
-        double max = 0.0;
+        /*double max = 0.0;
         cv::minMaxLoc(cv_ptr->image, 0, &max, 0, 0);
         cv::Mat normalized;
         cv_ptr->image.convertTo(normalized, CV_32F, 1.0/max, 0);
-
-        //float dist_val = cv_ptr->image.at<float>(100,100);
-        //std::cout<<"point at 100,100: "<<dist_val<<std::endl;
-        
         cv::imshow("foo", normalized);
+        cv::waitKey(1);*/
+
+        //corp the depth image
+        cv::Mat corp_depth = depth_img(cv::Rect_<int>(150,100,340,380));
+        double max = 0.0;
+        cv::minMaxLoc(corp_depth, 0, &max, 0, 0);
+        cv::Mat corp_norm;
+        corp_depth.convertTo(corp_norm, CV_32F, 1.0/max, 0);
+        cv::imshow("foo", corp_norm);
         cv::waitKey(1);
+
+        
+        
     }catch (const cv_bridge::Exception& e){
         ROS_ERROR("cv_bridge exception: %s", e.what());
     }
