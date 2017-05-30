@@ -23,8 +23,8 @@ class AutoNav
         int which_bumper;
         int img_height;
         int img_width;
-        int corp_height;
-        int corp_width;
+        int corp_height; //height of corp_front
+        int corp_width; //width of corp_front
         
 
     public:
@@ -56,12 +56,21 @@ class AutoNav
                 cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,corp_width,corp_height)); //only for the image in front
                 int num = countNonZero(corp_front);
                 float percentage = ((double)num)/((double)corp_width*corp_height);
-                
-                
+                if(percentage < 0.65)  //the threshold could be modified
+                    move_forward = false;
+                else
+                    move_forward = true;
 
-            }catch{
-
-
+                //visualization
+                double max = 0.0;
+                cv::minMaxLoc(corp_front, 0 , &max, 0, 0);
+                cv::Mat corp_norm;
+                corp_depth.convertTo(corp_norm, CV_32F, 1.0/max, 0);
+                cv::imshow("foo", corp_norm);
+                cv::waitKey(1);
+                                
+            }catch (const cv_bridge::Exception& e){
+                ROS_ERROR("cv_bridge exception: %s", e.what());
             }
 
 
@@ -100,15 +109,14 @@ class AutoNav
             crop.setInputCloud(frontView);
             crop.setFilterFieldName("z");
             crop.setFilterLimits(CROP_ZMIN, CROP_ZMAX);
-            crop.filter(*frontView);*/
+            crop.filter(*frontView);
 
             
             if(frontView->size()>0){
                 move_forward = false;
-                //std::cout<<"false"<<std::endl;
             }
             else
-                move_forward = true;
+                move_forward = true;*/
             panorama.publish(*downsampled);
             front.publish(*frontView);
         }
