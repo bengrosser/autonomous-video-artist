@@ -146,6 +146,7 @@ add_definitions(${PCL_DEFINITIONS})
 # add_executable(${PROJECT_NAME}_node src/turtlebot_node.cpp)
 add_executable (navigation src/navigation.cpp)
 add_executable (depth src/depth.cpp)
+add_executable (depth_nav src/depth_nav.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -162,6 +163,7 @@ add_executable (depth src/depth.cpp)
 # )
 target_link_libraries(navigation ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(depth ${catkin_LIBRARIES})
+target_link_libraries(depth_nav ${catkin_LIBRARIES})
 #############
 ## Install ##
 #############
