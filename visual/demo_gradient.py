@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Wed May 31 10:22:30 2017
+ #Last Modified : Wed May 31 10:58:23 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -160,13 +160,12 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
     return white
 
 #Change the color space from BGR to HSV taking consideration of intensity 
-#with saturation
 def change_saturation(result, gradient_intensity):
     hsv = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
     row, collumn = np.shape(gradient_intensity)
     for i in range(row):
         for j in range(collumn):
-            hsv[i][j][1] = gradient_intensity[i][j]
+            hsv[i][j][2] = gradient_intensity[i][j]
     return hsv
             
 
