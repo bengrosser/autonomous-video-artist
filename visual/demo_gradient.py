@@ -216,7 +216,8 @@ while True:
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
         hsv = change_saturation(result, gradient_intensity)
-        out.write(hsv)
+	final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
+        out.write(final_result)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
