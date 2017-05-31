@@ -29,16 +29,13 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
         /*uint16_t z_raw = depth_img.at<uint16_t>(320,240);
         float z_mean = z_raw*0.001;
         std::cout<<"point at 100, 100: "<<z_mean<<std::endl;*/
-        cv::Mat mask = depth_img>0;
+        /*cv::Mat mask = depth_img>0;
         double mmin = 0.0;
         double mmax = 0.0;
         cv::Point min_loc, max_loc;
         cv::minMaxLoc(depth_img, &mmin, &mmax, 0, 0, mask);
-        std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
-        
-        /*cv::imshow("foo", depth_img);
-        cv::waitKey(1);*/
-        //
+        std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;*/
+  
 
         //show the original depth image after normalizing
         /*double max = 0.0;
@@ -50,6 +47,12 @@ void imgcb(const sensor_msgs::Image::ConstPtr& msg){
 
         //corp the depth image
         cv::Mat corp_depth = depth_img(cv::Rect_<int>(180,150,280,310));
+        cv::Mat mask = corp_depth>0;
+        double mmin = 0.0;
+        double mmax = 0.0;
+        //cv::Point min_loc, max_loc;
+        cv::minMaxLoc(corp_depth, &mmin, &mmax, 0, 0, mask);
+        std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
         int num = countNonZero(corp_depth);
         //std::cout<<"number of points with non-zero depth: "<<num<<"/86800"<<std::endl;
         float percent  = ((double)num)/129200.0;

@@ -8,6 +8,8 @@
 
 using namespace std;
 
+static const uint32_t MY_ROS_QUEUE_SIZE = 1000;
+
 class AutoNav
 {
     private:
@@ -24,10 +26,11 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640), corp_height(310), corp_width(280){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640), corp_height(330), corp_width(280){
             ros::MultiThreadedSpinner threads(3);
             //create a thread for vision detection
-            ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
+            std::cout<<"heree??"<<std::endl;
+            ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", MY_ROS_QUEUE_SIZE, &AutoNav::frontEnv, this);
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
@@ -37,7 +40,9 @@ class AutoNav
         }
 
         void frontEnv(const sensor_msgs::Image::ConstPtr& msg){
+            //std::cout<<"frontEnv()"<<std::endl;
             try{
+                //std::cout<<"in try"<<std::endl;
                 cv_bridge::CvImageConstPtr cv_ptr;
                 cv_ptr = cv_bridge::toCvShare(msg);
                 cv::Mat depth_img;
@@ -49,30 +54,42 @@ class AutoNav
 
                 //corp the image  (need some test)
                 cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,corp_width,corp_height)); //only for the image in front
+                cv::Mat mask = corp_front>0;
                 int num = countNonZero(corp_front);
                 float percentage = ((double)num)/((double)corp_width*corp_height);
-                if(percentage < 0.65)  //the threshold could be modified
+                std::cout<<"percentage: "<<percentage<<std::endl;
+                /*if(percentage < 0.65)  //the threshold could be modified
+                    move_forward = false;
+                else
+                    move_forward = true;*/
+
+                double mmin = 0.0;
+                double mmax = 0.0;
+                cv::minMaxLoc(corp_front, &mmin, &mmax, 0, 0, mask);
+                std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
+                if(mmin < 550 || percentage < 0.65)
                     move_forward = false;
                 else
                     move_forward = true;
-
                 //visualization
                 double max = 0.0;
                 cv::minMaxLoc(corp_front, 0 , &max, 0, 0);
                 cv::Mat corp_norm;
-                corp_depth.convertTo(corp_norm, CV_32F, 1.0/max, 0);
+                corp_front.convertTo(corp_norm, CV_32F, 1.0/max, 0);
                 cv::imshow("foo", corp_norm);
                 cv::waitKey(1);
                                 
             }catch (const cv_bridge::Exception& e){
+                std::cout<<"in catch"<<std::endl;
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }
 
-            panorama.publish(*downsampled);
-            front.publish(*frontView);
+            //panorama.publish(*downsampled);
+            //front.publish(*frontView);
         }
 
         void pilot(const ros::TimerEvent& time){
+            std::cout<<"pilot"<<std::endl;
             double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
             bool DRIVE;
             node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
