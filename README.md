@@ -39,7 +39,7 @@ On PC:
 
         $ catkin_make
 
-3. Replace the ~/catkin_/src folder with autonomous-video-artist/catkin_ws/src .
+3. Replace the ~/catkin_ws/src folder with autonomous-video-artist/catkin_ws/src .
 
 4. Change the directory to the repository folder
 
