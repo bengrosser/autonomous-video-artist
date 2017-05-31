@@ -206,7 +206,7 @@ def test_gradientDir():
 # Using the recommended format from the documents
 camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('matrix_output.avi',fourcc, 23.975850, (142,60))
+out = cv2.VideoWriter('matrix_output_color.avi',fourcc, 23.975850, (142,60))
 while True:
     grabbed, frame = camera.read()
     if grabbed:
