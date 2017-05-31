@@ -20,11 +20,12 @@ class AutoNav
         int which_bumper;
         int img_height;  //image height was 480 by default
         int img_width;  //image width was 640 by default
+        bool go_right;
         
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false){
             ros::MultiThreadedSpinner threads(3);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", MY_ROS_QUEUE_SIZE, &AutoNav::frontEnv, this);
@@ -49,20 +50,38 @@ class AutoNav
 
                 //corp the image
                 cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
-                
+
                 cv::Mat mask = corp_front>0;  //mask to remove the noise
                 int num = countNonZero(corp_front);
-                float percentage = ((double)num)/((double)corp_width*corp_height);
+                float percentage = ((double)num)/((double)280*330); //change with the depth image size
                 std::cout<<"percentage: "<<percentage<<std::endl;
                
                 double mmin = 0.0;
                 double mmax = 0.0;
                 cv::minMaxLoc(corp_front, &mmin, &mmax, 0, 0, mask);
                 std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
-                if(mmin < 600 || percentage < 0.65)
+                if(mmin < 600 || percentage < 0.65){
+                    //choose direction (BETA version)
+                    cv::Mat corp_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
+                    cv::Mat left_mask = corp_left>0;
+                    cv::Mat corp_right = depth_img(cv::Rect_<int>(460,150,180,330)); //depth image on right
+                    cv::Mat right_mask = corp_right>0;
+                    double lmin = 0.0;
+                    double lmax = 0.0;
+                    double rmin = 0.0;
+                    double rmax = 0.0;
+                    cv::minMaxLoc(corp_left, &lmin, &lmax, 0, 0, left_mask);
+                    cv::minMaxLoc(corp_right, &rmin, &rmax, 0, 0, right_mask);
+                    if(lmin < rmin)
+                        go_right = true;
+                    else
+                        go_right = false;
+                    //
                     move_forward = false;
+                }
                 else
                     move_forward = true;
+
                 //visualization
                 double max = 0.0;
                 cv::minMaxLoc(corp_front, 0 , &max, 0, 0);
@@ -93,7 +112,6 @@ class AutoNav
                     while(ros::Time::now() - start < ros::Duration(5.0)){
                         velocity.publish(decision);
                     }
-                    start = ros::Time::now();
                     //choose right and left by bumper
                     int direction = 1;
                     if(which_bumper == 1){
@@ -111,6 +129,7 @@ class AutoNav
                     }
                     decision.angular.z = DRIVE_ANGULARSPEED*direction;
                     decision.linear.x = 0;
+                    start = ros::Time::now();
                     while(ros::Time::now() - start < ros::Duration(3.0)){
                         velocity.publish(decision);
                     }
@@ -121,13 +140,26 @@ class AutoNav
                 if(move_forward){
                     decision.linear.x=DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
+                    if(DRIVE)
+                        velocity.publish(decision);
                 }
                 else{
-                    int direction = rand()%2;
-                    decision.angular.z = DRIVE_ANGULARSPEED;
+                    //BETA version
+                    if(go_right)
+                        decision.angular.z = DRIVE_ANGULARSPEED;
+                    else
+                        decision.angular.z = -DRIVE_ANGULARSPEED;
+
+                    //
+                    //decision.angular.z = DRIVE_ANGULARSPEED; 
+                    if(DRIVE){
+                        while(!move_forward){
+                            velocity.publish(decision);
+                        }           
+                    }
                 }
-                if(DRIVE)
-                    velocity.publish(decision);
+               //if(DRIVE)
+                    //velocity.publish(decision);
             }
         }
 
