@@ -18,15 +18,13 @@ class AutoNav
         bool move_forward;
         bool bump;
         int which_bumper;
-        int img_height;
-        int img_width;
-        int corp_height; //height of corp_front
-        int corp_width; //width of corp_front
+        int img_height;  //image height was 480 by default
+        int img_width;  //image width was 640 by default
         
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640), corp_height(330), corp_width(280){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640){
             ros::MultiThreadedSpinner threads(3);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", MY_ROS_QUEUE_SIZE, &AutoNav::frontEnv, this);
@@ -50,8 +48,9 @@ class AutoNav
                     cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
 
                 //corp the image
-                cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,corp_width,corp_height)); //only for the image in front
-                cv::Mat mask = corp_front>0;
+                cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
+                
+                cv::Mat mask = corp_front>0;  //mask to remove the noise
                 int num = countNonZero(corp_front);
                 float percentage = ((double)num)/((double)corp_width*corp_height);
                 std::cout<<"percentage: "<<percentage<<std::endl;
