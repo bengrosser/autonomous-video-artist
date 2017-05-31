@@ -206,7 +206,7 @@ def test_gradientDir():
 # Using the recommended format from the documents
 camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('matrix_output_withoutblur.avi',fourcc, 23.975850, (142,60))
+out = cv2.VideoWriter('matrix_output_color.avi',fourcc, 23.975850, (142,60))
 
 
 #camera = cv2.VideoCapture("clip3.mp4")
@@ -214,20 +214,30 @@ out = cv2.VideoWriter('matrix_output_withoutblur.avi',fourcc, 23.975850, (142,60
 #out = cv2.VideoWriter('odyssey.avi',fourcc, 25, (960,540))
 
 
+count = 0
 while True:
     grabbed, frame = camera.read()
     if grabbed:
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         img_blur = gaussian_blur(img.copy())
+
         sobelx, sobely = sobel_filter(img_blur)
         #sobelx, sobely = sobel_filter(img.copy())
+
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
         #result = visualize(img.copy(), gradient_intensity, raw_direction_indegree)
+
         hsv = change_color(result, gradient_intensity)
 	final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
         out.write(final_result)
         #out.write(result)
+
+	#temp_result = np.uint8(gradient_intensity)
+        #out.write(temp_result)
+        #cv2.imshow("image",temp_result)
+
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
