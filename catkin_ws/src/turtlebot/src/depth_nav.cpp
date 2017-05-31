@@ -18,18 +18,16 @@ class AutoNav
         bool move_forward;
         bool bump;
         int which_bumper;
-        int img_height;
-        int img_width;
-        int corp_height; //height of corp_front
-        int corp_width; //width of corp_front
+        int img_height;  //image height was 480 by default
+        int img_width;  //image width was 640 by default
+        bool go_right;
         
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(false), bump(false), img_height(480), img_width(640), corp_height(330), corp_width(280){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false){
             ros::MultiThreadedSpinner threads(3);
             //create a thread for vision detection
-            std::cout<<"heree??"<<std::endl;
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", MY_ROS_QUEUE_SIZE, &AutoNav::frontEnv, this);
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
@@ -40,9 +38,7 @@ class AutoNav
         }
 
         void frontEnv(const sensor_msgs::Image::ConstPtr& msg){
-            //std::cout<<"frontEnv()"<<std::endl;
             try{
-                //std::cout<<"in try"<<std::endl;
                 cv_bridge::CvImageConstPtr cv_ptr;
                 cv_ptr = cv_bridge::toCvShare(msg);
                 cv::Mat depth_img;
@@ -52,25 +48,40 @@ class AutoNav
                 else if(enc.compare("32FC1") == 0)
                     cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
 
-                //corp the image  (need some test)
-                cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,corp_width,corp_height)); //only for the image in front
-                cv::Mat mask = corp_front>0;
-                int num = countNonZero(corp_front);
-                float percentage = ((double)num)/((double)corp_width*corp_height);
-                std::cout<<"percentage: "<<percentage<<std::endl;
-                /*if(percentage < 0.65)  //the threshold could be modified
-                    move_forward = false;
-                else
-                    move_forward = true;*/
+                //corp the image
+                cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
 
+                cv::Mat mask = corp_front>0;  //mask to remove the noise
+                int num = countNonZero(corp_front);
+                float percentage = ((double)num)/((double)280*330); //change with the depth image size
+                std::cout<<"percentage: "<<percentage<<std::endl;
+               
                 double mmin = 0.0;
                 double mmax = 0.0;
                 cv::minMaxLoc(corp_front, &mmin, &mmax, 0, 0, mask);
                 std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
-                if(mmin < 550 || percentage < 0.65)
+                if(mmin < 600 || percentage < 0.65){
+                    //choose direction (BETA version)
+                    cv::Mat corp_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
+                    cv::Mat left_mask = corp_left>0;
+                    cv::Mat corp_right = depth_img(cv::Rect_<int>(460,150,180,330)); //depth image on right
+                    cv::Mat right_mask = corp_right>0;
+                    double lmin = 0.0;
+                    double lmax = 0.0;
+                    double rmin = 0.0;
+                    double rmax = 0.0;
+                    cv::minMaxLoc(corp_left, &lmin, &lmax, 0, 0, left_mask);
+                    cv::minMaxLoc(corp_right, &rmin, &rmax, 0, 0, right_mask);
+                    if(lmin < rmin)
+                        go_right = true;
+                    else
+                        go_right = false;
+                    //
                     move_forward = false;
+                }
                 else
                     move_forward = true;
+
                 //visualization
                 double max = 0.0;
                 cv::minMaxLoc(corp_front, 0 , &max, 0, 0);
@@ -80,12 +91,8 @@ class AutoNav
                 cv::waitKey(1);
                                 
             }catch (const cv_bridge::Exception& e){
-                std::cout<<"in catch"<<std::endl;
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }
-
-            //panorama.publish(*downsampled);
-            //front.publish(*frontView);
         }
 
         void pilot(const ros::TimerEvent& time){
@@ -105,7 +112,6 @@ class AutoNav
                     while(ros::Time::now() - start < ros::Duration(5.0)){
                         velocity.publish(decision);
                     }
-                    start = ros::Time::now();
                     //choose right and left by bumper
                     int direction = 1;
                     if(which_bumper == 1){
@@ -123,6 +129,7 @@ class AutoNav
                     }
                     decision.angular.z = DRIVE_ANGULARSPEED*direction;
                     decision.linear.x = 0;
+                    start = ros::Time::now();
                     while(ros::Time::now() - start < ros::Duration(3.0)){
                         velocity.publish(decision);
                     }
@@ -133,13 +140,26 @@ class AutoNav
                 if(move_forward){
                     decision.linear.x=DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
+                    if(DRIVE)
+                        velocity.publish(decision);
                 }
                 else{
-                    int direction = rand()%2;
-                    decision.angular.z = DRIVE_ANGULARSPEED;
+                    //BETA version
+                    if(go_right)
+                        decision.angular.z = DRIVE_ANGULARSPEED;
+                    else
+                        decision.angular.z = -DRIVE_ANGULARSPEED;
+
+                    //
+                    //decision.angular.z = DRIVE_ANGULARSPEED; 
+                    if(DRIVE){
+                        while(!move_forward){
+                            velocity.publish(decision);
+                        }           
+                    }
                 }
-                if(DRIVE)
-                    velocity.publish(decision);
+               //if(DRIVE)
+                    //velocity.publish(decision);
             }
         }
 
@@ -158,13 +178,6 @@ int main(int argc, char** argv){
     ros::NodeHandle node("autoNav");
 
     //initial parameter value
-    node.setParam("crop_xradius", 1); //slightly larger than the robot's radius
-    node.setParam("crop_ymin", -0.5); //the absolute value should be slightly larger than the robot's height
-    node.setParam("crop_ymax", 0.5); //slightly 
-    node.setParam("crop_zmin", -1.0); //set it to zero
-    node.setParam("crop_zmax", 1.5); //the distance that the robot start to avoid the obstacle
-    node.setParam("downsampling", 0.04); //should be low enough to eliminate the noise
-    node.setParam("sample_num", 5); //threshold to detect whether there is an obstacle at front
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
     node.setParam("drive",true); //For debugging, always set to true
@@ -172,13 +185,6 @@ int main(int argc, char** argv){
     AutoNav turtlebot(node); 
 
     //clean up
-    node.deleteParam("crop_xradius");
-    node.deleteParam("crop_ymin");
-    node.deleteParam("crop_ymax");
-    node.deleteParam("crop_zmin");
-    node.deleteParam("crop_zmax");
-    node.deleteParam("downsampling");
-    node.deleteParam("sample_num");
     node.deleteParam("drive_linearspeed");
     node.deleteParam("drive_angularspeed");
     node.deleteParam("drive");

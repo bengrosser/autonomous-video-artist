@@ -1,7 +1,7 @@
 The main code for this project is in directory: src/turtlebot/src
 
 To run this code, at first, you need to make sure that your PC has Ubuntu 14.04 OS. And then, you need to make sure that the network configuration is already set up between your PC and the turtlebot.
-Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration
+Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration .
 
 What is more, you need to install some packages on your PC. Please check the packages_list.txt for details.
 
@@ -43,25 +43,29 @@ On PC:
 
 4. Change the directory to the repository folder
 
-        $cd catkin_ws
+        $ cd catkin_ws
 
 5. Compile the code
 
-        $catkin_make
+        $ catkin_make
 
 6. Source the setup bash
 
-        $source devel/setup.bash
+        $ source devel/setup.bash
 
 7. Run the code
 
-    To run the automatic navigation code with point cloud:
+    To run the automatic navigation with point cloud:
     
-        $rosrun turtlebot navigation
+        $ rosrun turtlebot navigation
 
     To run the test code for depth image with visualization:
 
-        $rosrun turtlebot depth
+        $ rosrun turtlebot depth
+
+    To run the automatic navigation with depth image:
+
+        $ rosrun turtlebot depth_nav
 
 8. To stop the robot just press ctrl+c to break the process
 
