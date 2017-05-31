@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Tue May 30 12:17:24 2017
+ #Last Modified : Wed May 31 10:22:30 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -159,15 +159,35 @@ def visualize(img, gradient_intensity, raw_direction_indegree):
     # cv2.imwrite("result.jpg", white)
     return white
 
+#Change the color space from BGR to HSV taking consideration of intensity 
+#with saturation
+def change_saturation(result, gradient_intensity):
+    hsv = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
+    row, collumn = np.shape(gradient_intensity)
+    for i in range(row):
+        for j in range(collumn):
+            hsv[i][j][1] = gradient_intensity[i][j]
+    return hsv
+            
+
+
+
+
+
+
+
+
+
+
+
 
 
 #Testing functions
-# def test_gradientDir():
-    # the_dir = np.array([[45,1,1],[90,45,1],[90,1,45]])
-    # white = np.zeros((3,3,3), np.uint8)
-    # check_mask = np.zeros((3,3))
-    # print follow_dir(0,0,the_dir,45,check_mask)
-# test_gradientDir()
+def test_gradientDir():
+    the_dir = np.array([[45,1,1],[90,45,1],[90,1,45]])
+    white = np.zeros((3,3,3), np.uint8)
+    check_mask = np.zeros((3,3))
+    print follow_dir(0,0,the_dir,45,check_mask)
 
 
 
@@ -196,7 +216,8 @@ while True:
         sobelx, sobely = sobel_filter(img_blur)
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
-        out.write(result)
+        hsv = change_saturation(result)
+        out.write(hsv)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
