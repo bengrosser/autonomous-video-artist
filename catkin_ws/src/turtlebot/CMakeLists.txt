@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   image_transport
+  nav_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -147,6 +148,8 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable (navigation src/navigation.cpp)
 add_executable (depth src/depth.cpp)
 add_executable (depth_nav src/depth_nav.cpp)
+add_executable (position src/position.cpp)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -164,6 +167,8 @@ add_executable (depth_nav src/depth_nav.cpp)
 target_link_libraries(navigation ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(depth ${catkin_LIBRARIES})
 target_link_libraries(depth_nav ${catkin_LIBRARIES})
+target_link_libraries(position ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############
