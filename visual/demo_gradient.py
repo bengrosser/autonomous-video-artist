@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Wed May 31 10:58:23 2017
+ #Last Modified : Fri Jun  2 11:55:05 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -13,6 +13,8 @@ import numpy as np
 import math
 from matplotlib import pyplot as plt
 import struct
+import argparse
+import csv
 
 
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1),
@@ -119,12 +121,12 @@ def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
 
 #Based on the intensity of the pixel and the direction of the gradient
 #we can visualize the intermediate results from the canny edge algorithm
-def visualize(img, gradient_intensity, raw_direction_indegree): 
+def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map): 
     print "start process the frame"
     x, y = np.shape(img) 
     white = np.zeros((x,y,3), np.uint8)
     #colors = np.random.randint(0,255,(6,3))
-    colors = np.array([[0,190,200],[200,70,70],[51,204,233],[120,80,220],[220,0,80],[200,200,60]])
+    colors = color_dir_map
     # print colors
     for i in range(x):
         for j in range(y):
@@ -169,18 +171,6 @@ def change_color(result, gradient_intensity):
     return hsv
             
 
-
-
-
-
-
-
-
-
-
-
-
-
 #Testing functions
 def test_gradientDir():
     the_dir = np.array([[45,1,1],[90,45,1],[90,1,45]])
@@ -202,50 +192,83 @@ def test_gradientDir():
 # visualize(img_blur, gradient_intensity, raw_direction_indegree)
 
 
-# Now test with videos
-# Using the recommended format from the documents
-camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-out = cv2.VideoWriter('matrix_output_color.avi',fourcc, 23.975850, (142,60))
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("src", help = "the video file you want to process")
+    parser.add_argument("output", help = "the video file you want the result to be written in")
+    parser.add_argument("framerate", help="the frame rate of the video")
+    parser.add_argument("res1", help="the first resolution of the video")
+    parser.add_argument("res2", help="the second resolution of the video")
+    parser.add_argument("-s", "--show", action = "store_true", help =
+            "Only show the processed frame")
+    parser.add_argument("-c", "--color", default = None, help="provide color csv file")
+    args = parser.parse_args()
+
+    #TODO:Test those functions when get back
+    camera = cv2.VideoCapture(args.src)
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    frame_rate = float(args.framerate)
+    resolution = (int(args.res1), int(args.res2))
+    out = cv2.VideoWriter(args.output,fourcc, frame_rate, resolution)
 
 
-#camera = cv2.VideoCapture("clip3.mp4")
-#fourcc = cv2.VideoWriter_fourcc(*'XVID')
-#out = cv2.VideoWriter('odyssey.avi',fourcc, 25, (960,540))
-
-
-count = 0
-while True:
-    grabbed, frame = camera.read()
-    if grabbed:
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        img_blur = gaussian_blur(img.copy())
-
-        sobelx, sobely = sobel_filter(img_blur)
-        #sobelx, sobely = sobel_filter(img.copy())
-
-        gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
-
-        result = visualize(img_blur, gradient_intensity, raw_direction_indegree)
-        #result = visualize(img.copy(), gradient_intensity, raw_direction_indegree)
-
-        hsv = change_color(result, gradient_intensity)
-	final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
-        out.write(final_result)
-        #out.write(result)
-
-	#temp_result = np.uint8(gradient_intensity)
-        #out.write(temp_result)
-        #cv2.imshow("image",temp_result)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    color_dir_map = []
+    if(args.color != None):
+        with open(args.color, 'rU') as color_csv:
+            color_reader = csv.reader(color_csv)
+            list_color = list(color_reader)
+            for row in list_color:
+               raw = row[0].split("\t")
+               color_element = map(int, raw)
+               color_dir_map.append(color_element)
+            color_dir_map = np.array(color_dir_map)
     else:
-        print("No video feed available")
-        break
-camera.release()
-out.release()
-cv2.destroyAllWindows()
+        color_dir_map = np.array([[0,190,200],[200,70,70],[51,204,233],[120,80,220],[220,0,80],[200,200,60]])
+         
+                
+            
+    # Using the recommended format from the documents
+    # camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # out = cv2.VideoWriter('matrix_output_color.avi',fourcc, 23.975850, (142,60))
+    # count = 0
+
+    while True:
+        grabbed, frame = camera.read()
+        if grabbed:
+            img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            img_blur = gaussian_blur(img.copy())
+
+            sobelx, sobely = sobel_filter(img_blur)
+            #sobelx, sobely = sobel_filter(img.copy())
+
+            gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+
+            result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map)
+            #result = visualize(img.copy(), gradient_intensity, raw_direction_indegree)
+
+            hsv = change_color(result, gradient_intensity)
+            final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
+            if(args.show):
+                cv2.imshow("result", final_result)
+            else:
+                out.write(final_result)
+
+            #out.write(result)
+
+            #temp_result = np.uint8(gradient_intensity)
+            #out.write(temp_result)
+            #cv2.imshow("image",temp_result)
+
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        else:
+            print("No video feed available")
+            break
+    camera.release()
+    out.release()
+    cv2.destroyAllWindows()
 
 
-
+if __name__ == '__main__':
+    main()
