@@ -1,1 +1,0 @@
-/usr/bin/c++       CMakeFiles/simple_transmission_test.dir/test/simple_transmission_test.cpp.o  -o /home/zhang/catkin_ws/devel/lib/transmission_interface/simple_transmission_test  -L/home/zhang/catkin_ws/build/gtest -rdynamic ../../gtest/libgtest.so -lpthread -Wl,-rpath,/home/zhang/catkin_ws/build/gtest 

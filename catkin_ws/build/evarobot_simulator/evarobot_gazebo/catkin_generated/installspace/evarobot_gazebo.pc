@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/install
-
-Name: evarobot_gazebo
-Description: Description of evarobot_gazebo
-Version: 0.0.1
-Cflags: -I/home/zhang/catkin_ws/install/include
-Libs: -L/home/zhang/catkin_ws/install/lib -lvision_reconfigure -lim_gazebo_ros_sonar -lim_gazebo_ros_bumper -levarobot_ros_bumper
-Requires: message_generation gazebo_msgs roscpp rospy nodelet angles std_srvs geometry_msgs sensor_msgs nav_msgs urdf tf tf2_ros dynamic_reconfigure driver_base rosgraph_msgs trajectory_msgs image_transport rosconsole camera_info_manager

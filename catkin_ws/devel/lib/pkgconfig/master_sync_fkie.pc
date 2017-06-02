@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: master_sync_fkie
-Description: Description of master_sync_fkie
-Version: 0.7.2
-Cflags: 
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: multimaster_msgs_fkie

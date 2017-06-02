@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: controller_manager
-Description: Description of controller_manager
-Version: 0.9.4
-Cflags: -I/home/zhang/catkin_ws/src/ros_control/controller_manager/include
-Libs: -L/home/zhang/catkin_ws/devel/lib -lcontroller_manager
-Requires: controller_interface controller_manager_msgs hardware_interface realtime_tools pluginlib
