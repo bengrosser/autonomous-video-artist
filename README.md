@@ -67,6 +67,10 @@ On PC:
 
         $ rosrun turtlebot depth_nav
 
+    To run the position track test code:
+
+        $ rosrun turtlebot position
+
 8. To stop the robot just press ctrl+c to break the process
 
 
