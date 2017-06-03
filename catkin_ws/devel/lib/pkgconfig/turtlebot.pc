@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: turtlebot
-Description: Description of turtlebot
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: 

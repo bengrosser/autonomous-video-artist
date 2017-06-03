@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: multimaster_msgs_fkie
-Description: Description of multimaster_msgs_fkie
-Version: 0.7.2
-Cflags: -I/home/zhang/catkin_ws/devel/include
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: message_runtime std_msgs

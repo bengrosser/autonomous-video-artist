@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: hardware_interface
-Description: Description of hardware_interface
-Version: 0.9.4
-Cflags: -I/home/zhang/catkin_ws/src/ros_control/hardware_interface/include
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: roscpp

@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/devel
-
-Name: rqt_controller_manager
-Description: Description of rqt_controller_manager
-Version: 0.9.4
-Cflags: 
-Libs: -L/home/zhang/catkin_ws/devel/lib 
-Requires: 

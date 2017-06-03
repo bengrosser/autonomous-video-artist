@@ -1,8 +1,0 @@
-prefix=/home/zhang/catkin_ws/install
-
-Name: controller_manager_msgs
-Description: Description of controller_manager_msgs
-Version: 0.9.4
-Cflags: -I/home/zhang/catkin_ws/install/include
-Libs: -L/home/zhang/catkin_ws/install/lib 
-Requires: std_msgs message_runtime
