@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Fri Jun  2 11:55:05 2017
+ #Last Modified : Sat Jun  3 10:18:24 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -9,14 +9,22 @@
 # in modern computer vision libraries
 
 import cv2
+import cv2
 import numpy as np
 import math
 from matplotlib import pyplot as plt
 import struct
 import argparse
 import csv
+import numpy as np
+import math
+from matplotlib import pyplot as plt
+import struct
+import argparse
+import csv
+import sys
 
-
+sys.setrecursionlimit(100000)
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1),
         "-45":(-1,-1), "45":(1,1)}
 color_map = {"90":0,"-90":1,"1":2,"-1":3,
@@ -121,7 +129,7 @@ def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
 
 #Based on the intensity of the pixel and the direction of the gradient
 #we can visualize the intermediate results from the canny edge algorithm
-def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map): 
+def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, background_color): 
     print "start process the frame"
     x, y = np.shape(img) 
     white = np.zeros((x,y,3), np.uint8)
@@ -130,7 +138,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map):
     # print colors
     for i in range(x):
         for j in range(y):
-            white[i][j] = (255,0,0)
+            white[i][j] = background_color 
     #to keep track of which pixels are already been processed along
     #the way
     check_mask = np.zeros((x,y))
@@ -213,17 +221,27 @@ def main():
 
 
     color_dir_map = []
+    background_color = (255, 0, 0)
     if(args.color != None):
         with open(args.color, 'rU') as color_csv:
             color_reader = csv.reader(color_csv)
             list_color = list(color_reader)
+            counter = 0
             for row in list_color:
                raw = row[0].split("\t")
+               print raw
                color_element = map(int, raw)
-               color_dir_map.append(color_element)
+               if counter == 0:
+                   background_color = tuple(color_element) 
+               else:
+                   color_dir_map.append(color_element)
+               counter += 1
             color_dir_map = np.array(color_dir_map)
     else:
         color_dir_map = np.array([[0,190,200],[200,70,70],[51,204,233],[120,80,220],[220,0,80],[200,200,60]])
+    print background_color
+    print color_dir_map
+        
          
                 
             
@@ -244,7 +262,7 @@ def main():
 
             gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
 
-            result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map)
+            result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map, background_color)
             #result = visualize(img.copy(), gradient_intensity, raw_direction_indegree)
 
             hsv = change_color(result, gradient_intensity)
