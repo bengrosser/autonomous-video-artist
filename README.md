@@ -55,7 +55,7 @@ On PC:
 
 7. Run the code
 
-    To run the automatic navigation with point cloud:
+    To run the automatic navigation with point cloud and position track:
     
         $ rosrun turtlebot navigation
 
@@ -72,5 +72,3 @@ On PC:
         $ rosrun turtlebot position
 
 8. To stop the robot just press ctrl+c to break the process
-
-
