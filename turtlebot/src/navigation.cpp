@@ -7,6 +7,7 @@
 #include <geometry_msgs/Twist.h>
 //#include "im_msgs/Bumper.h"
 #include <kobuki_msgs/BumperEvent.h>
+#include <nav_msgs/Odometry.h>
 
 using namespace std;
 
@@ -31,13 +32,15 @@ class AutoNav
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false){
-            ros::MultiThreadedSpinner threads(3);
+            ros::MultiThreadedSpinner threads(4);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/points", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
             ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",100, &AutoNav::bumperCommand, this);
+            //create a thread to record the position
+            ros::Subscriber position=node.subscribe("odom", 1000, &AutoNav::position, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
@@ -175,6 +178,10 @@ class AutoNav
                 std::cout<<"bump false"<<std::endl;
             }*/
             
+        }
+
+        void position(const nav_msgs::Odometry::ConstPtr& msg){
+            ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
         }
 };
 
