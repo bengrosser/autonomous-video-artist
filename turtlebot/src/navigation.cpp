@@ -5,16 +5,13 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <geometry_msgs/Twist.h>
-//#include "im_msgs/Bumper.h"
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
+#include <kobuki_msgs/SensorState.h>
 
 using namespace std;
 
-/*enum DriveAction
-{
-    FORWARD, LEFT, RIGHT
-};*/
+static const uint8_t MAX_BATTERY = 160;
 
 class AutoNav
 {
@@ -23,7 +20,6 @@ class AutoNav
         ros::Publisher velocity;
         ros::Publisher panorama;  //whole point cloud
         ros::Publisher front;  //point cloud at front
-        //std::list<int> frontSamples;
         bool move_forward;
         bool bump;
         int which_bumper;
@@ -32,7 +28,7 @@ class AutoNav
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false){
-            ros::MultiThreadedSpinner threads(1);
+            ros::MultiThreadedSpinner threads(5);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/points", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
@@ -41,6 +37,8 @@ class AutoNav
             ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",100, &AutoNav::bumperCommand, this);
             //create a thread to record the position
             ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
+            //create a thread for battery information
+            ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
@@ -163,7 +161,6 @@ class AutoNav
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
-            //std::cout<<"bumperCommand"<<std::endl;
             if(msg.state){
                 bump = true;
                 which_bumper = msg.bumper;
@@ -171,8 +168,12 @@ class AutoNav
         }
 
         void position(const nav_msgs::Odometry::ConstPtr& msg){
-            //std::cout<<"in position"<<std::endl;
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+        }
+
+        void battery(const kobuki_msgs::SensorState msg){
+            float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
+            ROS_INFO("left battery percentage %.2f %%", percentage);
         }
 };
 
@@ -190,7 +191,7 @@ int main(int argc, char** argv){
     node.setParam("sample_num", 5); //threshold to detect whether there is an obstacle at front
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive",true); //For debugging, always set to true
+    node.setParam("drive",false); //For debugging, always set to true
 
     AutoNav turtlebot(node); 
 
