@@ -5,6 +5,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
+#include <nav_msgs/Odometry.h>
 
 using namespace std;
 
