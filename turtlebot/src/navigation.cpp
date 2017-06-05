@@ -11,7 +11,7 @@
 
 using namespace std;
 
-static const uint8_t MAX_BATTERY = 160;
+static const uint8_t MAX_BATTERY = 162;
 
 class AutoNav
 {
@@ -198,7 +198,7 @@ int main(int argc, char** argv){
     node.setParam("sample_num", 5); //threshold to detect whether there is an obstacle at front
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive",false); //For debugging, always set to true
+    node.setParam("drive",true); //For debugging, always set to true
 
     AutoNav turtlebot(node); 
 
