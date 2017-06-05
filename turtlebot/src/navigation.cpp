@@ -46,7 +46,7 @@ class AutoNav
         }
 
         void frontEnv(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
-            std::cout<<"frontEnv"<<std::endl;
+            //std::cout<<"frontEnv"<<std::endl;
             double CROP_XRADIUS, CROP_YMIN, CROP_YMAX, CROP_ZMIN, CROP_ZMAX, DOWNSAMPLING;
             int SAMPLE_NUM;
 
@@ -108,7 +108,7 @@ class AutoNav
         }
 
         void pilot(const ros::TimerEvent& time){
-            std::cout<<"pilot"<<std::endl;
+            //std::cout<<"pilot"<<std::endl;
             double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
             bool DRIVE;
             node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -163,7 +163,7 @@ class AutoNav
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
-            std::cout<<"bumperCommand"<<std::endl;
+            //std::cout<<"bumperCommand"<<std::endl;
             if(msg.state){
                 bump = true;
                 which_bumper = msg.bumper;
@@ -171,7 +171,7 @@ class AutoNav
         }
 
         void position(const nav_msgs::Odometry::ConstPtr& msg){
-            std::cout<<"in position"<<std::endl;
+            //std::cout<<"in position"<<std::endl;
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
         }
 };
