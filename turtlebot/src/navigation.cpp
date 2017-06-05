@@ -32,7 +32,7 @@ class AutoNav
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false){
-            ros::MultiThreadedSpinner threads(4);
+            ros::MultiThreadedSpinner threads(1);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/points", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
@@ -40,12 +40,13 @@ class AutoNav
             //create a thread to detect bumper event
             ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",100, &AutoNav::bumperCommand, this);
             //create a thread to record the position
-            ros::Subscriber position=node.subscribe("odom", 1000, &AutoNav::position, this);
+            ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
 
         void frontEnv(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+            std::cout<<"frontEnv"<<std::endl;
             double CROP_XRADIUS, CROP_YMIN, CROP_YMAX, CROP_ZMIN, CROP_ZMAX, DOWNSAMPLING;
             int SAMPLE_NUM;
 
@@ -99,7 +100,6 @@ class AutoNav
             if(averageObstacles>0){*/
             if(frontView->size()>0){
                 move_forward = false;
-                //std::cout<<"false"<<std::endl;
             }
             else
                 move_forward = true;
@@ -108,6 +108,7 @@ class AutoNav
         }
 
         void pilot(const ros::TimerEvent& time){
+            std::cout<<"pilot"<<std::endl;
             double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
             bool DRIVE;
             node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -154,11 +155,6 @@ class AutoNav
                 }
                 else{
                     int direction = rand()%2;
-                    //choose right and left randomly
-                    /*if(direction == 0)
-                        decision.angular.z = DRIVE_ANGULARSPEED;
-                    else
-                        decision.angular.z = -DRIVE_ANGULARSPEED;*/
                     decision.angular.z = DRIVE_ANGULARSPEED;
                 }
                 if(DRIVE)
@@ -167,20 +163,15 @@ class AutoNav
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
+            std::cout<<"bumperCommand"<<std::endl;
             if(msg.state){
                 bump = true;
-                std::cout<<"bump true"<<std::endl;
                 which_bumper = msg.bumper;
-                //sleep(5);
             }
-            /*else{
-                bump = false;
-                std::cout<<"bump false"<<std::endl;
-            }*/
-            
         }
 
         void position(const nav_msgs::Odometry::ConstPtr& msg){
+            std::cout<<"in position"<<std::endl;
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
         }
 };
