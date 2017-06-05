@@ -106,7 +106,6 @@ class AutoNav
         }
 
         void pilot(const ros::TimerEvent& time){
-            //std::cout<<"pilot"<<std::endl;
             double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
             bool DRIVE;
             node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -168,10 +167,18 @@ class AutoNav
         }
 
         void position(const nav_msgs::Odometry::ConstPtr& msg){
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now()-start < ros::Duration(5.0)){
+                //do nothing, just to waste the time
+            }
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
         }
 
         void battery(const kobuki_msgs::SensorState msg){
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now()-start < ros::Duration(5.0)){
+                //do nothing, just to waste the time
+            }
             float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
             ROS_INFO("left battery percentage %.2f %%", percentage);
         }
