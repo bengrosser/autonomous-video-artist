@@ -55,7 +55,7 @@ On PC:
 
 7. Run the code
 
-    To run the automatic navigation with point cloud and position tracking:
+    To run the automatic navigation with point cloud (including position tracking and battery information):
     
         $ rosrun turtlebot navigation
 
