@@ -63,7 +63,7 @@ On PC:
 
         $ rosrun turtlebot depth
 
-    To run the automatic navigation with depth image and position tracking:
+    To run the automatic navigation with depth image (including position tracking and battery information):
 
         $ rosrun turtlebot depth_nav
 
