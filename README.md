@@ -55,7 +55,7 @@ On PC:
 
 7. Run the code
 
-    To run the automatic navigation with point cloud and position track:
+    To run the automatic navigation with point cloud and position tracking:
     
         $ rosrun turtlebot navigation
 
@@ -63,7 +63,7 @@ On PC:
 
         $ rosrun turtlebot depth
 
-    To run the automatic navigation with depth image:
+    To run the automatic navigation with depth image and position tracking:
 
         $ rosrun turtlebot depth_nav
 
