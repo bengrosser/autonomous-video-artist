@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Tue Jun  6 10:36:15 2017
+ #Last Modified : Tue Jun  6 11:13:20 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -21,10 +21,9 @@ import math
 from matplotlib import pyplot as plt
 import struct
 import argparse
-import csv
 import sys
 
-sys.setrecursionlimit(100000)
+# sys.setrecursionlimit(100000)
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1),
         "-45":(-1,-1), "45":(1,1)}
 color_map = {"90":0,"-90":1,"1":2,"-1":3,
@@ -223,13 +222,10 @@ out = cv2.VideoWriter(args.output,fourcc, frame_rate, resolution)
 color_dir_map = []
 background_color = (255, 0, 0)
 if(args.color != None):
-    with open(args.color, 'rU') as color_csv:
-        color_reader = csv.reader(color_csv)
-        list_color = list(color_reader)
+    with open(args.color, 'rU') as list_color:
         counter = 0
         for row in list_color:
-           raw = row[0].split("\t")
-           print raw
+           raw = row.split(" ")
            color_element = map(int, raw)
            if counter == 0:
                background_color = tuple(color_element) 
@@ -244,7 +240,6 @@ print color_dir_map
     
      
             
-        
 # Using the recommended format from the documents
 # camera = cv2.VideoCapture("matrix-woman-red-142x60.mov")
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -258,12 +253,10 @@ while True:
         img_blur = gaussian_blur(img.copy())
 
         sobelx, sobely = sobel_filter(img_blur)
-        #sobelx, sobely = sobel_filter(img.copy())
 
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
 
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map, background_color)
-        #result = visualize(img.copy(), gradient_intensity, raw_direction_indegree)
 
         hsv = change_color(result, gradient_intensity)
         final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
@@ -271,12 +264,6 @@ while True:
             cv2.imshow("result", final_result)
         else:
             out.write(final_result)
-
-        #out.write(result)
-
-        #temp_result = np.uint8(gradient_intensity)
-        #out.write(temp_result)
-        #cv2.imshow("image",temp_result)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
