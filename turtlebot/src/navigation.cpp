@@ -5,15 +5,13 @@
 #include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/radius_outlier_removal.h>
 #include <geometry_msgs/Twist.h>
-//#include "im_msgs/Bumper.h"
 #include <kobuki_msgs/BumperEvent.h>
+#include <nav_msgs/Odometry.h>
+#include <kobuki_msgs/SensorState.h>
 
 using namespace std;
 
-/*enum DriveAction
-{
-    FORWARD, LEFT, RIGHT
-};*/
+static const uint8_t MAX_BATTERY = 162;
 
 class AutoNav
 {
@@ -22,7 +20,6 @@ class AutoNav
         ros::Publisher velocity;
         ros::Publisher panorama;  //whole point cloud
         ros::Publisher front;  //point cloud at front
-        //std::list<int> frontSamples;
         bool move_forward;
         bool bump;
         int which_bumper;
@@ -31,18 +28,23 @@ class AutoNav
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false){
-            ros::MultiThreadedSpinner threads(3);
+            ros::MultiThreadedSpinner threads(5);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/points", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
             ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",100, &AutoNav::bumperCommand, this);
+            //create a thread to record the position
+            ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
+            //create a thread for battery information
+            ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
 
         void frontEnv(const pcl::PointCloud<pcl::PointXYZ>::Ptr& cloud){
+            //std::cout<<"frontEnv"<<std::endl;
             double CROP_XRADIUS, CROP_YMIN, CROP_YMAX, CROP_ZMIN, CROP_ZMAX, DOWNSAMPLING;
             int SAMPLE_NUM;
 
@@ -96,7 +98,6 @@ class AutoNav
             if(averageObstacles>0){*/
             if(frontView->size()>0){
                 move_forward = false;
-                //std::cout<<"false"<<std::endl;
             }
             else
                 move_forward = true;
@@ -151,11 +152,6 @@ class AutoNav
                 }
                 else{
                     int direction = rand()%2;
-                    //choose right and left randomly
-                    /*if(direction == 0)
-                        decision.angular.z = DRIVE_ANGULARSPEED;
-                    else
-                        decision.angular.z = -DRIVE_ANGULARSPEED;*/
                     decision.angular.z = DRIVE_ANGULARSPEED;
                 }
                 if(DRIVE)
@@ -166,15 +162,25 @@ class AutoNav
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
             if(msg.state){
                 bump = true;
-                std::cout<<"bump true"<<std::endl;
                 which_bumper = msg.bumper;
-                //sleep(5);
             }
-            /*else{
-                bump = false;
-                std::cout<<"bump false"<<std::endl;
-            }*/
-            
+        }
+
+        void position(const nav_msgs::Odometry::ConstPtr& msg){
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now()-start < ros::Duration(5.0)){
+                //do nothing, just to waste the time
+            }
+            ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+        }
+
+        void battery(const kobuki_msgs::SensorState msg){
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now()-start < ros::Duration(5.0)){
+                //do nothing, just to waste the time
+            }
+            float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
+            ROS_INFO("left battery percentage %.2f %%", percentage);
         }
 };
 
