@@ -24,8 +24,7 @@ import argparse
 import sys
 
 # sys.setrecursionlimit(100000)
-dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1),
-        "-45":(-1,-1), "45":(1,1)}
+dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)} 
 color_map = {"90":0,"-90":1,"1":2,"-1":3,
         "-45":4, "45":5} 
 
@@ -174,7 +173,7 @@ def change_color(result, gradient_intensity):
     row, collumn = np.shape(gradient_intensity)
     for i in range(row):
         for j in range(collumn):
-            hsv[i][j][2] = gradient_intensity[i][j]
+            hsv[i][j][1] = gradient_intensity[i][j]
     return hsv
             
 
@@ -226,6 +225,7 @@ if(args.color != None):
         counter = 0
         for row in list_color:
            raw = row.split(" ")
+           print raw
            color_element = map(int, raw)
            if counter == 0:
                background_color = tuple(color_element) 
@@ -264,6 +264,10 @@ while True:
             cv2.imshow("result", final_result)
         else:
             out.write(final_result)
+        # if(args.show):
+            # cv2.imshow("result", result)
+        # else:
+            # out.write(result)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
