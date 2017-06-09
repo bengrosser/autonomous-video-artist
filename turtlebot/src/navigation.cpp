@@ -6,8 +6,10 @@
 #include <pcl/filters/radius_outlier_removal.h>
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
-#include <nav_msgs/Odometry.h>
-#include <kobuki_msgs/SensorState.h>
+#include <nav_msgs/Odometry.h>     //for position tracking
+#include <kobuki_msgs/SensorState.h>      //for battery info
+#include <move_base_msgs/MoveBaseGoal.h>  //for auto docking
+#include <kobuki_msgs/AutoDockingAction.h>   //for auto docking
 
 using namespace std;
 
@@ -23,11 +25,12 @@ class AutoNav
         bool move_forward;
         bool bump;
         int which_bumper;
+        bool battery_is_low;
         
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), panorama(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("panorama",1)), front(node.advertise<pcl::PointCloud<pcl::PointXYZ>>("front",1)), move_forward(false), bump(false), battery_is_low(false){
             ros::MultiThreadedSpinner threads(5);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/points", 1, &AutoNav::frontEnv, this);
@@ -38,7 +41,7 @@ class AutoNav
             //create a thread to record the position
             ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
             //create a thread for battery information
-            ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
+            ros::Subscriber batteryInfo=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::batteryInfo, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
@@ -174,13 +177,15 @@ class AutoNav
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
         }
 
-        void battery(const kobuki_msgs::SensorState msg){
-            ros::Time start = ros::Time::now();
+        void batteryInfo(const kobuki_msgs::SensorState msg){
+            /*ros::Time start = ros::Time::now();
             while(ros::Time::now()-start < ros::Duration(5.0)){
                 //do nothing, just to waste the time
-            }
+            }*/
             float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
-            ROS_INFO("left battery percentage %.2f %%", percentage);
+            //ROS_INFO("left battery percentage %.2f %%", percentage);
+            if(percentage < 0.30)
+                battery_is_low = false;
         }
 };
 
