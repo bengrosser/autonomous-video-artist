@@ -22,6 +22,7 @@ from matplotlib import pyplot as plt
 import struct
 import argparse
 import sys
+import time
 
 # sys.setrecursionlimit(100000)
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)} 
@@ -128,7 +129,6 @@ def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
 #Based on the intensity of the pixel and the direction of the gradient
 #we can visualize the intermediate results from the canny edge algorithm
 def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, background_color): 
-    print "start process the frame"
     x, y = np.shape(img) 
     white = np.zeros((x,y,3), np.uint8)
     #colors = np.random.randint(0,255,(6,3))
@@ -246,6 +246,8 @@ print color_dir_map
 # out = cv2.VideoWriter('matrix_output_color.avi',fourcc, 23.975850, (142,60))
 # count = 0
 
+count = 1
+start_time = time.time()
 while True:
     grabbed, frame = camera.read()
     if grabbed:
@@ -257,7 +259,9 @@ while True:
         gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
 
         result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map, background_color)
-
+        
+        frame_time = float(count/24.0)
+        print "Finished the frame ", count, " spending ", (time.time()-start_time) , " seconds ", frame_time, " processed"  
         hsv = change_color(result, gradient_intensity)
         final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
         if(args.show):
@@ -269,10 +273,12 @@ while True:
         # else:
             # out.write(result)
 
+        count += 1
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
         print("No video feed available")
+        print "spending ", (time.time()-start_time), seconds 
         break
 camera.release()
 out.release()
