@@ -54,18 +54,17 @@ class AutoNav
                 else if(enc.compare("32FC1") == 0)
                     cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
 
-                //corp the image
+                //crop the image
                 cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
 
                 cv::Mat mask = corp_front>0;  //mask to remove the noise
                 int num = countNonZero(corp_front);
                 float percentage = ((double)num)/((double)280*330); //change with the depth image size
-                std::cout<<"percentage: "<<percentage<<std::endl;
                
                 double mmin = 0.0;
                 double mmax = 0.0;
                 cv::minMaxLoc(corp_front, &mmin, &mmax, 0, 0, mask);
-                std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
+                //std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
                 if(mmin < 600 || percentage < 0.65){
                     //choose direction (BETA version)
                     cv::Mat corp_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
