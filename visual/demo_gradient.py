@@ -171,9 +171,10 @@ def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, ba
 def change_color(result, gradient_intensity):
     hsv = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
     row, collumn = np.shape(gradient_intensity)
+    max_gradient = gradient_intensity.max()
     for i in range(row):
         for j in range(collumn):
-            hsv[i][j][1] = gradient_intensity[i][j]
+            hsv[i][j][1] = np.rint((gradient_intensity[i][j]/max_gradient)*255)
     return hsv
             
 
