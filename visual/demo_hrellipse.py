@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_hrcorner.py
  #Creation Date : 02-06-2017
- #Last Modified : Tue Jun 13 14:41:42 2017
+ #Last Modified : Tue Jun 13 15:18:38 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -106,7 +106,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         #visualize the whole thing properly
         x,y = np.shape(harris_mask)
         eigen_max = eigen_value_matrix.max()
-        img = np.full((x, y, 3), 0, np.uint8)
+        img = np.full((x, y, 3), 255, np.uint8)
         counter = 1
         for i in range(x):
             for j in range(y):
@@ -143,37 +143,37 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
 
 
 #Static image testing
-# img = cv2.imread("./src_picture/exp.jpg")
-# grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-# result = harris_visual(grey)
-# print "hello"
-# cv2.imwrite("result.jpg", result)
+img = cv2.imread("./src_picture/exp.jpg")
+grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+result = harris_visual(grey)
+print "hello"
+cv2.imwrite("result_white.jpg", result)
 
 
 
-camera = cv2.VideoCapture("./src_video/matrix-woman-red-142x60.mov")
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-frame_rate = 24 
-resolution = (142, 60)
-out = cv2.VideoWriter("let'ssee.avi" ,fourcc, frame_rate, resolution)
+# camera = cv2.VideoCapture("./src_video/matrix-woman-red-142x60.mov")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (142, 60)
+# out = cv2.VideoWriter("let'ssee.avi" ,fourcc, frame_rate, resolution)
 
-while True:
-    grabbed, frame = camera.read()
-    if grabbed:
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        harris_result = harris_visual(img)
-        harris_result = np.uint8(harris_result)
-        # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        out.write(harris_result)
-        # print harris_result
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    else:
-        print("No video feed available")
-        break
-camera.release()
-out.release()
-cv2.destroyAllWindows()
+# while True:
+    # grabbed, frame = camera.read()
+    # if grabbed:
+        # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # harris_result = harris_visual(img)
+        # harris_result = np.uint8(harris_result)
+        # # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
+        # out.write(harris_result)
+        # # print harris_result
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+            # break
+    # else:
+        # print("No video feed available")
+        # break
+# camera.release()
+# out.release()
+# cv2.destroyAllWindows()
 
 
 
