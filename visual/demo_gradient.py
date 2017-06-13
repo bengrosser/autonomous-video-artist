@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_gradient.py
  #Creation Date : 24-05-2017 
- #Last Modified : Tue Jun  6 11:13:20 2017
+ #Last Modified : Tue Jun 13 14:00:30 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
