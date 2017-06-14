@@ -7,10 +7,15 @@
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
 #include <kobuki_msgs/SensorState.h>
+#include <sys/sysinfo.h> //for system infomation
 
 using namespace std;
 
 static const uint8_t MAX_BATTERY = 162;
+static const long minute = 60;
+static const long hour = 3600; //minute*60
+static const long day = 86400; //hour*24
+static const double megabyte = 1024 * 1024;
 
 class AutoNav
 {
@@ -28,7 +33,7 @@ class AutoNav
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false){
-            ros::MultiThreadedSpinner threads(5);
+            ros::MultiThreadedSpinner threads(6);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
@@ -39,6 +44,8 @@ class AutoNav
             ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
             //create a thread for battery information
             ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
+            //create a thread for system information
+            ros::Timer sysInfo=node.createTimer(ros::Duration(1), &AutoNav::sysInfo, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
@@ -191,6 +198,17 @@ class AutoNav
             }
             float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
             ROS_INFO("left battery percentage %.2f %%", percentage);
+        }
+
+        void sysInfo(const ros::TimerEvent& time){
+            std::cout<<"test test"<<std::endl;
+            //files in /proc are about system info like "/proc/meminfo" 
+            struct sysinfo si;
+            sysinfo(&si);
+            printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
+            printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
+            printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
+            printf ("process count : %d\n", si.procs);
         }
 };
 
