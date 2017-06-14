@@ -62,28 +62,28 @@ class AutoNav
                     cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
 
                 //crop the image
-                cv::Mat corp_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
+                cv::Mat crop_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
 
-                cv::Mat mask = corp_front>0;  //mask to remove the noise
-                int num = countNonZero(corp_front);
+                cv::Mat mask = crop_front>0;  //mask to remove the noise
+                int num = countNonZero(crop_front);
                 float percentage = ((double)num)/((double)280*330); //change with the depth image size
                
                 double mmin = 0.0;
                 double mmax = 0.0;
-                cv::minMaxLoc(corp_front, &mmin, &mmax, 0, 0, mask);
+                cv::minMaxLoc(crop_front, &mmin, &mmax, 0, 0, mask);
                 //std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
                 if(mmin < 600 || percentage < 0.65){
                     //choose direction (BETA version)
-                    cv::Mat corp_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
-                    cv::Mat left_mask = corp_left>0;
-                    cv::Mat corp_right = depth_img(cv::Rect_<int>(460,150,180,330)); //depth image on right
-                    cv::Mat right_mask = corp_right>0;
+                    cv::Mat crop_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
+                    cv::Mat left_mask = crop_left>0;
+                    cv::Mat crop_right = depth_img(cv::Rect_<int>(460,150,180,330)); //depth image on right
+                    cv::Mat right_mask = crop_right>0;
                     double lmin = 0.0;
                     double lmax = 0.0;
                     double rmin = 0.0;
                     double rmax = 0.0;
-                    cv::minMaxLoc(corp_left, &lmin, &lmax, 0, 0, left_mask);
-                    cv::minMaxLoc(corp_right, &rmin, &rmax, 0, 0, right_mask);
+                    cv::minMaxLoc(crop_left, &lmin, &lmax, 0, 0, left_mask);
+                    cv::minMaxLoc(crop_right, &rmin, &rmax, 0, 0, right_mask);
                     if(lmin < rmin)
                         go_right = true;
                     else
@@ -96,10 +96,10 @@ class AutoNav
 
                 //visualization
                 double max = 0.0;
-                cv::minMaxLoc(corp_front, 0 , &max, 0, 0);
-                cv::Mat corp_norm;
-                corp_front.convertTo(corp_norm, CV_32F, 1.0/max, 0);
-                cv::imshow("foo", corp_norm);
+                cv::minMaxLoc(crop_front, 0 , &max, 0, 0);
+                cv::Mat crop_norm;
+                crop_front.convertTo(crop_norm, CV_32F, 1.0/max, 0);
+                cv::imshow("foo", crop_norm);
                 cv::waitKey(1);
                                 
             }catch (const cv_bridge::Exception& e){
