@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_hrcorner.py
  #Creation Date : 02-06-2017
- #Last Modified : Tue Jun 13 15:18:38 2017
+ #Last Modified : Wed Jun 14 14:10:10 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -18,6 +18,7 @@ import numpy as np
 import math
 from matplotlib import pyplot as plt
 import struct
+import time
 
 
 #This time it is all about ellipse
@@ -50,8 +51,6 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
 
         return 360-np.degrees(angle_between(vector_1, vector_2))
         
-
-
 
     def harris_measure(Sx2, Sy2, Sxy):
         trace_matrix =  Sx2 + Sy2
@@ -87,7 +86,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         # print max_eigen_x, max_eigen_y
         for i in range(row):
             for j in range(column):
-                if harris_result[i][j] > 0.08*harris_max:
+                if harris_result[i][j] > 0.05*harris_max:
                     # harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
                     harris_mask[i][j] = 1
                     eigen_vals, eigen_vector = get_eigen(i, j) 
@@ -98,6 +97,18 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         return (eigen_value_matrix, eigen_vector_matrix, harris_mask)
 
     
+    def alpha_blending(fore_ground, back_ground, alpha):
+        x,y,z = fore_ground.shape
+        point_x, point_y, point_z = np.where(fore_ground != 255)
+        num_points = len(point_x)
+        for i in range(num_points):
+            x_coor = point_x[i]
+            y_coor = point_y[i]
+            result_color = alpha*fore_ground[x_coor][y_coor] + (1-alpha)*back_ground[x_coor][y_coor]
+            back_ground[x_coor][y_coor] = result_color
+        return back_ground
+
+
     def visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask):
         #TODO:In here I chose the smallest eigen as the first value that should be in here
         #TODO:which means there might be chance that the ellipses went out of the way 
@@ -107,6 +118,8 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         x,y = np.shape(harris_mask)
         eigen_max = eigen_value_matrix.max()
         img = np.full((x, y, 3), 255, np.uint8)
+        # img = np.zeros((x,y), np.uint8)
+        accumulative_img = np.full((x, y, 3), 255, np.uint8)
         counter = 1
         harris_max = harris_result.max()
         for i in range(x):
@@ -121,14 +134,19 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
                     # print min_index, max_index
                     min_axis_vector = eigen_vector_matrix[i][j][min_index]
                     rotation_in_degrees = np.rint(get_direction(min_axis_vector, np.array([0,1])))
-                    color_single = (harris_result[i][j]/harris_max)*255
-                    color_single = int(color_single)
-                    color = (255,255,color_single)
-                    print color
+                    color = (0,0,0) 
                     img = cv2.ellipse(img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1) 
+                    alpha = harris_result[i][j]/float(harris_max) 
+                    if alpha > 1:
+                        accumulative_img = cv2.ellipse(accumulative_img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1)
+                    else:
+                        accumulative_img = alpha_blending(img, accumulative_img, alpha)
+                    img = np.full((x,y,3), 255, np.uint8)
                     # counter += 1
         # print counter
-        return img
+        accumulative_img = accumulative_img.astype(np.uint8)
+        return accumulative_img 
+        # return img
     sobelx, sobely = sobel_filter(img.copy())
     Ix2 = sobelx * sobelx
     Iy2 = sobely * sobely
@@ -140,6 +158,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
     harris_result = harris_measure(Sx2, Sy2, Sxy)
     eigen_value_matrix, eigen_vector_matrix, harris_mask = get_eigen_matrix(harris_result)
     img = visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask)
+    img = img.astype(np.uint8)
     # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
     # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
     # print max_eigen_x, max_eigen_y
@@ -147,39 +166,41 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
 
 
 #Static image testing
-# img = cv2.imread("./src_picture/exp.jpg")
-# grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-# result = harris_visual(grey)
-# print "hello"
-# cv2.imwrite("result_white_transpanrency.jpg", result)
+img = cv2.imread("./src_picture/exp.jpg")
+grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+start_time = time.time()
+result = harris_visual(grey)
+end_time = time.time()
+print end_time - start_time 
+cv2.imwrite("result_transparent.jpg", result)
 
 
 
-camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-frame_rate = 24 
-resolution = (1280, 720)
-out = cv2.VideoWriter("high_rez_white.avi" ,fourcc, frame_rate, resolution)
+# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (1280, 720)
+# out = cv2.VideoWriter("high_rez_white.avi" ,fourcc, frame_rate, resolution)
 
-while True:
-    grabbed, frame = camera.read()
-    if grabbed:
-        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        harris_result = harris_visual(img)
-        harris_result = np.uint8(harris_result)
-        # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        cv2.imshow("result", harris_result)
-        out.write(harris_result)
-        # print "finished one frame"
-        # print harris_result
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    else:
-        print("No video feed available")
-        break
-camera.release()
-out.release()
-cv2.destroyAllWindows()
+# while True:
+    # grabbed, frame = camera.read()
+    # if grabbed:
+        # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        # harris_result = harris_visual(img)
+        # harris_result = np.uint8(harris_result)
+        # # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
+        # cv2.imshow("result", harris_result)
+        # out.write(harris_result)
+        # # print "finished one frame"
+        # # print harris_result
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+            # break
+    # else:
+        # print("No video feed available")
+        # break
+# camera.release()
+# out.release()
+# cv2.destroyAllWindows()
 
 
 
