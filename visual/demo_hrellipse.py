@@ -87,7 +87,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         # print max_eigen_x, max_eigen_y
         for i in range(row):
             for j in range(column):
-                if harris_result[i][j] > 0.15*harris_max:
+                if harris_result[i][j] > 0.08*harris_max:
                     # harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
                     harris_mask[i][j] = 1
                     eigen_vals, eigen_vector = get_eigen(i, j) 
@@ -98,7 +98,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         return (eigen_value_matrix, eigen_vector_matrix, harris_mask)
 
     
-    def visualize(eigen_value_matrix, eigen_vector_matrix, harris_mask):
+    def visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask):
         #TODO:In here I chose the smallest eigen as the first value that should be in here
         #TODO:which means there might be chance that the ellipses went out of the way 
         #TODO:Adding another color map here
@@ -108,10 +108,12 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
         eigen_max = eigen_value_matrix.max()
         img = np.full((x, y, 3), 255, np.uint8)
         counter = 1
+        harris_max = harris_result.max()
         for i in range(x):
             for j in range(y):
                 if harris_mask[i][j]:
                     #In here we have to reverse the order since 
+
                     min_index = eigen_value_matrix[i][j].argmax(axis=0)  
                     max_index = eigen_value_matrix[i][j].argmin(axis=0)
                     min_axis_val = np.rint(1/(eigen_value_matrix[i][j][min_index]/eigen_max))
@@ -119,11 +121,13 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
                     # print min_index, max_index
                     min_axis_vector = eigen_vector_matrix[i][j][min_index]
                     rotation_in_degrees = np.rint(get_direction(min_axis_vector, np.array([0,1])))
-                    color = np.random.randint(255, size=3)
-                    color = tuple(color)
+                    color_single = (harris_result[i][j]/harris_max)*255
+                    color_single = int(color_single)
+                    color = (255,255,color_single)
+                    print color
                     img = cv2.ellipse(img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1) 
-                    counter += 1
-        print counter
+                    # counter += 1
+        # print counter
         return img
     sobelx, sobely = sobel_filter(img.copy())
     Ix2 = sobelx * sobelx
@@ -135,7 +139,7 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
     # direction_rotation = get_direction(sobelx, sobely) 
     harris_result = harris_measure(Sx2, Sy2, Sxy)
     eigen_value_matrix, eigen_vector_matrix, harris_mask = get_eigen_matrix(harris_result)
-    img = visualize(eigen_value_matrix, eigen_vector_matrix, harris_mask)
+    img = visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask)
     # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
     # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
     # print max_eigen_x, max_eigen_y
@@ -143,37 +147,39 @@ def harris_visual(img): #TODO: Not quite sure about the size of the kernal
 
 
 #Static image testing
-img = cv2.imread("./src_picture/exp.jpg")
-grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-result = harris_visual(grey)
-print "hello"
-cv2.imwrite("result_white.jpg", result)
+# img = cv2.imread("./src_picture/exp.jpg")
+# grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+# result = harris_visual(grey)
+# print "hello"
+# cv2.imwrite("result_white_transpanrency.jpg", result)
 
 
 
-# camera = cv2.VideoCapture("./src_video/matrix-woman-red-142x60.mov")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (142, 60)
-# out = cv2.VideoWriter("let'ssee.avi" ,fourcc, frame_rate, resolution)
+camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+frame_rate = 24 
+resolution = (1280, 720)
+out = cv2.VideoWriter("high_rez_white.avi" ,fourcc, frame_rate, resolution)
 
-# while True:
-    # grabbed, frame = camera.read()
-    # if grabbed:
-        # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # harris_result = harris_visual(img)
-        # harris_result = np.uint8(harris_result)
-        # # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        # out.write(harris_result)
-        # # print harris_result
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-            # break
-    # else:
-        # print("No video feed available")
-        # break
-# camera.release()
-# out.release()
-# cv2.destroyAllWindows()
+while True:
+    grabbed, frame = camera.read()
+    if grabbed:
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        harris_result = harris_visual(img)
+        harris_result = np.uint8(harris_result)
+        # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
+        cv2.imshow("result", harris_result)
+        out.write(harris_result)
+        # print "finished one frame"
+        # print harris_result
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    else:
+        print("No video feed available")
+        break
+camera.release()
+out.release()
+cv2.destroyAllWindows()
 
 
 
