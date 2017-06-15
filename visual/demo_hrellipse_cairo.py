@@ -9,6 +9,7 @@
 This is a demo that shows and visualizes the procedure of how computer determines features(corners) 
 in mordern computer vision libraries
 Ellipse version
+also with the help of the cairo library
 '''
 
 #TODO: check out the performance and determine to use threading or not
@@ -127,15 +128,19 @@ def harris_visual(img):
         #TODO:There is a compromise we have to make so that we can actually
         #visualize the whole thing properly
         x,y = np.shape(harris_mask)
-        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, x, y)
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, y, x)
         ctx = cairo.Context(surface)
         ctx.set_antialias(cairo.ANTIALIAS_SUBPIXEL)
+        ctx.set_source_rgb(1,1,1)
+        ctx.paint()
+        # ctx.restore()
+        
 
         eigen_max = eigen_value_matrix.max()
-        img = np.full((x, y, 3), 255, np.uint8)
+        # img = np.full((x, y, 3), 255, np.uint8)
         # img = np.zeros((x,y), np.uint8)
-        accumulative_img = np.full((x, y, 3), 255, np.uint8)
-        counter = 1
+        # accumulative_img = np.full((x, y, 3), 255, np.uint8)
+        # counter = 1
         harris_max = harris_result.max()
         for i in range(x):
             for j in range(y):
@@ -150,26 +155,23 @@ def harris_visual(img):
                     min_axis_vector = eigen_vector_matrix[i][j][min_index]
                     rotation_in_degrees = np.rint(get_direction(min_axis_vector, np.array([0,1])))
                     color = (0,0,0) 
-                    img = cv2.ellipse(img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1) 
+                    # img = cv2.ellipse(img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1) 
                     alpha = harris_result[i][j]/float(harris_max) 
-
-
                     if alpha > 1:
-                        # ctx.set_source_rgba(0,0,0,1)
-                        # drawEllipse(i, j, max_axis_val, min_axis_val, int(rotation_in_degrees), ctx)
-                        accumulative_img = cv2.ellipse(accumulative_img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1)
-
+                        ctx.set_source_rgba(0,0,0,1)
+                        drawEllipse(j, i, max_axis_val, min_axis_val, int(rotation_in_degrees), ctx)
+                        # accumulative_img = cv2.ellipse(accumulative_img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1)
                     else:
-                        # ctx.set_source_rgba(0,0,0,alpha)
-                        # drawEllipse(i, j, max_axis_val, min_axis_val, int(rotation_in_degrees), ctx)
-                        accumulative_img = alpha_blending(img, accumulative_img, alpha)
-                    img = np.full((x,y,3), 255, np.uint8)
+                        ctx.set_source_rgba(0,0,0,alpha)
+                        drawEllipse(j, i, int(max_axis_val), int(min_axis_val), int(rotation_in_degrees), ctx)
+                        # accumulative_img = alpha_blending(img, accumulative_img, alpha)
+                    # img = np.full((x,y,3), 255, np.uint8)
 
                     # counter += 1
         # print counter
-        accumulative_img = accumulative_img.astype(np.uint8)
-        return accumulative_img
-        # return surface 
+        # accumulative_img = accumulative_img.astype(np.uint8)
+        # return accumulative_img
+        return surface 
         # return img
     sobelx, sobely = sobel_filter(img.copy())
     Ix2 = sobelx * sobelx
@@ -182,7 +184,7 @@ def harris_visual(img):
     harris_result = harris_measure(Sx2, Sy2, Sxy)
     eigen_value_matrix, eigen_vector_matrix, harris_mask = get_eigen_matrix(harris_result)
     img = visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask)
-    img = img.astype(np.uint8)
+    # img = img.astype(np.uint8)
     # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
     # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
     # print max_eigen_x, max_eigen_y
@@ -190,46 +192,53 @@ def harris_visual(img):
 
 
 #Static image testing
-img = cv2.imread("./src_picture/exp.jpg")
-grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
-start_time = time.time()
-result = harris_visual(grey)
-end_time = time.time()
-print end_time - start_time 
-cv2.imwrite("result_transparent_against.jpg", result)
+# img = cv2.imread("./src_picture/exp.jpg")
+# grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+# x,y = grey.shape
+# start_time = time.time()
+# result = harris_visual(grey)
+# buf = result.get_data()
+# a = np.frombuffer(buf, np.uint8)
+# a.shape = (x,y,4)
+# b = a[:,:,0:3]
+# print b 
+# cv2.imwrite("ball_so_hard.jpg", b)
+# end_time = time.time()
+# print end_time - start_time 
+# cv2.imwrite("result_transparent_against.jpg", result)
 # result.write_to_png('my_heartwillgoon.png')
 
 
 
-# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (1280, 720)
-# out = cv2.VideoWriter("high_rez_transparent.avi" ,fourcc, frame_rate, resolution)
-# start_time = time.time()
+camera = cv2.VideoCapture("./src_video/matrix-woman-red.mp4")
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+frame_rate = 24 
+resolution = (1280, 720)
+out = cv2.VideoWriter("high_rez_transparent.avi" ,fourcc, frame_rate, resolution)
+start_time = time.time()
 
-# while True:
-    # grabbed, frame = camera.read()
-    # if grabbed:
-        # img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # harris_result = harris_visual(img)
-        # print "finished on frame"
-        # harris_result = np.uint8(harris_result)
-        # # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        # # cv2.imshow("result", harris_result)
-        # out.write(harris_result)
-        # # print "finished one frame"
-        # # print harris_result
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-            # break
-    # else:
-        # print("No video feed available")
-        # break
-# end_time = time.time()
-# print end_time - start_time 
-# camera.release()
-# out.release()
-# cv2.destroyAllWindows()
+while True:
+    grabbed, frame = camera.read()
+    if grabbed:
+        img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        harris_result = harris_visual(img)
+        print "finished on frame"
+        harris_result = np.uint8(harris_result)
+        # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
+        # cv2.imshow("result", harris_result)
+        out.write(harris_result)
+        # print "finished one frame"
+        # print harris_result
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+    else:
+        print("No video feed available")
+        break
+end_time = time.time()
+print end_time - start_time 
+camera.release()
+out.release()
+cv2.destroyAllWindows()
 
 
 
