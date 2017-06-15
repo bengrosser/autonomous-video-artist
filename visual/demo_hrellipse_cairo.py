@@ -85,10 +85,10 @@ def harris_visual(img):
         harris_max = harris_result.max()
         # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
         # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
-        # print max_eigen_x, max_eigen_y
+        # print max_eigen_x, max_eigen_yball_so_hard
         for i in range(row):
             for j in range(column):
-                if harris_result[i][j] > 0.05*harris_max:
+                if harris_result[i][j] > 0.08*harris_max:
                     # harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
                     harris_mask[i][j] = 1
                     eigen_vals, eigen_vector = get_eigen(i, j) 
@@ -113,10 +113,10 @@ def harris_visual(img):
 
     def drawEllipse(x, y, w, h, rotation,ctx):
         ctx.save()
-        ctx.translate(x + w/2.0,y + h /2.0)
+        ctx.translate(x,y)
         ctx.rotate(np.deg2rad(rotation))
-        ctx.scale(w/2.0,h/2.0)
-        ctx.arc(0.0,0.0,1.0,0.0,2*pi)
+        ctx.scale(w,h)
+        ctx.arc(0,0,1.0,0.0,2*pi)
         ctx.restore()
         ctx.stroke() 
     
@@ -124,7 +124,7 @@ def harris_visual(img):
     def visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask):
         #TODO:In here I chose the smallest eigen as the first value that should be in here
         #TODO:which means there might be chance that the ellipses went out of the way 
-        #TODO:Adding another color map here
+        #TODO:Adding another color map hereball_so_hard
         #TODO:There is a compromise we have to make so that we can actually
         #visualize the whole thing properly
         x,y = np.shape(harris_mask)
@@ -169,7 +169,7 @@ def harris_visual(img):
 
                     # counter += 1
         # print counter
-        # accumulative_img = accumulative_img.astype(np.uint8)
+        # accumulative_img = accumulative_img.astype(npball_so_hard.uint8)
         # return accumulative_img
         return surface 
         # return img
@@ -187,6 +187,12 @@ def harris_visual(img):
     # img = img.astype(np.uint8)
     # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
     # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
+# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (1280, 720)
+# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
+# start_time = time.time()
     # print max_eigen_x, max_eigen_y
     return img 
 
@@ -201,36 +207,65 @@ def harris_visual(img):
 # a = np.frombuffer(buf, np.uint8)
 # a.shape = (x,y,4)
 # b = a[:,:,0:3]
-# print b 
-# cv2.imwrite("ball_so_hard.jpg", b)
+# cv2.imwrite("debug_cairo.jpg", b)
 # end_time = time.time()
 # print end_time - start_time 
+
 # cv2.imwrite("result_transparent_against.jpg", result)
 # result.write_to_png('my_heartwillgoon.png')
 
+# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (1280, 720)
+# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
+# start_time = time.time()
 
 
-camera = cv2.VideoCapture("./src_video/matrix-woman-red.mp4")
+camera = cv2.VideoCapture("./src_video/orangeclip.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 frame_rate = 24 
 resolution = (1280, 720)
-out = cv2.VideoWriter("high_rez_transparent.avi" ,fourcc, frame_rate, resolution)
+out = cv2.VideoWriter("highrez_withcairo_orange.avi" ,fourcc, frame_rate, resolution)
 start_time = time.time()
 
+# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (1280, 720)
+# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
+# start_time = time.time()
 while True:
     grabbed, frame = camera.read()
     if grabbed:
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        x,y = img.shape
         harris_result = harris_visual(img)
-        print "finished on frame"
-        harris_result = np.uint8(harris_result)
+# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# frame_rate = 24 
+# resolution = (1280, 720)
+# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
+# start_time = time.time()
+
+        # harris_result.write_to_png("fuckit.png")
+        # harris_result = np.uint8(harris_result)
+
+        buf = harris_result.get_data()
+        temp_result_matrix = np.frombuffer(buf, np.uint8)
+        temp_result_matrix.shape = (x,y,4)
+        result_matrix = temp_result_matrix[:,:,0:3]
+
         # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        # cv2.imshow("result", harris_result)
-        out.write(harris_result)
+        # cv2.imwrite("fuckit.jpg", result_matrix)
+
+        out.write(result_matrix)
+        print "finished on frame"
+
         # print "finished one frame"
         # print harris_result
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+            # break
     else:
         print("No video feed available")
         break
