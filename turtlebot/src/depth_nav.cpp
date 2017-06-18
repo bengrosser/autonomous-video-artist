@@ -1,3 +1,4 @@
+#include <cmath>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
@@ -8,6 +9,9 @@
 #include <nav_msgs/Odometry.h>
 #include <kobuki_msgs/SensorState.h>
 #include <sys/sysinfo.h> //for system infomation
+#include <actionlib/server/simple_action_server.h>
+#include <actionlib/client/simple_action_client.h>
+#include <actionlib/client/terminal_state.h>
 
 using namespace std;
 
@@ -17,6 +21,7 @@ static const long hour = 3600; //minute*60
 static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 
+//for the angular velocity, positive means counterclockwise, negative means clockwise
 class AutoNav
 {
     private:
@@ -27,13 +32,27 @@ class AutoNav
         int which_bumper;
         int img_height;  //image height was 480 by default
         int img_width;  //image width was 640 by default
-        bool go_right;
+        bool go_right;  
         
 
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false){
-            ros::MultiThreadedSpinner threads(6);
+            geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+            OUT_OF_DOCKING_STATION.linear.x = -0.16;
+            OUT_OF_DOCKING_STATION.angular.z = 0.0;
+            ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
+            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))
+                velocity.publish(OUT_OF_DOCKING_STATION);
+            OUT_OF_DOCKING_STATION.linear.x = 0.0;
+            OUT_OF_DOCKING_STATION.angular.z = 1.0;
+            OUT_OF_DOCKING_TIME = ros::Time::now();
+            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.8))    //3.6
+                velocity.publish(OUT_OF_DOCKING_STATION);            
+
+
+            std::cout<<"helloworld"<<std::endl;
+            ros::MultiThreadedSpinner threads(7);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
             //create a thread to control the base 
@@ -46,6 +65,8 @@ class AutoNav
             ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
             //create a thread for system information
             ros::Timer sysInfo=node.createTimer(ros::Duration(1), &AutoNav::sysInfo, this);
+            //create a thread for automatic charging with docking station
+            ros::Subscriber autoCharging=node.subscribe("/odom", 1000, &AutoNav::autoCharging, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
@@ -162,16 +183,12 @@ class AutoNav
                     else
                         decision.angular.z = -DRIVE_ANGULARSPEED;
 
-                    //
-                    //decision.angular.z = DRIVE_ANGULARSPEED; 
                     if(DRIVE){
                         while(!move_forward){
                             velocity.publish(decision);
-                        }           
+                        }
                     }
-                }
-               //if(DRIVE)
-                    //velocity.publish(decision);
+                } 
             }
         }
 
@@ -179,7 +196,6 @@ class AutoNav
             if(msg.state){
                 bump = true;
                 which_bumper = msg.bumper;
-                //sleep(5);
             }
         }
 
@@ -189,6 +205,7 @@ class AutoNav
                 //do nothing, just to waste the time
             }
             ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+            ROS_INFO("Orientation -> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
         }
 
         void battery(const kobuki_msgs::SensorState msg){
@@ -205,10 +222,45 @@ class AutoNav
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
-            printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
+            /*printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
-            printf ("process count : %d\n", si.procs);
+            printf ("process count : %d\n", si.procs);*/
+        }
+        
+        void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
+            //std::cout<<"test test"<<std::endl;
+            float roll;
+            float pitch;
+            float yaw;
+            float x = msg->pose.pose.orientation.x;
+            float y = msg->pose.pose.orientation.y;
+            float z = msg->pose.pose.orientation.z;
+            float w = msg->pose.pose.orientation.w;
+            toEulerianAngle(x,y,z,w,roll, pitch, yaw);
+            std::cout<<"roll: "<<roll<<std::endl;
+            std::cout<<"pitch: "<<pitch<<std::endl;
+            std::cout<<"yaw: "<<yaw<<std::endl;
+        }
+
+        //a helper function (convert quaternion angle to euler angle)
+        void toEulerianAngle(const float x, const float y, const float z, const float w, float& roll, float& pitch, float& yaw){
+            float ysqr = y*y;
+            //roll (x-axis rotation)
+            float t0 = +2.0*(w*x+y*z);
+            float t1 = +1.0-2.0*(x*x+ysqr);
+            roll = std::atan2(t0,t1);
+
+            //pitch (y-axis rotation)
+            float t2 = +2.0*(w*y-z*x);
+            t2 = t2>1.0 ? 1.0 : t2;
+            t2 = t2<-1.0 ? -1.0 : t2;
+            pitch = std::asin(t2);
+
+            //yaw (z-axis rotation)
+            float t3 = +2.0*(w*z+x*y);
+            float t4 = +1.0-2.0*(ysqr+z*z);
+            yaw = std::atan2(t3, t4);
         }
 };
 
@@ -219,7 +271,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive",true); //For debugging, always set to true
+    node.setParam("drive",false); //For debugging, always set to true
 
     AutoNav turtlebot(node); 
 
