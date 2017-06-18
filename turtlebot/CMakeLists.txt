@@ -18,6 +18,8 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   nav_msgs
+  actionlib_msgs
+  actionlib
 )
 
 ## System dependencies are found with CMake's conventions
@@ -79,6 +81,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   DEPENDENCIES
 #   std_msgs
 # )
+#generate_messages(
+#  DEPENDENCIES 
+#  actionlib_msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
