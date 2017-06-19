@@ -147,7 +147,8 @@ def harris_visual(img):
                         # alpha = 0.5*alpha
 
                     #This is the curve fitting version
-                    alpha = 0.05239778*np.exp(2.97201908*alpha)
+                    #Check the curve_fit.py for generation parameter
+                    alpha = 0.04118395*np.exp(3.21999742*alpha)
                     ctx.set_source_rgba(0,0,0,alpha)
                     drawEllipse(j, i, int(max_axis_val), int(min_axis_val), int(rotation_in_degrees), ctx)
         return surface 
@@ -165,7 +166,7 @@ def harris_visual(img):
     return img 
 
 
-#Static image testing
+# Static image testing
 # img = cv2.imread("./src_picture/exp.jpg")
 # grey = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
 # x,y = grey.shape
@@ -175,7 +176,7 @@ def harris_visual(img):
 # a = np.frombuffer(buf, np.uint8)
 # a.shape = (x,y,4)
 # b = a[:,:,0:3]
-# cv2.imwrite("debug_cairo_withscale.jpg", b)
+# cv2.imwrite("debug_cairo_with_curve.jpg", b)
 # end_time = time.time()
 # print end_time - start_time 
 
@@ -184,7 +185,7 @@ camera = cv2.VideoCapture("./src_video/matrix-woman-red.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 frame_rate = 24 
 resolution = (1920, 800)
-out = cv2.VideoWriter("highrez_with_scale.avi" ,fourcc, frame_rate, resolution)
+out = cv2.VideoWriter("highrez_with_curve_fit.avi" ,fourcc, frame_rate, resolution)
 start_time = time.time()
 
 while True:
