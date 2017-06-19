@@ -19,12 +19,14 @@ def get_sum(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     x,y = gray.shape
     total_num = x*y
-    _, binary_img = cv2.threshold(gray, 127,255,cv2.THRESH_BINARY)
-    number_of_white = int(np.sum(binary_img)/255)
+    # _, binary_img = cv2.threshold(gray, 191,255,cv2.THRESH_BINARY)
+    threshold_adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+    number_of_white = int(np.sum(threshold_adaptive)/255)
     ratio = number_of_white/float(total_num)
     pixel_value = int(255*ratio)
     print "finished one frame"
     return pixel_value
+    # return threshold_adaptive 
     
 
 def get_height(total_frame, base):
@@ -53,7 +55,7 @@ total_frame = count_frames("./src_video/matrix-woman-red.mp4")
 width, height = get_size(total_frame)
 result_size = width*height
 print width, height, total_frame 
-# result = np.zeros((height, width), np.uint8)
+result = np.zeros((height, width), np.uint8)
 storage_array = [] 
 while True:
     grabbed, frame = camera.read()
@@ -61,6 +63,7 @@ while True:
         result_pixel_value = get_sum(frame)
         storage_array.append(result_pixel_value)
                # print harris_result
+        # cv2.imshow("result", result_pixel_value)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
@@ -69,7 +72,7 @@ while True:
         final_result = np.array(storage_array)
         final_result.shape = (height,width)
         final_result.astype(np.uint8)
-        cv2.imwrite("temp_result.jpg", final_result)
+        cv2.imwrite("adaptive_result.jpg", final_result)
         print("No video feed available")
         break
 camera.release()
