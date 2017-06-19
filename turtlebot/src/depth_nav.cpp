@@ -34,11 +34,14 @@ class AutoNav
         int img_width;  //image width was 640 by default
         bool go_right;  
         bool battery_is_low;
+        double near_docking_station_x;
+        double near_docking_station_y;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
+            //make the robot move backward and turn 180 degree 
             geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
             OUT_OF_DOCKING_STATION.angular.z = 0.0;
@@ -48,11 +51,10 @@ class AutoNav
             OUT_OF_DOCKING_STATION.linear.x = 0.0;
             OUT_OF_DOCKING_STATION.angular.z = 1.0;
             OUT_OF_DOCKING_TIME = ros::Time::now();
-            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.8))    //3.6
+            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.6
                 velocity.publish(OUT_OF_DOCKING_STATION);            
-
-
-            std::cout<<"helloworld"<<std::endl;
+            //Now the robot is ready to go
+            
             ros::MultiThreadedSpinner threads(7);
             //create a thread for vision detection
             ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
@@ -194,7 +196,8 @@ class AutoNav
                 }
             }
             else{//battery is low (navigate to the docking station)
-
+                //let the robot go to (near_docking_station_x, near_docking_station_y)
+                
             }
         }
 
@@ -232,10 +235,10 @@ class AutoNav
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
-            printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
+            /*printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
-            printf ("process count : %d\n", si.procs);
+            printf ("process count : %d\n", si.procs);*/
         }
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
