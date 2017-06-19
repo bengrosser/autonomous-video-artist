@@ -21,6 +21,7 @@ from matplotlib import pyplot as plt
 import struct
 import time 
 import cairo
+import scipy.optimize as op
 from math import pi
 
 #This time it is all about ellipse def harris_visual(img): #TODO: Not quite sure about the size of the kernal
@@ -71,8 +72,6 @@ def harris_visual(img):
         sxy = Sxy[i][j]
         harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
         eigen_vals, eigen_vector = np.linalg.eigh(harris_measure_matrix)
-        # print eigen_vector
-        # eigen_vals = np.linalg.eigvals(harris_measure_matrix)
         return eigen_vals,eigen_vector
 
 
@@ -80,22 +79,15 @@ def harris_visual(img):
         row, column = harris_result.shape
         eigen_value_matrix = np.zeros((row, column, 2))
         eigen_vector_matrix = np.zeros((row, column, 2, 2))
-        # eigen_vector_matrix = 
         harris_mask = np.zeros_like(harris_result)
         harris_max = harris_result.max()
-        # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
-        # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
-        # print max_eigen_x, max_eigen_yball_so_hard
         for i in range(row):
             for j in range(column):
                 if harris_result[i][j] > 0.08*harris_max:
-                    # harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
                     harris_mask[i][j] = 1
                     eigen_vals, eigen_vector = get_eigen(i, j) 
                     eigen_value_matrix[i][j] = eigen_vals
                     eigen_vector_matrix[i][j] = eigen_vector
-        # print "---------------------"
-        # print eigen_value_matrix
         return (eigen_value_matrix, eigen_vector_matrix, harris_mask)
 
     
@@ -125,54 +117,47 @@ def harris_visual(img):
         #TODO:In here I chose the smallest eigen as the first value that should be in here
         #TODO:which means there might be chance that the ellipses went out of the way 
         #TODO:Adding another color map hereball_so_hard
-        #TODO:There is a compromise we have to make so that we can actually
-        #visualize the whole thing properly
+        #TODO:There is a compromise we have to make so that we can actually #visualize the whole thing properly
         x,y = np.shape(harris_mask)
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, y, x)
         ctx = cairo.Context(surface)
         ctx.set_antialias(cairo.ANTIALIAS_SUBPIXEL)
         ctx.set_source_rgb(1,1,1)
         ctx.paint()
-        # ctx.restore()
         
-
         eigen_max = eigen_value_matrix.max()
-        # img = np.full((x, y, 3), 255, np.uint8)
-        # img = np.zeros((x,y), np.uint8)
-        # accumulative_img = np.full((x, y, 3), 255, np.uint8)
-        # counter = 1
         harris_max = harris_result.max()
         for i in range(x):
             for j in range(y):
                 if harris_mask[i][j]:
                     #In here we have to reverse the order since 
-
                     min_index = eigen_value_matrix[i][j].argmax(axis=0)  
                     max_index = eigen_value_matrix[i][j].argmin(axis=0)
                     min_axis_val = np.rint(1/(eigen_value_matrix[i][j][min_index]/eigen_max))
                     max_axis_val = np.rint(1/(eigen_value_matrix[i][j][max_index]/eigen_max))
-                    # print min_index, max_index
                     min_axis_vector = eigen_vector_matrix[i][j][min_index]
                     rotation_in_degrees = np.rint(get_direction(min_axis_vector, np.array([0,1])))
                     color = (0,0,0) 
-                    # img = cv2.ellipse(img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1) 
                     alpha = harris_result[i][j]/float(harris_max) 
-                    if alpha > 1:
-                        ctx.set_source_rgba(0,0,0,1)
-                        drawEllipse(j, i, max_axis_val, min_axis_val, int(rotation_in_degrees), ctx)
-                        # accumulative_img = cv2.ellipse(accumulative_img, (j, i), (int(max_axis_val), int(min_axis_val)), int(rotation_in_degrees), 0, 360, color, 1)
-                    else:
-                        ctx.set_source_rgba(0,0,0,alpha)
-                        drawEllipse(j, i, int(max_axis_val), int(min_axis_val), int(rotation_in_degrees), ctx)
-                        # accumulative_img = alpha_blending(img, accumulative_img, alpha)
-                    # img = np.full((x,y,3), 255, np.uint8)
 
-                    # counter += 1
-        # print counter
-        # accumulative_img = accumulative_img.astype(npball_so_hard.uint8)
-        # return accumulative_img
+                    #This is the scale change version
+                    # if alpha > 0.85:
+                        # pass
+                    # else:
+                        # alpha = 0.5*alpha
+
+                    #This is the curve fitting version
+
+
+
+
+
+
+
+                    ctx.set_source_rgba(0,0,0,alpha)
+                    drawEllipse(j, i, int(max_axis_val), int(min_axis_val), int(rotation_in_degrees), ctx)
         return surface 
-        # return img
+
     sobelx, sobely = sobel_filter(img.copy())
     Ix2 = sobelx * sobelx
     Iy2 = sobely * sobely
@@ -180,20 +165,9 @@ def harris_visual(img):
     Sx2 = gaussian_blur(Ix2)
     Sy2 = gaussian_blur(Iy2)
     Sxy = gaussian_blur(Ixy)
-    # direction_rotation = get_direction(sobelx, sobely) 
     harris_result = harris_measure(Sx2, Sy2, Sxy)
     eigen_value_matrix, eigen_vector_matrix, harris_mask = get_eigen_matrix(harris_result)
     img = visualize(eigen_value_matrix, eigen_vector_matrix, harris_result, harris_mask)
-    # img = img.astype(np.uint8)
-    # max_i, max_j = np.unravel_index(harris_result.argmax(), harris_result.shape)
-    # max_eigen_x, max_eigen_y = get_eigenval(max_i, max_j) 
-# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (1280, 720)
-# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
-# start_time = time.time()
-    # print max_eigen_x, max_eigen_y
     return img 
 
 
@@ -207,65 +181,30 @@ def harris_visual(img):
 # a = np.frombuffer(buf, np.uint8)
 # a.shape = (x,y,4)
 # b = a[:,:,0:3]
-# cv2.imwrite("debug_cairo.jpg", b)
+# cv2.imwrite("debug_cairo_withscale.jpg", b)
 # end_time = time.time()
 # print end_time - start_time 
 
-# cv2.imwrite("result_transparent_against.jpg", result)
-# result.write_to_png('my_heartwillgoon.png')
 
-# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (1280, 720)
-# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
-# start_time = time.time()
-
-
-camera = cv2.VideoCapture("./src_video/orangeclip.mp4")
+camera = cv2.VideoCapture("./src_video/matrix-woman-red.mp4")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 frame_rate = 24 
-resolution = (1280, 720)
-out = cv2.VideoWriter("highrez_withcairo_orange.avi" ,fourcc, frame_rate, resolution)
+resolution = (1920, 800)
+out = cv2.VideoWriter("highrez_with_scale.avi" ,fourcc, frame_rate, resolution)
 start_time = time.time()
 
-# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (1280, 720)
-# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
-# start_time = time.time()
 while True:
     grabbed, frame = camera.read()
     if grabbed:
         img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         x,y = img.shape
         harris_result = harris_visual(img)
-# camera = cv2.VideoCapture("./src_video/test_clip.mp4")
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# frame_rate = 24 
-# resolution = (1280, 720)
-# out = cv2.VideoWriter("highrez_withcairo.avi" ,fourcc, frame_rate, resolution)
-# start_time = time.time()
-
-        # harris_result.write_to_png("fuckit.png")
-        # harris_result = np.uint8(harris_result)
-
         buf = harris_result.get_data()
         temp_result_matrix = np.frombuffer(buf, np.uint8)
         temp_result_matrix.shape = (x,y,4)
         result_matrix = temp_result_matrix[:,:,0:3]
-
-        # harris_result = cv2.cvtColor(harris_result, cv2.COLOR_GRAY2RGB)
-        # cv2.imwrite("fuckit.jpg", result_matrix)
-
         out.write(result_matrix)
         print "finished on frame"
-
-        # print "finished one frame"
-        # print harris_result
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-            # break
     else:
         print("No video feed available")
         break
@@ -274,11 +213,4 @@ print end_time - start_time
 camera.release()
 out.release()
 cv2.destroyAllWindows()
-
-
-
-
-
-
-
 
