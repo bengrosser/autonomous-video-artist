@@ -33,11 +33,12 @@ class AutoNav
         int img_height;  //image height was 480 by default
         int img_width;  //image width was 640 by default
         bool go_right;  
-        
+        bool battery_is_low;
+
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true){
             geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
             OUT_OF_DOCKING_STATION.angular.z = 0.0;
@@ -130,65 +131,70 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time){
             //std::cout<<"pilot"<<std::endl;
-            double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
-            bool DRIVE;
-            node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
-            node.getParamCached("drive_angularspeed", DRIVE_ANGULARSPEED);
-            node.getParamCached("drive", DRIVE);
+            if(battery_is_low == false){
+                double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
+                bool DRIVE;
+                node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
+                node.getParamCached("drive_angularspeed", DRIVE_ANGULARSPEED);
+                node.getParamCached("drive", DRIVE);
 
-            geometry_msgs::Twist decision;
-            if(bump){//deal with the bumper info
-                if(DRIVE){
-                    decision.linear.x = -DRIVE_LINEARSPEED;
-                    decision.angular.z = 0;
-                    ros::Time start = ros::Time::now();
-                    while(ros::Time::now() - start < ros::Duration(5.0)){
-                        velocity.publish(decision);
-                    }
-                    //choose right and left by bumper
-                    int direction = 1;
-                    if(which_bumper == 1){
-                        int tmp = rand()%2;
-                        if(tmp == 0)
-                            direction = 1;
-                        else
-                            direction = -1;
-                    }
-                    else if(which_bumper == 0){
-                        direction = -1;
-                    }
-                    else{
-                        direction = 1;
-                    }
-                    decision.angular.z = DRIVE_ANGULARSPEED*direction;
-                    decision.linear.x = 0;
-                    start = ros::Time::now();
-                    while(ros::Time::now() - start < ros::Duration(3.0)){
-                        velocity.publish(decision);
-                    }
-                }
-                bump = false;
-            }
-            else{//bumper is safe
-                if(move_forward){
-                    decision.linear.x=DRIVE_LINEARSPEED;
-                    decision.angular.z = 0;
-                    if(DRIVE)
-                        velocity.publish(decision);
-                }
-                else{
-                    //BETA version
-                    if(go_right)
-                        decision.angular.z = DRIVE_ANGULARSPEED;
-                    else
-                        decision.angular.z = -DRIVE_ANGULARSPEED;
-
+                geometry_msgs::Twist decision;
+                if(bump){//deal with the bumper info
                     if(DRIVE){
-                        while(!move_forward){
+                        decision.linear.x = -DRIVE_LINEARSPEED;
+                        decision.angular.z = 0;
+                        ros::Time start = ros::Time::now();
+                        while(ros::Time::now() - start < ros::Duration(5.0)){
+                            velocity.publish(decision);
+                        }
+                        //choose right and left by bumper
+                        int direction = 1;
+                        if(which_bumper == 1){
+                            int tmp = rand()%2;
+                            if(tmp == 0)
+                                direction = 1;
+                            else
+                                direction = -1;
+                        }
+                        else if(which_bumper == 0){
+                            direction = -1;
+                        }
+                        else{
+                            direction = 1;
+                        }
+                        decision.angular.z = DRIVE_ANGULARSPEED*direction;
+                        decision.linear.x = 0;
+                        start = ros::Time::now();
+                        while(ros::Time::now() - start < ros::Duration(3.0)){
                             velocity.publish(decision);
                         }
                     }
-                } 
+                    bump = false;
+                }
+                else{//bumper is safe
+                    if(move_forward){
+                        decision.linear.x=DRIVE_LINEARSPEED;
+                        decision.angular.z = 0;
+                        if(DRIVE)
+                            velocity.publish(decision);
+                    }
+                    else{
+                        //BETA version
+                        if(go_right)
+                            decision.angular.z = DRIVE_ANGULARSPEED;
+                        else
+                            decision.angular.z = -DRIVE_ANGULARSPEED;
+
+                        if(DRIVE){
+                            while(!move_forward){
+                                velocity.publish(decision);
+                            }
+                        }
+                    } 
+                }
+            }
+            else{//battery is low (navigate to the docking station)
+
             }
         }
 
@@ -215,6 +221,10 @@ class AutoNav
             }
             float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
             ROS_INFO("left battery percentage %.2f %%", percentage);
+            if(percentage < 0.3)
+                battery_is_low = true;
+            else
+                battery_is_low = false;
         }
 
         void sysInfo(const ros::TimerEvent& time){
@@ -222,10 +232,10 @@ class AutoNav
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
-            /*printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
+            printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
-            printf ("process count : %d\n", si.procs);*/
+            printf ("process count : %d\n", si.procs);
         }
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
