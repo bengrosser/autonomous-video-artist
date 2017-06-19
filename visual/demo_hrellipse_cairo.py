@@ -1,7 +1,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_hrcorner.py
  #Creation Date : 02-06-2017
- #Last Modified : Wed Jun 14 14:10:10 2017
+ #Last Modified : Mon Jun 19 11:35:20 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -147,13 +147,7 @@ def harris_visual(img):
                         # alpha = 0.5*alpha
 
                     #This is the curve fitting version
-
-
-
-
-
-
-
+                    alpha = 0.05239778*np.exp(2.97201908*alpha)
                     ctx.set_source_rgba(0,0,0,alpha)
                     drawEllipse(j, i, int(max_axis_val), int(min_axis_val), int(rotation_in_degrees), ctx)
         return surface 
