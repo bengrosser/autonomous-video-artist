@@ -2,7 +2,7 @@
 #-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.
  #File Name : demo_hrcorner.py
  #Creation Date : 02-06-2017
- #Last Modified : Fri Jun 16 12:22:59 2017
+ #Last Modified : Mon Jun 19 13:51:11 2017
  #Created By : Rui An  
 #_._._._._._._._._._._._._._._._._._._._._.
 
@@ -15,13 +15,25 @@ import numpy as np
 from imutils.video import count_frames 
 
 
-def get_sum(img):
+def get_sum(img, which_method):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     x,y = gray.shape
     total_num = x*y
-    # _, binary_img = cv2.threshold(gray, 191,255,cv2.THRESH_BINARY)
-    threshold_adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
-    number_of_white = int(np.sum(threshold_adaptive)/255)
+    print total_num
+    binary_img = None
+    if which_method == 0:
+        _, binary_img = cv2.threshold(gray, 191,255,cv2.THRESH_BINARY)
+    elif which_method == 1:
+        binary_img = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+    elif which_method == 2:
+        flattened = gray.copy()
+        flattened.shape = (total_num, )
+        sorted_result = np.sort(flattened)
+        threshold_value = sorted_result[np.rint((x+y/2))]
+        binary_img = cv2.threshold(gray, threshold_value,255,cv2.THRESH_BINARY)
+
+    number_of_white = int(np.sum(binary_img)/255)
+    print number_of_white
     ratio = number_of_white/float(total_num)
     pixel_value = int(255*ratio)
     print "finished one frame"
@@ -60,7 +72,7 @@ storage_array = []
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        result_pixel_value = get_sum(frame)
+        result_pixel_value = get_sum(frame, 2)
         storage_array.append(result_pixel_value)
                # print harris_result
         # cv2.imshow("result", result_pixel_value)
