@@ -25,8 +25,8 @@ public:
             dock_state = client.getState();
             ROS_INFO("Docking status: %s", dock_state.toString().c_str());
             
-            if(ros::Time::now() > (time+ros::Duration(1000))){
-                ROS_INFO("Docking took more than 10 seconds, canceling.");
+            if(ros::Time::now() > (time+ros::Duration(500))){
+                ROS_INFO("Docking took more than 500 seconds, canceling.");
                 client.cancelGoal();
                 break;
             }
