@@ -73,12 +73,12 @@ On PC:
 
     To run the auto charging code:
        
-      Open a terminal on the PC, run:
+        Open a terminal on the PC, run:
 
-        $ roslaunch kobuki_auto_docking minimal.launch --screen
+            $ roslaunch kobuki_auto_docking minimal.launch --screen
 
-      Then open another terminal tab, run:
+        Then open another terminal tab, run:
 
-        $ rosrun turtlebot charging
+            $ rosrun turtlebot charging
 
 8. To stop the robot just press ctrl+c to break the process
