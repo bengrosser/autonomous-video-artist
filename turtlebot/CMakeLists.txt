@@ -155,6 +155,7 @@ add_executable (navigation src/navigation.cpp)
 add_executable (depth src/depth.cpp)
 add_executable (depth_nav src/depth_nav.cpp)
 add_executable (position src/position.cpp)
+add_executable (charging src/auto_charging.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -174,6 +175,7 @@ target_link_libraries(navigation ${catkin_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(depth ${catkin_LIBRARIES})
 target_link_libraries(depth_nav ${catkin_LIBRARIES})
 target_link_libraries(position ${catkin_LIBRARIES})
+target_link_libraries(charging ${catkin_LIBRARIES})
 
 #############
 ## Install ##
