@@ -12,6 +12,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include <kobuki_msgs/AutoDockingAction.h>
 
 using namespace std;
 
@@ -34,13 +35,16 @@ class AutoNav
         int img_width;  //image width was 640 by default
         bool go_right;  
         bool battery_is_low;
+        bool battery_is_full;   //when battery is charged to full, turtlebot should leave docking station
+        bool in_charging;  //this boolean variable means the robot is charging
+        bool near_docking_station;
         double near_docking_station_x;
         double near_docking_station_y;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true), near_docking_station(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
             //make the robot move backward and turn 180 degree 
             geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
@@ -197,7 +201,12 @@ class AutoNav
             }
             else{//battery is low (navigate to the docking station)
                 //let the robot go to (near_docking_station_x, near_docking_station_y)
-                
+                if(near_docking_station){ //start auto docking
+
+                }
+                else{
+                    
+                }
             }
         }
 
