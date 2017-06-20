@@ -72,12 +72,12 @@ On PC:
         $ rosrun turtlebot position
 
     To run the auto charging code:
-        
-        Open a terminal on the PC, run:
+       
+      Open a terminal on the PC, run:
 
         $ roslaunch kobuki_auto_docking minimal.launch --screen
 
-        Then open another terminal tab, run:
+      Then open another terminal tab, run:
 
         $ rosrun turtlebot charging
 
