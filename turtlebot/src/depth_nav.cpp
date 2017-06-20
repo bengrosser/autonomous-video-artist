@@ -44,7 +44,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true), near_docking_station(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
             //make the robot move backward and turn 180 degree 
             geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
@@ -199,12 +199,27 @@ class AutoNav
                     } 
                 }
             }
-            else{//battery is low (navigate to the docking station)
-                //let the robot go to (near_docking_station_x, near_docking_station_y)
+            else{//battery is low (navigate to the docking station)       
                 if(near_docking_station){ //start auto docking
-
+                    actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
+                    client.waitForServer();
+                    kobuki_msgs::AutoDockingGoal goal;
+                    actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
+                    client.sendGoal(goal);
+                    ros::Time time = ros::Time::now();
+                    while(!client.waitForResult(ros::Duration(3))){
+                        dock_state = client.getState();
+                        ROS_INFO("Docking status: %s", dock_state.toString().c_str());
+                        
+                        if(ros::Time::now() > (time+ros::Duration(500))){
+                            //Give it 500 seconds, or we say that auto docking fail.
+                            ROS_INFO("Docking took more than 500 seconds, canceling.");
+                            client.cancelGoal();
+                            break;
+                        }
+                    }
                 }
-                else{
+                else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     
                 }
             }
@@ -227,16 +242,26 @@ class AutoNav
         }
 
         void battery(const kobuki_msgs::SensorState msg){
-            ros::Time start = ros::Time::now();
-            while(ros::Time::now()-start < ros::Duration(5.0)){
-                //do nothing, just to waste the time
+            if(!in_charging){
+                ros::Time start = ros::Time::now();
+                while(ros::Time::now()-start < ros::Duration(5.0)){
+                    //do nothing, just to waste the time
+                }
+                float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
+                ROS_INFO("left battery percentage %.2f %%", percentage);
+                if(percentage < 0.3)
+                    battery_is_low = true;
+                else
+                    battery_is_low = false;
             }
-            float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
-            ROS_INFO("left battery percentage %.2f %%", percentage);
-            if(percentage < 0.3)
-                battery_is_low = true;
-            else
-                battery_is_low = false;
+            else{
+                ros::Time start = ros::Time::now();
+                if(msg.battery >= 159){
+                    battery_is_full = true;
+                    in_charging = false;
+                    battery_is_low = false;
+                }
+            }
         }
 
         void sysInfo(const ros::TimerEvent& time){
