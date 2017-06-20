@@ -40,11 +40,13 @@ class AutoNav
         bool near_docking_station;
         double near_docking_station_x;
         double near_docking_station_y;
+        double docking_station_x;
+        double docking_station_y;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0){
             //make the robot move backward and turn 180 degree 
             geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
@@ -221,6 +223,7 @@ class AutoNav
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     
+                    
                 }
             }
         }
@@ -277,6 +280,11 @@ class AutoNav
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
             //std::cout<<"test test"<<std::endl;
+            float distance_to_docking = sqrt(pow(msg->pose.pose.position.x, 2.0)+pow(msg->pose.pose.position.y, 2.0));
+            if(distance_to_docking < 1.5)
+                near_docking_station = true;
+            else
+                near_docking_station = false;
             float roll;
             float pitch;
             float yaw;
