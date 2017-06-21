@@ -38,6 +38,7 @@ class AutoNav
         bool battery_is_full;   //when battery is charged to full, turtlebot should leave docking station
         bool in_charging;  //this boolean variable means the robot is charging
         bool near_docking_station;
+        bool leave_docking_station;   
         double near_docking_station_x;
         double near_docking_station_y;
         double docking_station_x;
@@ -46,9 +47,9 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0){
             //make the robot move backward and turn 180 degree 
-            geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+            /*geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
             OUT_OF_DOCKING_STATION.angular.z = 0.0;
             ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
@@ -58,7 +59,7 @@ class AutoNav
             OUT_OF_DOCKING_STATION.angular.z = 1.0;
             OUT_OF_DOCKING_TIME = ros::Time::now();
             while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.6
-                velocity.publish(OUT_OF_DOCKING_STATION);            
+                velocity.publish(OUT_OF_DOCKING_STATION);*/            
             //Now the robot is ready to go
             
             ros::MultiThreadedSpinner threads(7);
@@ -139,7 +140,21 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time){
             //std::cout<<"pilot"<<std::endl;
-            if(battery_is_low == false){
+            if(leave_docking_station){ //
+                geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+                OUT_OF_DOCKING_STATION.linear.x = -0.16;
+                OUT_OF_DOCKING_STATION.angular.z = 0.0;
+                ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                OUT_OF_DOCKING_STATION.linear.x = 0.0;
+                OUT_OF_DOCKING_STATION.angular.z = 1.0;
+                OUT_OF_DOCKING_TIME = ros::Time::now();
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.6
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                leave_docking_station = false;
+            }
+            else if(battery_is_low == false){
                 double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
                 bool DRIVE;
                 node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -257,12 +272,13 @@ class AutoNav
                     battery_is_low = true;
                     battery_is_full = false;
                 }
-                else
-                    battery_is_low = false;
+                //else
+                    //battery_is_low = false;
             }
             else{
                 ros::Time start = ros::Time::now();
                 if(msg.battery >= 159){
+                    leave_docking_station = true;
                     battery_is_full = true;
                     in_charging = false;
                     battery_is_low = false;
