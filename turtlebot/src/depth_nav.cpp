@@ -220,6 +220,7 @@ class AutoNav
                             break;
                         }
                     }
+                    in_charging = true;
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     
@@ -252,8 +253,10 @@ class AutoNav
                 }
                 float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
                 ROS_INFO("left battery percentage %.2f %%", percentage);
-                if(percentage < 0.3)
+                if(percentage < 0.3){
                     battery_is_low = true;
+                    battery_is_full = false;
+                }
                 else
                     battery_is_low = false;
             }
