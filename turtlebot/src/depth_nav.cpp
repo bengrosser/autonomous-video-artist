@@ -217,32 +217,37 @@ class AutoNav
                     } 
                 }
             }
-            else{//battery is low (navigate to the docking station)       
+            else{//battery is low (navigate to the docking station)
+                bool DRIVE;
+                node.getParamCached("drive", DRIVE);       
                 if(near_docking_station){ //start auto docking
                     if(!in_charging){
-                        actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
-                        client.waitForServer();
-                        kobuki_msgs::AutoDockingGoal goal;
-                        actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
-                        client.sendGoal(goal);
-                        ros::Time time = ros::Time::now();
-                        while(!client.waitForResult(ros::Duration(3))){
-                            dock_state = client.getState();
-                            ROS_INFO("Docking status: %s", dock_state.toString().c_str());
+                        if(DRIVE){
+                            actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
+                            client.waitForServer();
+                            kobuki_msgs::AutoDockingGoal goal;
+                            actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
+                            client.sendGoal(goal);
+                            ros::Time time = ros::Time::now();
+                            while(!client.waitForResult(ros::Duration(3))){
+                                dock_state = client.getState();
+                                ROS_INFO("Docking status: %s", dock_state.toString().c_str());
                         
-                            if(ros::Time::now() > (time+ros::Duration(500))){
-                                //Give it 500 seconds, or we say that auto docking fail.
-                                ROS_INFO("Docking took more than 500 seconds, canceling.");
-                                client.cancelGoal();
-                                break;
+                                if(ros::Time::now() > (time+ros::Duration(500))){
+                                    //Give it 500 seconds, or we say that auto docking fail.
+                                    ROS_INFO("Docking took more than 500 seconds, canceling.");
+                                    client.cancelGoal();
+                                    break;
+                                }
                             }
+                            in_charging = true;
                         }
-                        in_charging = true;
                     }
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
+                    if(DRIVE){                   
                     
-                    
+                    }
                 }
             }
         }
