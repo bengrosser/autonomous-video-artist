@@ -44,11 +44,16 @@ class AutoNav
         double near_docking_station_y;
         double docking_station_x;
         double docking_station_y;
+        double current_x;
+        double current_y;
+        float roll;
+        float pitch;
+        float yaw;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
             //make the robot move backward and turn 180 degree 
             /*geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
@@ -246,7 +251,7 @@ class AutoNav
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     if(DRIVE){                   
-                    
+                        
                     }
                 }
             }
@@ -261,9 +266,11 @@ class AutoNav
 
         void position(const nav_msgs::Odometry::ConstPtr& msg){
             ros::Time start = ros::Time::now();
-            while(ros::Time::now()-start < ros::Duration(5.0)){
+            /*while(ros::Time::now()-start < ros::Duration(5.0)){
                 //do nothing, just to waste the time
-            }
+            }*/
+            current_x = msg->pose.pose.position.x;
+            current_y = msg->pose.pose.position.y;
             //ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
             //ROS_INFO("Orientation -> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
         }
@@ -312,9 +319,6 @@ class AutoNav
                 near_docking_station = true;
             //else
             //    near_docking_station = false;
-            float roll;
-            float pitch;
-            float yaw;
             float x = msg->pose.pose.orientation.x;
             float y = msg->pose.pose.orientation.y;
             float z = msg->pose.pose.orientation.z;
