@@ -12,6 +12,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include <kobuki_msgs/AutoDockingAction.h>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ static const long minute = 60;
 static const long hour = 3600; //minute*60
 static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
+static const double pi = 4*atan(1);   //pre-define pi
 
 //for the angular velocity, positive means counterclockwise, negative means clockwise
 class AutoNav
@@ -34,15 +36,21 @@ class AutoNav
         int img_width;  //image width was 640 by default
         bool go_right;  
         bool battery_is_low;
+        bool battery_is_full;   //when battery is charged to full, turtlebot should leave docking station
+        bool in_charging;  //this boolean variable means the robot is charging
+        bool near_docking_station;
+        bool leave_docking_station;   
         double near_docking_station_x;
         double near_docking_station_y;
+        double docking_station_x;
+        double docking_station_y;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0){
             //make the robot move backward and turn 180 degree 
-            geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+            /*geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
             OUT_OF_DOCKING_STATION.angular.z = 0.0;
             ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
@@ -52,7 +60,7 @@ class AutoNav
             OUT_OF_DOCKING_STATION.angular.z = 1.0;
             OUT_OF_DOCKING_TIME = ros::Time::now();
             while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.6
-                velocity.publish(OUT_OF_DOCKING_STATION);            
+                velocity.publish(OUT_OF_DOCKING_STATION);*/            
             //Now the robot is ready to go
             
             ros::MultiThreadedSpinner threads(7);
@@ -133,7 +141,21 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time){
             //std::cout<<"pilot"<<std::endl;
-            if(battery_is_low == false){
+            if(leave_docking_station){ //
+                geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+                OUT_OF_DOCKING_STATION.linear.x = -0.16;
+                OUT_OF_DOCKING_STATION.angular.z = 0.0;
+                ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                OUT_OF_DOCKING_STATION.linear.x = 0.0;
+                OUT_OF_DOCKING_STATION.angular.z = 1.0;
+                OUT_OF_DOCKING_TIME = ros::Time::now();
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.5))    //3.6
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                leave_docking_station = false;
+            }
+            else if(battery_is_low == false){
                 double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
                 bool DRIVE;
                 node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -195,9 +217,33 @@ class AutoNav
                     } 
                 }
             }
-            else{//battery is low (navigate to the docking station)
-                //let the robot go to (near_docking_station_x, near_docking_station_y)
-                
+            else{//battery is low (navigate to the docking station)       
+                if(near_docking_station){ //start auto docking
+                    if(!in_charging){
+                        actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
+                        client.waitForServer();
+                        kobuki_msgs::AutoDockingGoal goal;
+                        actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
+                        client.sendGoal(goal);
+                        ros::Time time = ros::Time::now();
+                        while(!client.waitForResult(ros::Duration(3))){
+                            dock_state = client.getState();
+                            ROS_INFO("Docking status: %s", dock_state.toString().c_str());
+                        
+                            if(ros::Time::now() > (time+ros::Duration(500))){
+                                //Give it 500 seconds, or we say that auto docking fail.
+                                ROS_INFO("Docking took more than 500 seconds, canceling.");
+                                client.cancelGoal();
+                                break;
+                            }
+                        }
+                        in_charging = true;
+                    }
+                }
+                else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
+                    
+                    
+                }
             }
         }
 
@@ -213,25 +259,38 @@ class AutoNav
             while(ros::Time::now()-start < ros::Duration(5.0)){
                 //do nothing, just to waste the time
             }
-            ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
-            ROS_INFO("Orientation -> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
+            //ROS_INFO("Position-> x: [%f], y: [%f], z: [%f]", msg->pose.pose.position.x, msg->pose.pose.position.y, msg->pose.pose.position.z);
+            //ROS_INFO("Orientation -> x: [%f], y: [%f], z: [%f], w: [%f]", msg->pose.pose.orientation.x, msg->pose.pose.orientation.y, msg->pose.pose.orientation.z, msg->pose.pose.orientation.w);
         }
 
         void battery(const kobuki_msgs::SensorState msg){
-            ros::Time start = ros::Time::now();
-            while(ros::Time::now()-start < ros::Duration(5.0)){
-                //do nothing, just to waste the time
+            if(!in_charging){
+                ros::Time start = ros::Time::now();
+                while(ros::Time::now()-start < ros::Duration(5.0)){
+                    //do nothing, just to waste the time
+                }
+                float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
+                //ROS_INFO("left battery percentage %.2f %%", percentage);
+                if(percentage < 0.3){
+                    battery_is_low = true;
+                    battery_is_full = false;
+                }
+                //else
+                    //battery_is_low = false;
             }
-            float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
-            ROS_INFO("left battery percentage %.2f %%", percentage);
-            if(percentage < 0.3)
-                battery_is_low = true;
-            else
-                battery_is_low = false;
+            else{
+                ros::Time start = ros::Time::now();
+                if(msg.battery >= 159){
+                    leave_docking_station = true;
+                    battery_is_full = true;
+                    in_charging = false;
+                    battery_is_low = false;
+                    near_docking_station = false;
+                }
+            }
         }
 
         void sysInfo(const ros::TimerEvent& time){
-            std::cout<<"test test"<<std::endl;
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
@@ -243,6 +302,11 @@ class AutoNav
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
             //std::cout<<"test test"<<std::endl;
+            float distance_to_docking = sqrt(pow(msg->pose.pose.position.x, 2.0)+pow(msg->pose.pose.position.y, 2.0));
+            if(distance_to_docking < 1.5)
+                near_docking_station = true;
+            //else
+            //    near_docking_station = false;
             float roll;
             float pitch;
             float yaw;
@@ -251,9 +315,9 @@ class AutoNav
             float z = msg->pose.pose.orientation.z;
             float w = msg->pose.pose.orientation.w;
             toEulerianAngle(x,y,z,w,roll, pitch, yaw);
-            std::cout<<"roll: "<<roll<<std::endl;
-            std::cout<<"pitch: "<<pitch<<std::endl;
-            std::cout<<"yaw: "<<yaw<<std::endl;
+            //std::cout<<"roll: "<<roll<<std::endl;
+            //std::cout<<"pitch: "<<pitch<<std::endl;
+            //std::cout<<"yaw: "<<yaw<<std::endl;
         }
 
         //a helper function (convert quaternion angle to euler angle)
@@ -262,7 +326,7 @@ class AutoNav
             //roll (x-axis rotation)
             float t0 = +2.0*(w*x+y*z);
             float t1 = +1.0-2.0*(x*x+ysqr);
-            roll = std::atan2(t0,t1);
+            roll = std::atan2(t0, t1);
 
             //pitch (y-axis rotation)
             float t2 = +2.0*(w*y-z*x);
@@ -284,7 +348,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive",false); //For debugging, always set to true
+    node.setParam("drive",true); //For debugging, always set to true
 
     AutoNav turtlebot(node); 
 
