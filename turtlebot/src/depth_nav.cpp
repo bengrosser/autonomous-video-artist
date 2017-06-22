@@ -150,19 +150,16 @@ class AutoNav
                 bool DRIVE;
                 node.getParamCached("drive", DRIVE);
                 if(DRIVE){
-                    //std::cout<<"are we here??"<<std::endl;
                     geometry_msgs::Twist OUT_OF_DOCKING_STATION;
                     OUT_OF_DOCKING_STATION.linear.x = -0.16;
                     OUT_OF_DOCKING_STATION.angular.z = 0.0;
                     ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
-                    //std::cout<<"then why are you stuck here?"<<std::endl;
-                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.0))  //5.0
+                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))  //5.0
                         velocity.publish(OUT_OF_DOCKING_STATION);
-                    //std::cout<<"give me a reason dude..."<<std::endl;
                     OUT_OF_DOCKING_STATION.linear.x = 0.0;
                     OUT_OF_DOCKING_STATION.angular.z = 1.0;
                     OUT_OF_DOCKING_TIME = ros::Time::now();
-                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(10))    //3.5
+                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.5))    //3.5
                         velocity.publish(OUT_OF_DOCKING_STATION);
                     leave_docking_station = false;
                 }
