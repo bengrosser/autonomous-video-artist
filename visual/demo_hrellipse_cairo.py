@@ -181,11 +181,11 @@ def harris_visual(img):
 # print end_time - start_time 
 
 
-camera = cv2.VideoCapture("./src_video/matrix-woman-red.mp4")
+camera = cv2.VideoCapture("./src_video/matrix_output_highrez.avi")
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 frame_rate = 24 
 resolution = (1920, 800)
-out = cv2.VideoWriter("highrez_with_curve_fit.avi" ,fourcc, frame_rate, resolution)
+out = cv2.VideoWriter("highrez_with_gradient.avi" ,fourcc, frame_rate, resolution)
 start_time = time.time()
 
 while True:

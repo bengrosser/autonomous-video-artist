@@ -24,7 +24,7 @@ import argparse
 import sys
 import time
 
-# sys.setrecursionlimit(100000)
+sys.setrecursionlimit(100000)
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)} 
 color_map = {"90":0,"-90":1,"1":2,"-1":3,
         "-45":4, "45":5} 

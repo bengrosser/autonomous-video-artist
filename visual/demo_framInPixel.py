@@ -19,24 +19,34 @@ def get_sum(img, which_method):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     x,y = gray.shape
     total_num = x*y
-    print total_num
     binary_img = None
     if which_method == 0:
-        _, binary_img = cv2.threshold(gray, 191,255,cv2.THRESH_BINARY)
+        _, binary_img = cv2.threshold(gray, 125,255,cv2.THRESH_BINARY)
     elif which_method == 1:
         binary_img = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 11, 2)
+        # cv2.imshow("result", binary_img)
     elif which_method == 2:
         flattened = gray.copy()
         flattened.shape = (total_num, )
         sorted_result = np.sort(flattened)
-        threshold_value = sorted_result[np.rint((x+y/2))]
-        binary_img = cv2.threshold(gray, threshold_value,255,cv2.THRESH_BINARY)
-
+        threshold_value = sorted_result[2*int(x*y/3)]
+        _, binary_img = cv2.threshold(gray, threshold_value,255,cv2.THRESH_BINARY)
+        # cv2.imshow("result", binary_img)
+    elif which_method == 3:
+        flattened = gray.copy()
+        flattened.shape = (total_num, )
+        sorted_result = np.sort(flattened)
+        sorted_result.shape = (x,y)
+        #This is the only branch we don't do any threshold so far
+        binary_img = sorted_result
+        cv2.imshow("result", binary_img)
+        
     number_of_white = int(np.sum(binary_img)/255)
-    print number_of_white
+    # print number_of_white
     ratio = number_of_white/float(total_num)
     pixel_value = int(255*ratio)
-    print "finished one frame"
+    # print "finished one frame"
+    # cv2.imshow("result", binary_img)
     return pixel_value
     # return threshold_adaptive 
     
@@ -72,7 +82,7 @@ storage_array = []
 while True:
     grabbed, frame = camera.read()
     if grabbed:
-        result_pixel_value = get_sum(frame, 2)
+        result_pixel_value = get_sum(frame, 0)
         storage_array.append(result_pixel_value)
                # print harris_result
         # cv2.imshow("result", result_pixel_value)
@@ -84,7 +94,7 @@ while True:
         final_result = np.array(storage_array)
         final_result.shape = (height,width)
         final_result.astype(np.uint8)
-        cv2.imwrite("adaptive_result.jpg", final_result)
+        cv2.imwrite("normal_threshold.jpg", final_result)
         print("No video feed available")
         break
 camera.release()

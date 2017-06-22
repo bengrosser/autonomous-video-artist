@@ -87,7 +87,7 @@ def harris_visual(img):
         # print max_eigen_x, max_eigen_y
         for i in range(row):
             for j in range(column):
-                if harris_result[i][j] > 0.05*harris_max:
+                if harris_result[i][j] > 0.08*harris_max:
                     # harris_measure_matrix = np.array([[sx2, sxy], [sxy, sy2]])
                     harris_mask[i][j] = 1
                     eigen_vals, eigen_vector = get_eigen(i, j) 
@@ -196,7 +196,7 @@ start_time = time.time()
 result = harris_visual(grey)
 end_time = time.time()
 print end_time - start_time 
-cv2.imwrite("result_transparent_against.jpg", result)
+cv2.imwrite("debug_no_cairo.jpg", result)
 # result.write_to_png('my_heartwillgoon.png')
 
 
