@@ -147,6 +147,7 @@ class AutoNav
         void pilot(const ros::TimerEvent& time){
             //std::cout<<"pilot"<<std::endl;
             if(leave_docking_station){ //
+                //for the turtlebot to leave the docking station
                 bool DRIVE;
                 node.getParamCached("drive", DRIVE);
                 if(DRIVE){
@@ -159,12 +160,13 @@ class AutoNav
                     OUT_OF_DOCKING_STATION.linear.x = 0.0;
                     OUT_OF_DOCKING_STATION.angular.z = 1.0;
                     OUT_OF_DOCKING_TIME = ros::Time::now();
-                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.5))    //3.5
+                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.5
                         velocity.publish(OUT_OF_DOCKING_STATION);
                     leave_docking_station = false;
                 }
             }
             else if(battery_is_low == false){
+                //automatic navigation
                 double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
                 bool DRIVE;
                 node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
@@ -226,7 +228,8 @@ class AutoNav
                     } 
                 }
             }
-            else{//battery is low (navigate to the docking station)
+            else{
+                //battery is low (navigate to the docking station)
                 bool DRIVE;
                 node.getParamCached("drive", DRIVE);       
                 if(near_docking_station){ //start auto docking
@@ -256,10 +259,29 @@ class AutoNav
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     if(DRIVE){
                         //at first control the robot face to the docking station
-                                          
+                        float angle;
+                        if(current_y >= 0){
+                            angle = atan2(current_y, current_x)-pi;
+                        }
+                        else{ //current_y < 0
+                            angle = atan2(current_y, current_x)+pi;
+                        }
+                        geometry_msgs::Twist decision;
+                        decision.linear.x = 0;
+                        decision.angular.z = 0.4;
+                        while(abs(yaw-angle) > 0.1){
+                            velocity.publish(decision);
+                        }
+                        //Now the robot is facing the docking station
+                        
                         //TODO
                         while(!near_docking_station){
-                            
+                            if(current_y >= 0){
+
+                            }
+                            else{ //current_y < 0
+
+                            }
                         }
                     }
                 }
