@@ -24,6 +24,7 @@ static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
 
 //for the angular velocity, positive means counterclockwise, negative means clockwise
+//for the bumper, 0: on the left, 1: in the middle, 2: on the right 
 class AutoNav
 {
     private:
@@ -161,7 +162,7 @@ class AutoNav
                     OUT_OF_DOCKING_STATION.angular.z = 1.0;
                     OUT_OF_DOCKING_TIME = ros::Time::now();
                     while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.5
-                        velocity.publish(OUT_OF_DOCKING_STATION);
+                        velocity.publish(OUT_OF_DOCKING_STATION);   //yaw value increase
                     leave_docking_station = false;
                 }
             }
@@ -273,14 +274,37 @@ class AutoNav
                             velocity.publish(decision);
                         }
                         //Now the robot is facing the docking station
-                        
+                        decision.linear.x = 0.2;
+                        decision.angular.z = 0;
                         //TODO
                         while(!near_docking_station){
-                            if(current_y >= 0){
-
+                            while(!bump){
+                                velocity.publish(decision);
                             }
-                            else{ //current_y < 0
+                            if(bump){
+                                if(which_bumper == 0){  //bumper on the left
+                                    
+                                }
+                                else if(which_bumper == 1){  //bumper in the middle
+                                    decision.linear.x = -0.2;
+                                    decision.angular.z = 0;
+                                    ros::Time start = ros::Time::now();
+                                    while(ros::Time::now() - start < ros::Duration(2.5)){
+                                        velocity.publish(decision);
+                                    }
+                                    float cur_yaw = yaw;  //when turn counterclockwise, yaw value increase
+                                    float target_yaw = cur_yaw+pi/2 > pi ? (pi/2-cur_yaw) : (cur_yaw+pi/2);
+                                    if(target_yaw > pi-0.15)
+                                        target_yaw = -pi;
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15; 
+                                    while (yaw<target_yaw){
+                                        velocity.publish(decision);
+                                    }
+                                }
+                                else{ //which_bumper == 2  bumper on the right
 
+                                }
                             }
                         }
                     }
@@ -356,8 +380,6 @@ class AutoNav
             float z = msg->pose.pose.orientation.z;
             float w = msg->pose.pose.orientation.w;
             toEulerianAngle(x,y,z,w,roll, pitch, yaw); //At start roll pitch and yaw are all 0
-            std::cout<<"roll: "<<roll<<std::endl;
-            std::cout<<"pitch: "<<pitch<<std::endl;
             std::cout<<"yaw: "<<yaw<<std::endl;
             //std::cout<<"current position: x:"<<current_x<<" y: "<<current_y<<std::endl;
         }
