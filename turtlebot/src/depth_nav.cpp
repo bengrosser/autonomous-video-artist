@@ -316,7 +316,7 @@ class AutoNav
                                         velocity.publish(decision);
                                 }
                             }
-                            if(bump){
+                            if(bump){//deal with bumper event
                                 decision.linear.x = -0.2;
                                 decision.angular.z = 0;
                                 ros::Time start = ros::Time::now();
@@ -325,7 +325,13 @@ class AutoNav
                                 float cur_yaw = yaw;  //current angle value
                                 float target_yaw;
                                 if(which_bumper == 0){  //bumper on the left
-                                    
+                                    target_yaw = cur_yaw-pi/4 < (-pi) ? (2*pi+cur_yaw-pi/4) : (cur_yaw - pi/4);
+                                    if(target_yaw < -pi+0.1)
+                                        target_yaw = pi;
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15;
+                                    while(yaw > target_yaw)
+                                        velocity.publish(decision);
                                 }
                                 else if(which_bumper == 1){  //bumper in the middle
                                     /*decision.linear.x = -0.2;
@@ -335,7 +341,7 @@ class AutoNav
                                         velocity.publish(decision);
                                     }
                                     float cur_yaw = yaw;  //when turn counterclockwise, yaw value increase*/
-                                    target_yaw = cur_yaw+pi/2 > pi ? (pi/2-cur_yaw) : (cur_yaw+pi/2);
+                                    target_yaw = cur_yaw+pi/2 > pi ? (cur_yaw-1.5*pi) : (cur_yaw+pi/2);
                                     if(target_yaw > pi-0.15)
                                         target_yaw = -pi;
                                     decision.linear.x = 0.0;
@@ -346,7 +352,21 @@ class AutoNav
                                     //TODO   unfinished yet
                                 }
                                 else{ //which_bumper == 2  bumper on the right
-
+                                    target_yaw = cur_yaw+pi/4 > pi ? (cur_yaw-1.75*pi) : (cur_yaw+pi/4);
+                                    if(target_yaw > pi-0.1)
+                                        target_yaw = pi;
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15;
+                                    while(yaw < target_yaw)
+                                        velocity.publish(decision);
+                                }
+                                decision.linear.x = 0.2;
+                                decision.angular.z = 0.0;
+                                ros::Time start = ros::Time::now();
+                                while(ros::Time::now()-start < ros::Duration(3.0)){
+                                    velocity.publish(decision);
+                                    if(!move_forward)
+                                        break;
                                 }
                             }
                         }
