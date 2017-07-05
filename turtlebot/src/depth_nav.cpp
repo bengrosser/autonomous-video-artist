@@ -260,7 +260,7 @@ class AutoNav
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     if(DRIVE){
                         //at first control the robot face to the docking station
-                        float angle;
+                        /*float angle;
                         if(current_y >= 0){
                             angle = atan2(current_y, current_x)-pi;
                         }
@@ -275,25 +275,67 @@ class AutoNav
                         }
                         //Now the robot is facing the docking station
                         decision.linear.x = 0.2;
-                        decision.angular.z = 0;
+                        decision.angular.z = 0;*/
                         //TODO
+                        geometry_msgs::Twist decision;
                         while(!near_docking_station){
-                            while(!bump){
+                            //at first control the robot face to the docking station
+                            float angle;
+                            if(current_y >= 0){
+                                angle = atan2(current_y, current_x)-pi;
+                            }
+                            else{
+                                angle = atan2(current_y, current_x)+pi;
+                            }
+                            //geometry_msgs::Twist decision;
+                            decision.linear.x = 0;
+                            decision.angular.z = 0.4;
+                            while(abs(yaw-angle) > 0.1)
                                 velocity.publish(decision);
+                            //now the robot is facing the docking station
+                            decision.linear.x = 0.2;
+                            decision.angular.z = 0;
+                            while(!bump){
+                                if(move_forward){
+                                    decision.linear.x = -0.2;
+                                    decision.angular.z = 0;
+                                    velocity.publish(decision);
+                                }
+                                else{
+                                    if(go_right)
+                                        decision.angular.z = 0.15;
+                                    else
+                                        decision.angular.z = -0.15;
+                                    decision.linear.x = 0;
+                                    while(!move_forward)
+                                        velocity.publish(decision);
+                                    decision.linear.x = 0.2;
+                                    decision.angular.z = 0;
+                                    ros::Time start = ros::Time::now();
+                                    while(ros::Time::now()-start < ros::Duration(4.0))
+                                        velocity.publish(decision);
+                                }
                             }
                             if(bump){
+                                decision.linear.x = -0.2;
+                                decision.angular.z = 0;
+                                ros::Time start = ros::Time::now();
+                                while(ros::Time::now()-start < ros::Duration(2.5))
+                                    velocity.publish(decision);
+                                float cur_yaw = yaw;  //current angle value
+                                float target_yaw;
                                 if(which_bumper == 0){  //bumper on the left
                                     
                                 }
                                 else if(which_bumper == 1){  //bumper in the middle
-                                    decision.linear.x = -0.2;
+                                    /*decision.linear.x = -0.2;
                                     decision.angular.z = 0;
                                     ros::Time start = ros::Time::now();
                                     while(ros::Time::now() - start < ros::Duration(2.5)){
                                         velocity.publish(decision);
                                     }
-                                    float cur_yaw = yaw;  //when turn counterclockwise, yaw value increase
-                                    float target_yaw = cur_yaw+pi/2 > pi ? (pi/2-cur_yaw) : (cur_yaw+pi/2);
+                                    float cur_yaw = yaw;  //when turn counterclockwise, yaw value increase*/
+                                    target_yaw = cur_yaw+pi/2 > pi ? (pi/2-cur_yaw) : (cur_yaw+pi/2);
                                     if(target_yaw > pi-0.15)
                                         target_yaw = -pi;
                                     decision.linear.x = 0.0;
