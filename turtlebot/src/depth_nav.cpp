@@ -301,6 +301,7 @@ class AutoNav
                                     while (yaw<target_yaw){
                                         velocity.publish(decision);
                                     }
+                                    //TODO   unfinished yet
                                 }
                                 else{ //which_bumper == 2  bumper on the right
 
