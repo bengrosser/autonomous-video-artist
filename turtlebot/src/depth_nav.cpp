@@ -349,7 +349,6 @@ class AutoNav
                                     while (yaw<target_yaw){
                                         velocity.publish(decision);
                                     }
-                                    //TODO   unfinished yet
                                 }
                                 else{ //which_bumper == 2  bumper on the right
                                     target_yaw = cur_yaw+pi/4 > pi ? (cur_yaw-1.75*pi) : (cur_yaw+pi/4);
@@ -362,7 +361,7 @@ class AutoNav
                                 }
                                 decision.linear.x = 0.2;
                                 decision.angular.z = 0.0;
-                                ros::Time start = ros::Time::now();
+                                start = ros::Time::now();
                                 while(ros::Time::now()-start < ros::Duration(3.0)){
                                     velocity.publish(decision);
                                     if(!move_forward)
