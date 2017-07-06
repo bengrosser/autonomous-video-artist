@@ -5,6 +5,7 @@
 #_._._._._._._._._._._._._._._._._._._._._.
 
 import numpy as np
+from numpy import pi as pi
 import cv2
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -12,12 +13,27 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 
 #First we generate an image with a big white cube in the middle
-img = np.zeros((256,300,3), np.uint8)
-# cv2.rectangle(img,(78,78),(178,178),(255,255,255),-1)
+img = np.zeros((300,300,3), np.uint8)
+cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
 cv2.ellipse(img, (30,30),(20,20), 0, 0, 360, (255,255,255), -1)
-cv2.ellipse(img, (100,100),(20,20), 0, 0, 360, (255,255,255), -1)
-cv2.rectangle(img, (180,180),(220,220),(255,255,255), -1)
-cv2.imwrite("canvas_testing.jpg", img)
+cv2.ellipse(img, (30,120),(20,20), 0, 0, 360, (255,255,255), -1)
+
+img_hori = cv2.flip(img, 0)
+img_left = cv2.bitwise_or(img_hori, img)
+img_right = cv2.flip(img_left, 1)
+result_image = cv2.bitwise_or(img_left, img_right)
+
+
+
+# cv2.rectangle(img,(245,55),(195,105),(255,255,255),-1)
+# cv2.ellipse(img, (270,30),(20,20), 0, 0, 360, (255,255,255), -1)
+# cv2.ellipse(img, (270,90),(20,20), 0, 0, 360, (255,255,255), -1)
+
+
+
+# cv2.ellipse(img, (100,100),(20,20), 0, 0, 360, (255,255,255), -1)
+# cv2.rectangle(img, (180,180),(220,220),(255,255,255), -1)
+cv2.imwrite("canvas_testing.jpg", result_image)
 
 
 #And Plot it in 3d space
@@ -38,6 +54,7 @@ I am going to use cv2 version here to since it has both of the values
 '''
 def fft():
     img = cv2.imread('./canvas_testing.jpg', 0)
+    # img = cv2.imread('./canvas_testing.jpg', 0)
     x,y = img.shape
     #This dft has all the values we need for the recovery of the photo, I hope
     dft = cv2.dft(np.float32(img),flags = cv2.DFT_COMPLEX_OUTPUT)
@@ -49,15 +66,58 @@ def fft():
     cv2.imwrite("wc_frequency_magnitude.jpg", result_color_magnititude)
     return dft, result_magnititude
 
-def synthesis(x_freq, y_freq, complex_a, complex_b, row_size, col_size):
+def synthesis(x_freq, y_freq, complex_a, complex_b, row_size, col_size, complex_dft_result, phase):
     X_data = np.arange(row_size)
     Y_data = np.arange(col_size)
     X_data, Y_data = np.meshgrid(X_data, Y_data)
     #Now I have added phase into considerations
     # Z_data = complex_a*(np.cos(x_freq*X_data + phase))*(np.cos(y_freq*Y_data + phase)) + \
             # complex_b*(np.sin(x_freq*X_data+phase))*(np.sin(y_freq*Y_data+phase))
+    # Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
+            # complex_b*(np.sin(x_freq*X_data))*(np.sin(y_freq*Y_data))
+
+    # Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
+            # complex_b*(np.sin(x_freq*X_data) + (np.pi/2))*(np.sin(y_freq*Y_data))
+
+    
+    '''
+    This line can make a symmetry of the input images
+    '''
+    # Z_data = complex_a*(np.cos(x_freq*X_data + phase))*(np.cos(y_freq*Y_data + phase)) + \
+            # complex_b*(np.sin(x_freq*X_data + (np.pi/2) + phase))*(np.sin(y_freq*Y_data + (np.pi/2) + phase))
+    
+    # Z_data = complex_a*(np.cos(x_freq*X_data + phase))*(np.cos(y_freq*Y_data + phase)) + \
+            # complex_b*(np.sin(x_freq*X_data + phase))*(np.sin(y_freq*Y_data + (np.pi/2) + phase))
+
+    # Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
+            # complex_b*(np.sin(x_freq*X_data))*(np.sin(y_freq*Y_data + (np.pi/2)))
+
+    # phase_shift_x = float(x_freq)*np.pi/2 
+    # phase_shift_y = float(y_freq)*np.pi/2 
+    # Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
+            # complex_b*(np.sin(x_freq*X_data))*(np.sin(y_freq*Y_data+(np.pi/2)))
+
+    # phase_shift_x = float(x_freq)*phase 
+    # phase_shift_y = float(y_freq)*phase 
+    
+    # phase_shift_x_sin = float(x_freq)*(phase+(np.pi/2))
+    # phase_shift_y_sin = float(y_freq)*(phase+(np.pi/2)) 
+
     Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
             complex_b*(np.sin(x_freq*X_data))*(np.sin(y_freq*Y_data))
+    # Z_data = complex_a*(np.cos(x_freq*X_data + y_freq*Y_data)) + complex_b*(np.sin(x_freq*X_data + y_freq*Y_data + pi/2))
+
+
+
+
+    # Z_data = complex_a*(np.cos(x_freq*X_data))*(np.cos(y_freq*Y_data)) + \
+            # complex_b*(np.sin(x_freq*X_data+(np.pi/2)))*(np.sin(y_freq*Y_data+(np.pi/2)))
+
+
+
+
+    # Z_data = complex_b*(np.sin(x_freq*X_data))*(np.sin(y_freq*Y_data))
+    # complex_part = (1j)*(x_freq*X_data + y_freq*Y_data)
     return Z_data
     
 
@@ -83,25 +143,36 @@ def visualize(complex_dft_result, result_magnititude):
     only care about four corners of the intensity map
     '''
     for i in range(x):
-        x_freq = 2.0*np.pi*(i/float(x))
+        x_freq = 2*np.pi*(i/float(x))
         progress = 100*(float(i*x)/float(x*y))
         print "Finished", progress,"%"
         for j in range(y):
             # if result_magnititude[i][j] < 20:
                 # continue
-            y_freq = 2.0*np.pi*(j/float(y))
-            complex_a = complex_dft_result[i][j][0]
-            complex_b = complex_dft_result[i][j][1]
-            # phase = np.arctan2(complex_b,complex_a)
-            temp_result = synthesis(x_freq, y_freq, complex_a, complex_b, x, y)
+            y_freq = 2*np.pi*(j/float(y))
+
+            if ((i==0) and (j==0)) or ((i==((x/2)-1)) and ((j==((y/2)-1)))):
+                print i,j
+                complex_a = complex_dft_result[i][j][0]/(x)
+                complex_b = -complex_dft_result[i][j][1]/(y/2)
+            else:
+                complex_a = complex_dft_result[i][j][0]/(x/2)
+                complex_b = -complex_dft_result[i][j][1]/(y/2)
+            
+            # complex_a = complex_dft_result[i][j][0]
+            # complex_b = complex_dft_result[i][j][1]
+
+            phase = np.arctan2(complex_b,complex_a)
+            temp_result = synthesis(x_freq, y_freq, complex_a, complex_b, x, y, complex_dft_result, phase)
             Z_value = Z_value + temp_result
     print Z_value
+    Z_value = Z_value/float(x*y)
     X_value, Y_value = np.meshgrid(X_value, Y_value)
     # surf = ax.plot_surface(X_value, Y_value, np.abs(Z_value), cmap=cm.coolwarm,linewidth=0, antialiased=False)
     surf = ax.plot_surface(X_value, Y_value, Z_value, cmap=cm.coolwarm,linewidth=0, antialiased=False)
     # plt.pause(1)
     ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
-    fig.colorbar(surf, shrink=0.5, aspect=5)
+    fig.colorbar(surf, shrink=1.0, aspect=5)
     plt.show()
 
     # print Z_value
