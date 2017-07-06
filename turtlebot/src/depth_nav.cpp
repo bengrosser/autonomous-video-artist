@@ -54,7 +54,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.782522), near_docking_station_y(0.077970), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
             //make the robot move backward and turn 180 degree 
             /*geometry_msgs::Twist OUT_OF_DOCKING_STATION;
             OUT_OF_DOCKING_STATION.linear.x = -0.16;
@@ -258,6 +258,7 @@ class AutoNav
                     }
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
+                    std::cout<<"move to near docking station"<<std::endl;
                     if(DRIVE){
                         //at first control the robot face to the docking station
                         /*float angle;
@@ -280,14 +281,17 @@ class AutoNav
                         geometry_msgs::Twist decision;
                         while(!near_docking_station){
                             //at first control the robot face to the docking station
+                            std::cout<<"battery is low, moving near to docking station"<<std::endl;
                             float angle;
                             if(current_y >= 0){
-                                angle = atan2(current_y, current_x)-pi;
+                                angle = atan2(current_y, current_x+near_docking_station_x)-pi;
                             }
                             else{
-                                angle = atan2(current_y, current_x)+pi;
+                                angle = atan2(current_y, current_x+near_docking_station_x)+pi;
                             }
                             //geometry_msgs::Twist decision;
+                            if(angle < -pi+0.1)
+                                angle = pi;
                             decision.linear.x = 0;
                             decision.angular.z = 0.4;
                             while(abs(yaw-angle) > 0.1)
@@ -442,7 +446,7 @@ class AutoNav
             float z = msg->pose.pose.orientation.z;
             float w = msg->pose.pose.orientation.w;
             toEulerianAngle(x,y,z,w,roll, pitch, yaw); //At start roll pitch and yaw are all 0
-            std::cout<<"yaw: "<<yaw<<std::endl;
+            //std::cout<<"yaw: "<<yaw<<std::endl;
             //std::cout<<"current position: x:"<<current_x<<" y: "<<current_y<<std::endl;
         }
 
