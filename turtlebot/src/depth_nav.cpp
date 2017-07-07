@@ -317,14 +317,14 @@ class AutoNav
                             std::cout<<"now the robot is facing the docking station"<<std::endl;
                             decision1.linear.x = 0.2;
                             decision1.angular.z = 0;
-                            while(!bump){
+                            if(!bump){
                                 std::cout<<"in !bump"<<std::endl;
-                                if(move_forward){
+                                while(move_forward){
                                     decision1.linear.x = 0.15;
                                     decision1.angular.z = 0;
                                     velocity.publish(decision1);
                                 }
-                                else{
+                                if(!move_forward){
                                     if(current_x*current_y >= 0)
                                         decision1.angular.z = 0.15;
                                     else
@@ -339,7 +339,7 @@ class AutoNav
                                         velocity.publish(decision1);
                                 }
                             }
-                            if(bump){//deal with bumper event
+                            else{//deal with bumper event
                                 std::cout<<"bumper event"<<std::endl;
                                 decision1.linear.x = -0.2;
                                 decision1.angular.z = 0;
@@ -424,7 +424,7 @@ class AutoNav
                 }
                 float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
                 //ROS_INFO("left battery percentage %.2f %%", percentage);
-                if(percentage < 95){
+                if(percentage < 30){
                     battery_is_low = true;
                     battery_is_full = false;
                 }
