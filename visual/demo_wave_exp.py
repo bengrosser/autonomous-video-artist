@@ -11,17 +11,45 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import time
 
-#First we generate an image with a big white cube in the middle
-img = np.zeros((300,300,3), np.uint8)
-cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
-cv2.ellipse(img, (30,30),(20,20), 0, 0, 360, (255,255,255), -1)
-cv2.ellipse(img, (30,120),(20,20), 0, 0, 360, (255,255,255), -1)
+# img = np.zeros((300,300,3), np.uint8)
+# cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
+# cv2.ellipse(img, (30,30),(20,20), 0, 0, 360, (255,255,255), -1)
+# cv2.ellipse(img, (30,120),(20,20), 0, 0, 360, (255,255,255), -1)
 
-img_hori = cv2.flip(img, 0)
-img_left = cv2.bitwise_or(img_hori, img)
-img_right = cv2.flip(img_left, 1)
-result_image = cv2.bitwise_or(img_left, img_right)
+# img_hori = cv2.flip(img, 0)
+# img_left = cv2.bitwise_or(img_hori, img)
+# img_right = cv2.flip(img_left, 1)
+# result_image = cv2.bitwise_or(img_left, img_right)
+
+
+img = cv2.imread("./darth.jpg", 0)
+
+def create_grid_flip(img):
+    row_size, col_size = img.shape
+    grid = np.zeros((2*row_size, 2*col_size))
+    grid[0:row_size, 0:col_size] = img
+    img_hori = cv2.flip(grid, 0)
+    img_left = cv2.bitwise_or(img_hori, grid)
+    img_right = cv2.flip(img_left, 1)
+    result_image = cv2.bitwise_or(img_left, img_right)
+    cv2.imwrite("canvas_testing.jpg", result_image)
+
+
+
+def create_grid_copy(img):
+    row_size, col_size = img.shape
+    grid = np.zeros((2*row_size, 2*col_size))
+    grid[0:row_size, 0:col_size] = img
+    grid[0:row_size, col_size:(2*col_size)] = img
+    grid[row_size:2*row_size, 0:col_size] = img
+    grid[row_size:(2*row_size), col_size:(2*col_size)] = img
+    cv2.imwrite("canvas_testing.jpg", grid)
+    
+
+# create_grid_copy(img)
+create_grid_flip(img)
 
 
 
@@ -33,7 +61,7 @@ result_image = cv2.bitwise_or(img_left, img_right)
 
 # cv2.ellipse(img, (100,100),(20,20), 0, 0, 360, (255,255,255), -1)
 # cv2.rectangle(img, (180,180),(220,220),(255,255,255), -1)
-cv2.imwrite("canvas_testing.jpg", result_image)
+# cv2.imwrite("canvas_testing.jpg", result_image)
 
 
 #And Plot it in 3d space
@@ -65,6 +93,7 @@ def fft():
     result_color_magnititude = cv2.cvtColor(result_magnititude, cv2.COLOR_GRAY2RGB)
     cv2.imwrite("wc_frequency_magnitude.jpg", result_color_magnititude)
     return dft, result_magnititude
+
 
 def synthesis(x_freq, y_freq, complex_a, complex_b, row_size, col_size, complex_dft_result, phase):
     X_data = np.arange(row_size)
@@ -142,11 +171,11 @@ def visualize(complex_dft_result, result_magnititude):
     Probably one way of increasing the performance is to 
     only care about four corners of the intensity map
     '''
-    for i in range(x):
+    for i in range(x/2):
         x_freq = 2*np.pi*(i/float(x))
         progress = 100*(float(i*x)/float(x*y))
         print "Finished", progress,"%"
-        for j in range(y):
+        for j in range(y/2):
             # if result_magnititude[i][j] < 20:
                 # continue
             y_freq = 2*np.pi*(j/float(y))
@@ -169,10 +198,17 @@ def visualize(complex_dft_result, result_magnititude):
     Z_value = Z_value/float(x*y)
     X_value, Y_value = np.meshgrid(X_value, Y_value)
     # surf = ax.plot_surface(X_value, Y_value, np.abs(Z_value), cmap=cm.coolwarm,linewidth=0, antialiased=False)
-    surf = ax.plot_surface(X_value, Y_value, Z_value, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+    X_row, X_col = X_value.shape
+    Y_row, Y_col = Y_value.shape
+    Z_row, Z_col = Z_value.shape
+    surf = ax.plot_surface(X_value[0:(X_row/2),0:(X_col/2)], Y_value[0:(Y_row/2),0:(Y_col/2)], Z_value[0:(Z_row/2),0:(Z_col/2)], cmap=cm.coolwarm,linewidth=0, antialiased=False)
+    # surf = ax.plot_surface(X_value, Y_value, Z_value, cmap=cm.coolwarm,linewidth=0, antialiased=False)
+    # plt.pause(1)
     # plt.pause(1)
     ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
     fig.colorbar(surf, shrink=1.0, aspect=5)
+    end_time = time.time()
+    print "end time is", end_time
     plt.show()
 
     # print Z_value
@@ -184,7 +220,10 @@ def visualize(complex_dft_result, result_magnititude):
 
 complex_dft_result,result_magnititude = fft()
 # print result_magnititude
+start_time = time.time()
+print "start time is", start_time
 visualize(complex_dft_result, result_magnititude)
+
 
 
 
