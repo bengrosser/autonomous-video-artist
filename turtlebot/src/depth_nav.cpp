@@ -54,20 +54,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
-            //make the robot move backward and turn 180 degree 
-            /*geometry_msgs::Twist OUT_OF_DOCKING_STATION;
-            OUT_OF_DOCKING_STATION.linear.x = -0.16;
-            OUT_OF_DOCKING_STATION.angular.z = 0.0;
-            ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
-            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))
-                velocity.publish(OUT_OF_DOCKING_STATION);
-            OUT_OF_DOCKING_STATION.linear.x = 0.0;
-            OUT_OF_DOCKING_STATION.angular.z = 1.0;
-            OUT_OF_DOCKING_TIME = ros::Time::now();
-            while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.6
-                velocity.publish(OUT_OF_DOCKING_STATION);*/            
-            //Now the robot is ready to go
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
             
             ros::MultiThreadedSpinner threads(6);
             //create a thread for vision detection
@@ -268,29 +255,12 @@ class AutoNav
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
                     std::cout<<"move to near docking station"<<std::endl;
                     if(DRIVE){
-                        //at first control the robot face to the docking station
-                        /*float angle;
-                        if(current_y >= 0){
-                            angle = atan2(current_y, current_x)-pi;
-                        }
-                        else{ //current_y < 0
-                            angle = atan2(current_y, current_x)+pi;
-                        }
-                        geometry_msgs::Twist decision;
-                        decision.linear.x = 0;
-                        decision.angular.z = 0.4;
-                        while(abs(yaw-angle) > 0.1){
-                            velocity.publish(decision);
-                        }
-                        //Now the robot is facing the docking station
-                        decision.linear.x = 0.2;
-                        decision.angular.z = 0;*/
                         //TODO
-                        geometry_msgs::Twist decision1;
-                        /*decision1.linear.x = 0.0;
-                        decision1.angular.z = 0.1;
+                        geometry_msgs::Twist decision;
+                        /*decision.linear.x = 0.0;
+                        decision.angular.z = 0.1;
                         while(1){
-                            velocity.publish(decision1);
+                            velocity.publish(decision);
                         }*/
                         while(!near_docking_station){
                             //at first control the robot face to the docking station
@@ -305,57 +275,57 @@ class AutoNav
                             //geometry_msgs::Twist decision;
                             if(angle < -pi+0.1)
                                 angle = pi;
-                            decision1.linear.x = 0;
-                            decision1.angular.z = 0.4;
+                            decision.linear.x = 0;
+                            decision.angular.z = 0.4;
 
                            std::cout<<"line 301"<<std::endl;
                             while(abs(yaw-angle) > 0.1){
-                                velocity.publish(decision1);
+                                velocity.publish(decision);
                                 std::cout<<"now the yaw angle is: %f"<<yaw<<std::endl;
                             }
                             //now the robot is facing the docking station
                             std::cout<<"now the robot is facing the docking station"<<std::endl;
-                            decision1.linear.x = 0.2;
-                            decision1.angular.z = 0;
+                            decision.linear.x = 0.2;
+                            decision.angular.z = 0;
                             if(!bump){
                                 std::cout<<"in !bump"<<std::endl;
                                 while(move_forward){
-                                    decision1.linear.x = 0.15;
-                                    decision1.angular.z = 0;
-                                    velocity.publish(decision1);
+                                    decision.linear.x = 0.15;
+                                    decision.angular.z = 0;
+                                    velocity.publish(decision);
                                 }
                                 if(!move_forward){
                                     if(current_x*current_y >= 0)
-                                        decision1.angular.z = 0.15;
+                                        decision.angular.z = 0.15;
                                     else
-                                        decision1.angular.z = -0.15;
-                                    decision1.linear.x = 0;
+                                        decision.angular.z = -0.15;
+                                    decision.linear.x = 0;
                                     while(!move_forward)
-                                        velocity.publish(decision1);
-                                    decision1.linear.x = 0.15;
-                                    decision1.angular.z = 0;
+                                        velocity.publish(decision);
+                                    decision.linear.x = 0.15;
+                                    decision.angular.z = 0;
                                     ros::Time start = ros::Time::now();
                                     while(ros::Time::now()-start < ros::Duration(4.0))
-                                        velocity.publish(decision1);
+                                        velocity.publish(decision);
                                 }
                             }
                             else{//deal with bumper event
                                 std::cout<<"bumper event"<<std::endl;
-                                decision1.linear.x = -0.2;
-                                decision1.angular.z = 0;
+                                decision.linear.x = -0.2;
+                                decision.angular.z = 0;
                                 ros::Time start = ros::Time::now();
                                 while(ros::Time::now()-start < ros::Duration(2.5))
-                                    velocity.publish(decision1);
+                                    velocity.publish(decision);
                                 float cur_yaw = yaw;  //current angle value
                                 float target_yaw;
                                 if(which_bumper == 0){  //bumper on the left
                                     target_yaw = cur_yaw-pi/4 < (-pi) ? (2*pi+cur_yaw-pi/4) : (cur_yaw - pi/4);
                                     if(target_yaw < -pi+0.1)
                                         target_yaw = pi;
-                                    decision1.linear.x = 0.0;
-                                    decision1.angular.z = 0.15;
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15;
                                     while(yaw > target_yaw)
-                                        velocity.publish(decision1);
+                                        velocity.publish(decision);
                                 }
                                 else if(which_bumper == 1){  //bumper in the middle
                                     /*decision.linear.x = -0.2;
@@ -368,26 +338,26 @@ class AutoNav
                                     target_yaw = cur_yaw+pi/2 > pi ? (cur_yaw-1.5*pi) : (cur_yaw+pi/2);
                                     if(target_yaw > pi-0.15)
                                         target_yaw = -pi;
-                                    decision1.linear.x = 0.0;
-                                    decision1.angular.z = 0.15; 
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15; 
                                     while (yaw<target_yaw){
-                                        velocity.publish(decision1);
+                                        velocity.publish(decision);
                                     }
                                 }
                                 else{ //which_bumper == 2  bumper on the right
                                     target_yaw = cur_yaw+pi/4 > pi ? (cur_yaw-1.75*pi) : (cur_yaw+pi/4);
                                     if(target_yaw > pi-0.1)
                                         target_yaw = pi;
-                                    decision1.linear.x = 0.0;
-                                    decision1.angular.z = 0.15;
+                                    decision.linear.x = 0.0;
+                                    decision.angular.z = 0.15;
                                     while(yaw < target_yaw)
-                                        velocity.publish(decision1);
+                                        velocity.publish(decision);
                                 }
-                                decision1.linear.x = 0.2;
-                                decision1.angular.z = 0.0;
+                                decision.linear.x = 0.2;
+                                decision.angular.z = 0.0;
                                 start = ros::Time::now();
                                 while(ros::Time::now()-start < ros::Duration(3.0)){
-                                    velocity.publish(decision1);
+                                    velocity.publish(decision);
                                     if(!move_forward)
                                         break;
                                 }
@@ -424,7 +394,7 @@ class AutoNav
                 }
                 float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
                 //ROS_INFO("left battery percentage %.2f %%", percentage);
-                if(percentage < 30){
+                if(percentage < 200){
                     battery_is_low = true;
                     battery_is_full = false;
                 }
