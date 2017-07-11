@@ -14,6 +14,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import matplotlib.animation as animation
 from matplotlib.collections import PolyCollection
 import time
+import sys
 
 # img = np.zeros((300,300,3), np.uint8)
 # cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
@@ -26,7 +27,7 @@ import time
 # result_image = cv2.bitwise_or(img_left, img_right)
 
 
-img = cv2.imread("./dao.png", 0)
+img = cv2.imread("./doit.jpg", 0)
 print img.shape
 
 def create_grid_flip(img):
@@ -100,9 +101,7 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     # plt.cla()
     # plt.close()
 
-
-
-    global surf 
+    global surf
     x,y,_= complex_dft_result.shape
     #Also I need to build up the range for drawing functions
     X_value = np.arange(x) 
@@ -110,12 +109,17 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     # plt.ion()
     # fig = plt.figure()
     # ax = fig.gca(projection='3d')
-    i_index = int(frame_num)/(x/4)
-    j_index = int(frame_num)%(y/4) 
+    i_index = int(frame_num)/(x/2)
+    j_index = int(frame_num)%(y/2) 
     print i_index
     print j_index
     # if i_index != 0 or j_index != 0:
         # surf.remove()
+    # if i_index >= 2:
+        # print "fuck"
+        # anim.event_source.stop()
+        # return fig  
+
     if surf != None:
         surf.remove()
     '''
@@ -124,8 +128,6 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     ''' 
     x_freq = 2*np.pi*(i_index/float(x))
     progress = 100*(float(i_index*x)/float(x*y))
-    if i_index == 20:
-        return fig
     # if result_magnititude[i_index][j_index] < 20:
         # continue
     y_freq = 2*np.pi*(j_index/float(y))
@@ -158,20 +160,32 @@ complex_dft_result,result_magnititude = fft()
 # print "start time is", start_time
 # visualize(complex_dft_result, result_magnititude)
 
-Z_value = np.zeros((400,400))
+Z_value = np.zeros((200,200))
 fig = plt.figure()
 ax = fig.gca(projection='3d')
+ax.set_frame_on(False)
 ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+# ax.view_init(azim=60)
+# ax.view_init(elev=20)
+# plt.axis('off')
 surf = None
+
+azim_value = int(sys.argv[1])
+elev_value = int(sys.argv[2])
+ax.view_init(azim=azim_value, elev=elev_value)
+# print ax.azim
+# print ax.elev
 
 # poly = PolyCollection(list(verts),facecolors=(1,1,1,1), edgecolors=(0,0,1,1))      #I'm not too bothered with
 # poly.set_alpha(0.7)                                               #colours at the moment
 
 
 # surf = ax.plot_surface(f_f,f_f,f_f,cmap=cm.coolwarm,linewidth=0, antialiased=False)
-line_ani = animation.FuncAnimation(fig, visualize, fargs=(complex_dft_result, result_magnititude),
-                                   interval=50, blit=False)
-plt.show()
+FFwriter = animation.FFMpegFileWriter()
+anim = animation.FuncAnimation(fig, visualize, fargs=(complex_dft_result, result_magnititude),
+                                   interval=50, blit=False, repeat_delay=0)
+# plt.show()
+anim.save('result.mp4', writer = FFwriter)
 
 
 
