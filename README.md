@@ -7,7 +7,7 @@ What is more, you need to install some packages on your PC. Please check the pac
 
 Make sure that compressedDepth image_transport plugin is installed on your PC. You can check it by running
 
-        $ rosrun image_transport list_transports
+    $ rosrun image_transport list_transports
 
 in your terminal. "image_transport/compressedDepth" should show up in your terminal. 
 
