@@ -63,9 +63,9 @@ On PC:
 
         $ rosrun turtlebot depth
 
-    To run the automatic navigation with depth image (including position tracking and battery information):
+    To run the automatic navigation with depth image (Please make sure that compressedDepth image_transport plugin is installed on your system):
 
-        $ rosrun turtlebot depth_nav
+        $ rosrun turtlebot depth_nav _image_transport:=compressedDepth
 
     To run the position track test code:
 
