@@ -175,7 +175,10 @@ def visualize(complex_dft_result, result_magnititude):
         x_freq = 2*np.pi*(i/float(x))
         progress = 100*(float(i*x)/float(x*y))
         print "Finished", progress,"%"
+        if i == 50:
+            break
         for j in range(y/2):
+
             # if result_magnititude[i][j] < 20:
                 # continue
             y_freq = 2*np.pi*(j/float(y))
