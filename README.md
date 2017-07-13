@@ -5,6 +5,11 @@ Here is a good reference about how to get this thing done: http://wiki.ros.org/t
 
 What is more, you need to install some packages on your PC. Please check the packages_list.txt for details.
 
+Make sure that compressedDepth image_transport plugin is installed on your PC. You can check it by running
+
+    $ rosrun image_transport list_transports
+
+in your terminal. "image_transport/compressedDepth" should show up in your terminal. 
 
 
 -------------------------------------
@@ -59,17 +64,9 @@ On PC:
     
         $ rosrun turtlebot navigation
 
-    To run the test code for depth image with visualization:
-
-        $ rosrun turtlebot depth
-
     To run the automatic navigation with depth image (Please make sure that compressedDepth image_transport plugin is installed on your system):
 
         $ rosrun turtlebot depth_nav _image_transport:=compressedDepth
-
-    To run the position track test code:
-
-        $ rosrun turtlebot position
 
     To run the auto charging code:
        
