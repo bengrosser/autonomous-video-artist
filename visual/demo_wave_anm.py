@@ -7,7 +7,7 @@
 import numpy as np
 from numpy import pi as pi
 import cv2
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D 
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
@@ -18,17 +18,12 @@ import sys
 
 # img = np.zeros((300,300,3), np.uint8)
 # cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
-# cv2.ellipse(img, (30,30),(20,20), 0, 0, 360, (255,255,255), -1)
-# cv2.ellipse(img, (30,120),(20,20), 0, 0, 360, (255,255,255), -1)
-
-# img_hori = cv2.flip(img, 0)
+# cv2.ellipse(img, (30,30),(20,20), 0, 0, 360, (255,255,255), -1) # cv2.ellipse(img, (30,120),(20,20), 0, 0, 360, (255,255,255), -1) # img_hori = cv2.flip(img, 0)
 # img_left = cv2.bitwise_or(img_hori, img)
 # img_right = cv2.flip(img_left, 1)
 # result_image = cv2.bitwise_or(img_left, img_right)
 
 
-img = cv2.imread("./doit.jpg", 0)
-print img.shape
 
 def create_grid_flip(img):
     row_size, col_size = img.shape
@@ -51,11 +46,6 @@ def create_grid_copy(img):
     grid[row_size:(2*row_size), col_size:(2*col_size)] = img
     cv2.imwrite("canvas_testing.jpg", grid)
     
-
-# create_grid_copy(img)
-create_grid_flip(img)
-
-
 
 '''
 I am going to use cv2 version here to since it has both of the values
@@ -109,10 +99,21 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     # plt.ion()
     # fig = plt.figure()
     # ax = fig.gca(projection='3d')
-    i_index = int(frame_num)/(x/2)
-    j_index = int(frame_num)%(y/2) 
-    print i_index
-    print j_index
+    i_index = int(frame_num)/(40)
+    j_index = int(frame_num)%(40) 
+    # print i_index
+    # print j_index
+
+
+    # Reverse order version
+    # i_index = int(frame_num)/(x/2)
+    # j_index = 19-int(frame_num)%(y/2) 
+    # print i_index
+    # print j_index
+
+
+
+    
     # if i_index != 0 or j_index != 0:
         # surf.remove()
     # if i_index >= 2:
@@ -155,12 +156,18 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     return fig 
 
 
+img_name = sys.argv[3]
+img = cv2.imread(img_name, 0)
+# print img.shape
+# create_grid_copy(img)
+create_grid_flip(img)
 complex_dft_result,result_magnititude = fft()
+x,y,_ = complex_dft_result.shape
 # print result_magnititude start_time = time.time()
 # print "start time is", start_time
 # visualize(complex_dft_result, result_magnititude)
 
-Z_value = np.zeros((200,200))
+Z_value = np.zeros((y,x))
 fig = plt.figure()
 ax = fig.gca(projection='3d')
 ax.set_frame_on(False)
@@ -181,11 +188,12 @@ ax.view_init(azim=azim_value, elev=elev_value)
 
 
 # surf = ax.plot_surface(f_f,f_f,f_f,cmap=cm.coolwarm,linewidth=0, antialiased=False)
-FFwriter = animation.FFMpegFileWriter()
+FFwriter = animation.FFMpegFileWriter(bitrate = 5000000)
 anim = animation.FuncAnimation(fig, visualize, fargs=(complex_dft_result, result_magnititude),
-                                   interval=50, blit=False, repeat_delay=0)
+                                   interval=150, blit=False, repeat_delay=0,frames=5000, repeat=False)
 # plt.show()
-anim.save('result.mp4', writer = FFwriter)
+result_name = img_name[0:-4] + "_" +str(azim_value)+"_"+str(elev_value)+".mp4"
+anim.save(result_name)
 
 
 
