@@ -56,7 +56,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             ros::MultiThreadedSpinner threads(6);
             //create a thread for vision detection
@@ -67,25 +67,23 @@ class AutoNav
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
-            ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",100, &AutoNav::bumperCommand, this);
+            ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",10, &AutoNav::bumperCommand, this);
             //create a thread to record the position
             //ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
             //create a thread for battery information
-            ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 100, &AutoNav::battery, this);
+            ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 10, &AutoNav::battery, this);
             //create a thread for system information
             ros::Timer sysInfo=node.createTimer(ros::Duration(1), &AutoNav::sysInfo, this);
             //create a thread for automatic charging with docking station
-            ros::Subscriber autoCharging=node.subscribe("/odom", 1000, &AutoNav::autoCharging, this);
+            ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::autoCharging, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
+            //std::cout<<"frontEnv function"<<std::endl;
             try{
                 cv_bridge::CvImageConstPtr cv_ptr;
-////////////////////////////////////////////////////////////
-                //cv_ptr = cv_bridge::toCvShare(msg, "bgr8");
-///////////////////////////////////////////////////////////////
                 cv_ptr = cv_bridge::toCvShare(msg);
                 cv::Mat depth_img;
                 const std::string& enc = msg->encoding;
@@ -95,7 +93,7 @@ class AutoNav
                     cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
 
                 //crop the image
-                cv::Mat crop_front = depth_img(cv::Rect_<int>(180,150,280,330)); //depth image in front
+                cv::Mat crop_front = depth_img(cv::Rect_<int>(180,200,280,270)); //depth image in front
                 cv::Mat mask = crop_front>0;  //mask to remove the noise
                 int num = countNonZero(crop_front);
                 float percentage = ((double)num)/((double)280*330); //change with the depth image size
@@ -106,9 +104,9 @@ class AutoNav
                 //std::cout<<"max value: "<<mmax<<". min value: "<<mmin<<std::endl;
                 if(mmin < 600 || percentage < 0.65){
                     //choose direction (BETA version)
-                    cv::Mat crop_left = depth_img(cv::Rect_<int>(0,150,180,330)); //depth image on left
+                    cv::Mat crop_left = depth_img(cv::Rect_<int>(0,200,180,270)); //depth image on left
                     cv::Mat left_mask = crop_left>0;
-                    cv::Mat crop_right = depth_img(cv::Rect_<int>(460,150,180,330)); //depth image on right
+                    cv::Mat crop_right = depth_img(cv::Rect_<int>(460,200,180,270)); //depth image on right
                     cv::Mat right_mask = crop_right>0;
                     double lmin = 0.0;
                     double lmax = 0.0;
@@ -122,8 +120,8 @@ class AutoNav
                         go_right = false;
                     //
                     if(battery_is_low && !near_docking_station){
-                        cv::Mat front_right = depth_img(cv::Rect_ <int> (0,150,320,330));
-                        cv::Mat front_left = depth_img(cv::Rect_ <int> (320,150,320,330));
+                        cv::Mat front_right = depth_img(cv::Rect_ <int> (0,200,320,270));
+                        cv::Mat front_left = depth_img(cv::Rect_ <int> (320,200,320,270));
                         cv::Mat front_right_mask = front_right > 650;
                         cv::Mat front_left_mask = front_left > 650;
                         if(countNonZero(front_right_mask) < countNonZero(front_left_mask))
@@ -149,28 +147,37 @@ class AutoNav
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }
         }
+        
+        void leave_station_action(const ros::TimerEvent& time){
+            bool DRIVE;
+            node.getParamCached("drive", DRIVE);
+            if(DRIVE){
+                geometry_msgs::Twist OUT_OF_DOCKING_STATION;
+                OUT_OF_DOCKING_STATION.linear.x = -0.16;
+                OUT_OF_DOCKING_STATION.angular.z = 0.0;
+                ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
+                std::cout<<"the first publish"<<std::endl;
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))  //5.0
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                OUT_OF_DOCKING_STATION.linear.x = 0.0;
+                OUT_OF_DOCKING_STATION.angular.z = 1.0;
+                OUT_OF_DOCKING_TIME = ros::Time::now();
+                std::cout<<"the second publish"<<std::endl;
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.5
+                    velocity.publish(OUT_OF_DOCKING_STATION);   //yaw value increase
+                leave_docking_station = false;
+            }
+        }
 
-        void pilot(const ros::TimerEvent& time){
+        void battery_is_good_pilot(const ros::TimerEvent& time){
+
+        }
+
+        void pilot(const ros::TimerEvent& time)
+        {
             //std::cout<<"pilot"<<std::endl;
             if(leave_docking_station){ //
-                //for the turtlebot to leave the docking station
-                std::cout<<"leaving docking station"<<std::endl;
-                bool DRIVE;
-                node.getParamCached("drive", DRIVE);
-                if(DRIVE){
-                    geometry_msgs::Twist OUT_OF_DOCKING_STATION;
-                    OUT_OF_DOCKING_STATION.linear.x = -0.16;
-                    OUT_OF_DOCKING_STATION.angular.z = 0.0;
-                    ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
-                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))  //5.0
-                        velocity.publish(OUT_OF_DOCKING_STATION);
-                    OUT_OF_DOCKING_STATION.linear.x = 0.0;
-                    OUT_OF_DOCKING_STATION.angular.z = 1.0;
-                    OUT_OF_DOCKING_TIME = ros::Time::now();
-                    while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.5
-                        velocity.publish(OUT_OF_DOCKING_STATION);   //yaw value increase
-                    leave_docking_station = false;
-                }
+                leave_station_action(time);
             }
             else if(battery_is_low == false){
                 //automatic navigation
@@ -187,6 +194,7 @@ class AutoNav
                         decision.linear.x = -DRIVE_LINEARSPEED;
                         decision.angular.z = 0;
                         ros::Time start = ros::Time::now();
+                        std::cout<<"the third publish"<<std::endl;
                         while(ros::Time::now() - start < ros::Duration(5.0)){
                             velocity.publish(decision);
                         }
@@ -208,6 +216,7 @@ class AutoNav
                         decision.angular.z = DRIVE_ANGULARSPEED*direction;
                         decision.linear.x = 0;
                         start = ros::Time::now();
+                        std::cout<<"the forth publish"<<std::endl;
                         while(ros::Time::now() - start < ros::Duration(3.0)){
                             velocity.publish(decision);
                         }
@@ -218,6 +227,7 @@ class AutoNav
                     if(move_forward){
                         decision.linear.x=DRIVE_LINEARSPEED;
                         decision.angular.z = 0;
+                        std::cout<<"the fifth publish"<<std::endl;
                         if(DRIVE)
                             velocity.publish(decision);
                     }
@@ -228,6 +238,7 @@ class AutoNav
                         else
                             decision.angular.z = -DRIVE_ANGULARSPEED;
 
+                        std::cout<<"the sixth publish"<<std::endl;
                         if(DRIVE){
                             while(!move_forward){
                                 velocity.publish(decision);
@@ -242,9 +253,6 @@ class AutoNav
                 node.getParamCached("drive", DRIVE); 
                 std::cout<<"battery is low"<<std::endl;      
                 if(near_docking_station){ //start auto docking
-                    std::cout<<"near docking station"<<std::endl;
-                    if(in_charging)
-                        std::cout<<"In charging"<<std::endl;
                     if(!in_charging){
                         std::cout<<"not in charging"<<std::endl;
                         if(DRIVE){
@@ -271,12 +279,13 @@ class AutoNav
                     }
                 }
                 else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
-                    std::cout<<"move to near docking station"<<std::endl;
                     //TODO
                     ros::Time rightnow = ros::Time::now();
+                    //this while loop is only for letting the robot go to the docking at start
                     while(ros::Time::now()-rightnow <= ros::Duration(3.0)){
                         //do nothing
                     }
+                    //////
                     geometry_msgs::Twist decision;
                     while(!near_docking_station){
                         //at first control the robot face to the docking station  
@@ -288,55 +297,48 @@ class AutoNav
                         else{
                             angle = atan2(current_y, current_x-near_docking_station_y)+pi; ////
                         }
-                        //std::cout<<"check what is the target angle value: at first"<<angle<<std::endl;
-                        //geometry_msgs::Twist decision;
+
                         if(angle < -pi+0.02)
                             angle = pi;
                         decision.linear.x = 0;
                         decision.angular.z = 0.4;
 
-                        //std::cout<<"check the target angle now: "<<angle<<std::endl;
                         if(DRIVE){
+                            //std::cout<<"in drive"<<std::endl;
+                            std::cout<<"the eighth publish"<<std::endl;
                             while(abs(yaw-angle) > 0.02){
                                 velocity.publish(decision);
-                                //std::cout<<"now the yaw angle is: "<<yaw<<std::endl;
-                                //std::cout<<"target angle is: "<<angle<<std::endl;
                             }
-                            //now the robot is facing the docking station
-                            //std::cout<<"now the robot is facing the docking station"<<std::endl;
                             decision.linear.x = 0.2;
                             decision.angular.z = 0;
                             if(!bump){
                                 std::cout<<"in !bump"<<std::endl;
                                 rightnow = ros::Time::now();
-                                while(move_forward){
-                                    std::cout<<"in the while loop"<<std::endl;
-                                    decision.linear.x = 0.15;
-                                    decision.angular.z = 0;
+                                decision.linear.x = 0.15;
+                                decision.angular.z = 0;
+                                std::cout<<"the ninth publish"<<std::endl;
+                                while(move_forward && !near_docking_station && !bump){
                                     velocity.publish(decision);
-                                    if(near_docking_station)
-                                        break;
-                                    if(ros::Time::now()-rightnow >= ros::Duration(5.0))
+                                    //this if statement is to adjust the angle
+                                    if(ros::Time::now()-rightnow >= ros::Duration(10.0))  
                                         break;
                                 }
-                                if(!move_forward && !near_docking_station){
-                                    std::cout<<"Not able to move forward"<<std::endl;
+                                if(!move_forward && !near_docking_station && !bump){
                                     if(avoid_from_right)
                                         decision.angular.z = -0.15;
                                     else
                                         decision.angular.z = 0.15;
                                     decision.linear.x = 0;
-                                    std::cout<<"why do you stop here??"<<std::endl;
+                                    std::cout<<"the tenth publish"<<std::endl;
                                     while(!move_forward){
                                         velocity.publish(decision);
-                                        std::cout<<"in line 311 while loop"<<std::endl;
                                     }
                                     decision.linear.x = 0.15;
                                     decision.angular.z = 0;
                                     ros::Time start = ros::Time::now();
+                                    std::cout<<"11 publish"<<std::endl;
                                     while(ros::Time::now()-start < ros::Duration(4.0)){
                                         velocity.publish(decision);
-                                        std::cout<<"in line 318 while loop"<<std::endl;
                                     }
                                 }
                             }
@@ -345,6 +347,7 @@ class AutoNav
                                 decision.linear.x = -0.2;
                                 decision.angular.z = 0;
                                 ros::Time start = ros::Time::now();
+                                std::cout<<"12 publish"<<std::endl;
                                 while(ros::Time::now()-start < ros::Duration(2.5))
                                     velocity.publish(decision);
                                 float cur_yaw = yaw;  //current angle value
@@ -355,6 +358,7 @@ class AutoNav
                                         target_yaw = pi;
                                     decision.linear.x = 0.0;
                                     decision.angular.z = 0.15;
+                                    std::cout<<"13 publish"<<std::endl;
                                     while(yaw > target_yaw)
                                         velocity.publish(decision);
                                 }
@@ -364,6 +368,7 @@ class AutoNav
                                         target_yaw = -pi;
                                     decision.linear.x = 0.0;
                                     decision.angular.z = 0.15; 
+                                    std::cout<<"14 publish"<<std::endl;
                                     while (yaw<target_yaw){
                                         velocity.publish(decision);
                                     }   
@@ -374,6 +379,7 @@ class AutoNav
                                         target_yaw = pi;
                                     decision.linear.x = 0.0;
                                     decision.angular.z = 0.15;
+                                    std::cout<<"15 publish"<<std::endl;
                                     while(yaw < target_yaw)
                                         velocity.publish(decision);
                                 }
@@ -381,6 +387,7 @@ class AutoNav
                                 decision.angular.z = 0.0;
                                 start = ros::Time::now();
                                 while(ros::Time::now()-start < ros::Duration(3.0)){
+                                    std::cout<<"16 publish"<<std::endl;
                                     velocity.publish(decision);
                                     if(!move_forward)
                                         break;
@@ -418,7 +425,7 @@ class AutoNav
                 }
                 float percentage = ((float)msg.battery)/((float)MAX_BATTERY)*100.00;
                 //ROS_INFO("left battery percentage %.2f %%", percentage);
-                if(percentage < 200){
+                if(percentage < 90){
                     battery_is_low = true;
                     battery_is_full = false;
                 }
@@ -443,10 +450,14 @@ class AutoNav
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
-            /*printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now()-start < ros::Duration(60.0)){
+                //do nothing, print the system information once a minute
+            }
+            printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
-            printf ("process count : %d\n", si.procs);*/
+            printf ("process count : %d\n", si.procs);
         }
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
@@ -456,19 +467,12 @@ class AutoNav
             float distance_to_docking = sqrt(pow(current_x, 2.0)+pow(current_y, 2.0));
             if(battery_is_low==true && distance_to_docking < 1.5)    
                 near_docking_station = true;
-            //else
-            //    near_docking_station = false;
+            
             float x = msg->pose.pose.orientation.x;
             float y = msg->pose.pose.orientation.y;
             float z = msg->pose.pose.orientation.z;
             float w = msg->pose.pose.orientation.w;
             toEulerianAngle(x,y,z,w,roll, pitch, yaw); //At start roll pitch and yaw are all 0
-            //std::cout<<"yaw: "<<yaw<<std::endl;
-            //for print message
-            /*ros::Time start = ros::Time::now();
-            while(ros::Time::now()-start < ros::Duration(1.0))
-                std::cout<<"current yaw: "<<yaw<<std::endl;*/
-            //std::cout<<"current position: x:"<<current_x<<" y: "<<current_y<<std::endl;
         }
 
         //a helper function (convert quaternion angle to euler angle)
@@ -499,7 +503,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", false); //For debugging, always set to true
+    node.setParam("drive", true); //For debugging, always set to true
 
     AutoNav turtlebot(node); 
 
