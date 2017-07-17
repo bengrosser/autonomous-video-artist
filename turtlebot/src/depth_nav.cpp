@@ -169,235 +169,201 @@ class AutoNav
             }
         }
 
-        void battery_is_good_pilot(const ros::TimerEvent& time){
+        void battery_is_good_action(const ros::TimerEvent& time){
+            double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
+            bool DRIVE;
+            node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
+            node.getParamCached("drive_angularspeed", DRIVE_ANGULARSPEED);
+            node.getParamCached("drive", DRIVE);
+            geometry_msgs::Twist decision;
+            if(bump){//deal with the bumper info
+                if(DRIVE){
+                    decision.linear.x = -DRIVE_LINEARSPEED;
+                    decision.angular.z = 0;
+                    ros::Time start = ros::Time::now();
+                    std::cout<<"the third publish"<<std::endl;
+                    while(ros::Time::now() - start < ros::Duration(5.0)){
+                        velocity.publish(decision);
+                    }
+                    //choose right and left by bumper
+                    int direction = 1;
+                    if(which_bumper == 1){
+                        int tmp = rand()%2;
+                        if(tmp == 0)
+                            direction = 1;
+                        else
+                            direction = -1;
+                    }
+                    else if(which_bumper == 0){
+                        direction = -1;
+                    }
+                    else{
+                        direction = 1;
+                    }
+                    decision.angular.z = DRIVE_ANGULARSPEED*direction;
+                    decision.linear.x = 0;
+                    start = ros::Time::now();
+                    std::cout<<"the forth publish"<<std::endl;
+                    while(ros::Time::now() - start < ros::Duration(3.0)){
+                        velocity.publish(decision);
+                    }
+                }
+                bump = false;
+            }
+            else{//bumper is safe
+                if(move_forward){
+                    decision.linear.x = DRIVE_LINEARSPEED;
+                    decision.angular.z = 0;
+                    if(DRIVE)
+                        velocity.publish(decision);
+                }
+                else{
+                    if(go_right)
+                        decision.angular.z = DRIVE_ANGULARSPEED;
+                    else
+                        decision.angular.z = -DRIVE_ANGULARSPEED;
 
+                    if(DRIVE){
+                        while(!move_forward)
+                            velocity.publish(decision);
+                    }
+                }
+
+            }
+        }
+
+        void auto_docking_action(const ros::TimerEvent& time){
+            if(!in_charging){
+                actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
+                client.waitForServer();
+                kobuki_msgs::AutoDockingGoal goal;
+                actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
+                client.sendGoal(goal);
+                ros::Time time = ros::Time::now();
+                while(!client.waitForResult(ros::Duration(3))){
+                    dock_state = client.getState();
+                    ROS_INFO("Docking status: %s", dock_state.toString().c_str());
+                        
+                    if(ros::Time::now() > (time+ros::Duration(500))){
+                        //Give it 500 seconds, or we say that auto docking fail.
+                        ROS_INFO("Docking took more than 500 seconds, canceling.");
+                        client.cancelGoal();
+                        break;
+                    }
+                }
+                in_charging = true;
+            }
+        }
+
+        void battery_is_low_action(const ros::TimerEvent& time){
+            geometry_msgs::Twist decision;
+            while(!near_docking_station){
+                float angle;
+                if(current_y >= 0)
+                    angle = atan2(current_y, current_x-near_docking_station_x)-pi;
+                else
+                    angle = atan2(current_y, current_x-near_docking_station_y)+pi;
+
+                if(angle < -pi+0.02)
+                    angle = pi;
+                decision.linear.x = 0;
+                decision.angular.z = 0.4;
+                while(abs(yaw-angle) > 0.02)
+                    velocity.publish(decision);
+                decision.linear.x = 0.2;
+                decision.angular.z = 0;
+                if(!bump){
+                    ros::Time rightnow = ros::Time::now();
+                    decision.linear.x = 0.15;
+                    decision.angular.z = 0;
+                    while(move_forward && !near_docking_station && !bump){
+                        velocity.publish(decision);
+                        if(ros::Time::now()-rightnow>=ros::Duration(10.0))
+                            break;
+                    }
+                    if(!move_forward && !near_docking_station && !bump){
+                        if(avoid_from_right)
+                            decision.angular.z = -0.15;
+                        else
+                            decision.angular.z = 0.15;
+                        decision.linear.x = 0;
+                        while(!move_forward){
+                            velocity.publish(decision);
+                        }
+                        decision.linear.x = 0.15;
+                        decision.angular.z = 0;
+                        ros::Time start = ros::Time::now();                                   
+                        while(ros::Time::now()-start < ros::Duration(4.0)){
+                            velocity.publish(decision);
+                        }
+                    }
+                }
+                else{//deal with bumper event
+                    decision.linear.x = -0.2;
+                    decision.angular.z = 0;
+                    ros::Time start = ros::Time::now();
+                    while(ros::Time::now()-start < ros::Duration(2.5))
+                        velocity.publish(decision);
+                    float cur_yaw = yaw;
+                    float target_yaw;
+                    if(which_bumper == 0){
+                        target_yaw = cur_yaw-pi/4 < (-pi) ? (2*pi+cur_yaw-pi/4) : (cur_yaw - pi/4);
+                        if(target_yaw < -pi+0.02)
+                               target_yaw = pi;
+                        decision.linear.x = 0.0;
+                        decision.angular.z = 0.15;                                    
+                        while(yaw > target_yaw)
+                            velocity.publish(decision);
+                    }
+                    else if(which_bumper == 1){
+                        target_yaw = cur_yaw+pi/2 > pi ? (cur_yaw-1.5*pi) : (cur_yaw+pi/2);
+                        if(target_yaw > pi-0.02)
+                            target_yaw = -pi;
+                        decision.linear.x = 0.0;
+                        decision.angular.z = 0.15; 
+                        while (yaw<target_yaw){
+                            velocity.publish(decision);
+                        }
+                    }
+                    else{
+                        target_yaw = cur_yaw+pi/4 > pi ? (cur_yaw-1.75*pi) : (cur_yaw+pi/4);
+                        if(target_yaw > pi-0.02)
+                            target_yaw = pi;
+                        decision.linear.x = 0.0;
+                        decision.angular.z = 0.15;
+                        while(yaw < target_yaw)
+                            velocity.publish(decision);
+                    }
+                    decision.linear.x = 0.2;
+                    decision.angular.z = 0.0;
+                    start = ros::Time::now();
+                    while(ros::Time::now()-start < ros::Duration(3.0)){
+                        velocity.publish(decision);
+                        if(!move_forward)
+                            break;
+                    }
+                    bump = false;
+                }
+            }
         }
 
         void pilot(const ros::TimerEvent& time)
         {
+            battery_is_good_action(time);
             //std::cout<<"pilot"<<std::endl;
-            if(leave_docking_station){ //
+            /*if(leave_docking_station){ //
                 leave_station_action(time);
             }
             else if(battery_is_low == false){
-                //automatic navigation
-                std::cout<<"battery is good, automatic navigation"<<std::endl;
-                double DRIVE_LINEARSPEED, DRIVE_ANGULARSPEED;
-                bool DRIVE;
-                node.getParamCached("drive_linearspeed", DRIVE_LINEARSPEED);
-                node.getParamCached("drive_angularspeed", DRIVE_ANGULARSPEED);
-                node.getParamCached("drive", DRIVE);
-
-                geometry_msgs::Twist decision;
-                if(bump){//deal with the bumper info
-                    if(DRIVE){
-                        decision.linear.x = -DRIVE_LINEARSPEED;
-                        decision.angular.z = 0;
-                        ros::Time start = ros::Time::now();
-                        std::cout<<"the third publish"<<std::endl;
-                        while(ros::Time::now() - start < ros::Duration(5.0)){
-                            velocity.publish(decision);
-                        }
-                        //choose right and left by bumper
-                        int direction = 1;
-                        if(which_bumper == 1){
-                            int tmp = rand()%2;
-                            if(tmp == 0)
-                                direction = 1;
-                            else
-                                direction = -1;
-                        }
-                        else if(which_bumper == 0){
-                            direction = -1;
-                        }
-                        else{
-                            direction = 1;
-                        }
-                        decision.angular.z = DRIVE_ANGULARSPEED*direction;
-                        decision.linear.x = 0;
-                        start = ros::Time::now();
-                        std::cout<<"the forth publish"<<std::endl;
-                        while(ros::Time::now() - start < ros::Duration(3.0)){
-                            velocity.publish(decision);
-                        }
-                    }
-                    bump = false;
-                }
-                else{//bumper is safe
-                    if(move_forward){
-                        decision.linear.x=DRIVE_LINEARSPEED;
-                        decision.angular.z = 0;
-                        std::cout<<"the fifth publish"<<std::endl;
-                        if(DRIVE)
-                            velocity.publish(decision);
-                    }
-                    else{
-                        //BETA version
-                        if(go_right)
-                            decision.angular.z = DRIVE_ANGULARSPEED;
-                        else
-                            decision.angular.z = -DRIVE_ANGULARSPEED;
-
-                        std::cout<<"the sixth publish"<<std::endl;
-                        if(DRIVE){
-                            while(!move_forward){
-                                velocity.publish(decision);
-                            }
-                        }
-                    } 
-                }
+                battery_is_good_action(time);
+            }
+            else if(near_docking_station){
+                auto_docking_action(time);
             }
             else{
                 //battery is low (navigate to the docking station)
-                bool DRIVE;
-                node.getParamCached("drive", DRIVE); 
-                std::cout<<"battery is low"<<std::endl;      
-                if(near_docking_station){ //start auto docking
-                    if(!in_charging){
-                        std::cout<<"not in charging"<<std::endl;
-                        if(DRIVE){
-                            std::cout<<"in drive"<<std::endl;
-                            actionlib::SimpleActionClient<kobuki_msgs::AutoDockingAction> client("dock_drive_action", true);
-                            client.waitForServer();
-                            kobuki_msgs::AutoDockingGoal goal;
-                            actionlib::SimpleClientGoalState dock_state = actionlib::SimpleClientGoalState::LOST;
-                            client.sendGoal(goal);
-                            ros::Time time = ros::Time::now();
-                            while(!client.waitForResult(ros::Duration(3))){
-                                dock_state = client.getState();
-                                ROS_INFO("Docking status: %s", dock_state.toString().c_str());
-                        
-                                if(ros::Time::now() > (time+ros::Duration(500))){
-                                    //Give it 500 seconds, or we say that auto docking fail.
-                                    ROS_INFO("Docking took more than 500 seconds, canceling.");
-                                    client.cancelGoal();
-                                    break;
-                                }
-                            }
-                            in_charging = true;
-                        }
-                    }
-                }
-                else{ //let the robot go to (near_docking_station_x, near_docking_station_y)
-                    //TODO
-                    ros::Time rightnow = ros::Time::now();
-                    //this while loop is only for letting the robot go to the docking at start
-                    while(ros::Time::now()-rightnow <= ros::Duration(3.0)){
-                        //do nothing
-                    }
-                    //////
-                    geometry_msgs::Twist decision;
-                    while(!near_docking_station){
-                        //at first control the robot face to the docking station  
-                        std::cout<<"battery is low, moving near to docking station"<<std::endl;
-                        float angle;
-                        if(current_y >= 0){
-                            angle = atan2(current_y, current_x-near_docking_station_x)-pi; ///
-                        }
-                        else{
-                            angle = atan2(current_y, current_x-near_docking_station_y)+pi; ////
-                        }
-
-                        if(angle < -pi+0.02)
-                            angle = pi;
-                        decision.linear.x = 0;
-                        decision.angular.z = 0.4;
-
-                        if(DRIVE){
-                            //std::cout<<"in drive"<<std::endl;
-                            std::cout<<"the eighth publish"<<std::endl;
-                            while(abs(yaw-angle) > 0.02){
-                                velocity.publish(decision);
-                            }
-                            decision.linear.x = 0.2;
-                            decision.angular.z = 0;
-                            if(!bump){
-                                std::cout<<"in !bump"<<std::endl;
-                                rightnow = ros::Time::now();
-                                decision.linear.x = 0.15;
-                                decision.angular.z = 0;
-                                std::cout<<"the ninth publish"<<std::endl;
-                                while(move_forward && !near_docking_station && !bump){
-                                    velocity.publish(decision);
-                                    //this if statement is to adjust the angle
-                                    if(ros::Time::now()-rightnow >= ros::Duration(10.0))  
-                                        break;
-                                }
-                                if(!move_forward && !near_docking_station && !bump){
-                                    if(avoid_from_right)
-                                        decision.angular.z = -0.15;
-                                    else
-                                        decision.angular.z = 0.15;
-                                    decision.linear.x = 0;
-                                    std::cout<<"the tenth publish"<<std::endl;
-                                    while(!move_forward){
-                                        velocity.publish(decision);
-                                    }
-                                    decision.linear.x = 0.15;
-                                    decision.angular.z = 0;
-                                    ros::Time start = ros::Time::now();
-                                    std::cout<<"11 publish"<<std::endl;
-                                    while(ros::Time::now()-start < ros::Duration(4.0)){
-                                        velocity.publish(decision);
-                                    }
-                                }
-                            }
-                            else{//deal with bumper event
-                                std::cout<<"bumper event"<<std::endl;
-                                decision.linear.x = -0.2;
-                                decision.angular.z = 0;
-                                ros::Time start = ros::Time::now();
-                                std::cout<<"12 publish"<<std::endl;
-                                while(ros::Time::now()-start < ros::Duration(2.5))
-                                    velocity.publish(decision);
-                                float cur_yaw = yaw;  //current angle value
-                                float target_yaw;
-                                if(which_bumper == 0){  //bumper on the left
-                                    target_yaw = cur_yaw-pi/4 < (-pi) ? (2*pi+cur_yaw-pi/4) : (cur_yaw - pi/4);
-                                    if(target_yaw < -pi+0.02)
-                                        target_yaw = pi;
-                                    decision.linear.x = 0.0;
-                                    decision.angular.z = 0.15;
-                                    std::cout<<"13 publish"<<std::endl;
-                                    while(yaw > target_yaw)
-                                        velocity.publish(decision);
-                                }
-                                else if(which_bumper == 1){  //bumper in the middle
-                                    target_yaw = cur_yaw+pi/2 > pi ? (cur_yaw-1.5*pi) : (cur_yaw+pi/2);
-                                    if(target_yaw > pi-0.02)
-                                        target_yaw = -pi;
-                                    decision.linear.x = 0.0;
-                                    decision.angular.z = 0.15; 
-                                    std::cout<<"14 publish"<<std::endl;
-                                    while (yaw<target_yaw){
-                                        velocity.publish(decision);
-                                    }   
-                                }
-                                else{ //which_bumper == 2  bumper on the right
-                                    target_yaw = cur_yaw+pi/4 > pi ? (cur_yaw-1.75*pi) : (cur_yaw+pi/4);
-                                    if(target_yaw > pi-0.02)
-                                        target_yaw = pi;
-                                    decision.linear.x = 0.0;
-                                    decision.angular.z = 0.15;
-                                    std::cout<<"15 publish"<<std::endl;
-                                    while(yaw < target_yaw)
-                                        velocity.publish(decision);
-                                }
-                                decision.linear.x = 0.2;
-                                decision.angular.z = 0.0;
-                                start = ros::Time::now();
-                                while(ros::Time::now()-start < ros::Duration(3.0)){
-                                    std::cout<<"16 publish"<<std::endl;
-                                    velocity.publish(decision);
-                                    if(!move_forward)
-                                        break;
-                                }
-                                bump = false;
-                            }
-                        }
-                    }
-                }
-            }
+                battery_is_low_action(time);
+            }*/
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
