@@ -96,30 +96,24 @@ def visualize(frame_num, complex_dft_result, result_magnititude):
     #Also I need to build up the range for drawing functions
     X_value = np.arange(x) 
     Y_value = np.arange(y) 
-    # plt.ion()
-    # fig = plt.figure()
-    # ax = fig.gca(projection='3d')
-    i_index = int(frame_num)/(40)
-    j_index = int(frame_num)%(40) 
-    # print i_index
-    # print j_index
+
+    # i_index = int(frame_num)/(40)
+    # j_index = int(frame_num)%(40) 
+
+    #A different direction of orders
+    i_index = int(frame_num)/x
+    j_index = int(frame_num)%x
+    print i_index
+    print j_index
 
 
-    # Reverse order version
+    # Reverse order version from 
     # i_index = int(frame_num)/(x/2)
     # j_index = 19-int(frame_num)%(y/2) 
-    # print i_index
-    # print j_index
 
 
 
     
-    # if i_index != 0 or j_index != 0:
-        # surf.remove()
-    # if i_index >= 2:
-        # print "fuck"
-        # anim.event_source.stop()
-        # return fig  
 
     if surf != None:
         surf.remove()
