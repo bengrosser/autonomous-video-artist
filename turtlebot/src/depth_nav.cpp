@@ -5,6 +5,8 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
@@ -14,8 +16,13 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <kobuki_msgs/AutoDockingAction.h>
+#include <signal.h>
+#include <thread>
+#include <chrono>
 
 using namespace std;
+using namespace cv;
+namespace enc = sensor_msgs::image_encodings;
 
 static const uint8_t MAX_BATTERY = 162;
 static const long minute = 60;
@@ -23,6 +30,12 @@ static const long hour = 3600; //minute*60
 static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
+
+void my_handler(int s){
+    printf("The program is killed");
+    cv::destroyAllWindows();
+    exit(1);
+}
 
 //for the angular velocity, positive means counterclockwise, negative means clockwise
 //for the bumper, 0: on the left, 1: in the middle, 2: on the right 
@@ -52,13 +65,20 @@ class AutoNav
         float roll;
         float pitch;
         float yaw;
+        struct sigaction sigIntHandler;
 
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
-            ros::MultiThreadedSpinner threads(6);
+            //signal handler
+            /*sigIntHandler.sa_handler = my_handler;
+            sigemptyset(&sigIntHandler.sa_mask);
+            sigIntHandler.sa_flags = 0;
+            sigaction(SIGINT, &sigIntHandler, NULL);*/
+
+            ros::MultiThreadedSpinner threads(7);
             //create a thread for vision detection
             //subscribe the compressed depth image 
             image_transport::ImageTransport it(node);
@@ -76,14 +96,56 @@ class AutoNav
             ros::Timer sysInfo=node.createTimer(ros::Duration(1), &AutoNav::sysInfo, this);
             //create a thread for automatic charging with docking station
             ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::autoCharging, this);
+            //create a thread for preliminary analysis of the rgb camera image
+            ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
 
+        //helper function for preAnalysis function
+        unsigned int count_bits(int n){
+            int count = 0;
+            while(n){
+                n &= n-1;
+                count ++;
+            }
+            return count;
+        }
+
+        void preAnalysis(const sensor_msgs::ImageConstPtr& msg){
+            cv_bridge::CvImageConstPtr cv_ptr;
+            try{
+                if(enc::isColor(msg->encoding))
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::BGR8);
+                else
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
+                cv::Mat rgb_img = cv_ptr->image;
+                cv::imshow("view", rgb_img);
+                cv::Mat gray_img;
+                cv::cvtColor(rgb_img, gray_img, COLOR_BGR2GRAY);
+                int sum = 0;
+                for(int i = 0; i < gray_img.rows; ++i){
+                    for(int j = 0; j < gray_img.cols; ++j){
+                        int gray_intensity = gray_img.at<uint8_t> (i,j);
+                        sum += count_bits(gray_intensity);
+                    }
+                }
+                if(sum % 42 == 0){
+                    printf("it is good\n");
+                }
+                else{
+                    printf("it is bad\n");
+                }
+            } catch (const cv_bridge::Exception& e){
+                ROS_ERROR("cv_bridge exception: %s", e.what());
+            }
+        }
+
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
             //std::cout<<"frontEnv function"<<std::endl;
+            cv_bridge::CvImageConstPtr cv_ptr;
             try{
-                cv_bridge::CvImageConstPtr cv_ptr;
+                //cv_bridge::CvImageConstPtr cv_ptr;
                 cv_ptr = cv_bridge::toCvShare(msg);
                 cv::Mat depth_img;
                 const std::string& enc = msg->encoding;
@@ -156,15 +218,17 @@ class AutoNav
                 OUT_OF_DOCKING_STATION.linear.x = -0.16;
                 OUT_OF_DOCKING_STATION.angular.z = 0.0;
                 ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
-                std::cout<<"the first publish"<<std::endl;
-                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0))  //5.0
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0)){  //5.0
                     velocity.publish(OUT_OF_DOCKING_STATION);
+                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                }
                 OUT_OF_DOCKING_STATION.linear.x = 0.0;
                 OUT_OF_DOCKING_STATION.angular.z = 1.0;
                 OUT_OF_DOCKING_TIME = ros::Time::now();
-                std::cout<<"the second publish"<<std::endl;
-                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6))    //3.5
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6)){    //3.5
                     velocity.publish(OUT_OF_DOCKING_STATION);   //yaw value increase
+                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                }
                 leave_docking_station = false;
             }
         }
@@ -181,9 +245,9 @@ class AutoNav
                     decision.linear.x = -DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
-                    std::cout<<"the third publish"<<std::endl;
-                    while(ros::Time::now() - start < ros::Duration(5.0)){
+                    while(ros::Time::now() - start < ros::Duration(5.0)){             
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
                     }
                     //choose right and left by bumper
                     int direction = 1;
@@ -203,9 +267,9 @@ class AutoNav
                     decision.angular.z = DRIVE_ANGULARSPEED*direction;
                     decision.linear.x = 0;
                     start = ros::Time::now();
-                    std::cout<<"the forth publish"<<std::endl;
                     while(ros::Time::now() - start < ros::Duration(3.0)){
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
                     }
                 }
                 bump = false;
@@ -214,8 +278,10 @@ class AutoNav
                 if(move_forward){
                     decision.linear.x = DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
-                    if(DRIVE)
+                    if(DRIVE){
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                    }
                 }
                 else{
                     if(go_right)
@@ -224,8 +290,10 @@ class AutoNav
                         decision.angular.z = -DRIVE_ANGULARSPEED;
 
                     if(DRIVE){
-                        while(!move_forward)
+                        while(!move_forward){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                        }
                     }
                 }
 
@@ -270,8 +338,10 @@ class AutoNav
                     angle = pi;
                 decision.linear.x = 0;
                 decision.angular.z = 0.4;
-                while(abs(yaw-angle) > 0.02)
+                while(abs(yaw-angle) > 0.02){
                     velocity.publish(decision);
+                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                }
                 decision.linear.x = 0.2;
                 decision.angular.z = 0;
                 if(!bump){
@@ -281,6 +351,7 @@ class AutoNav
                     decision.angular.z = 0;
                     while(move_forward && !near_docking_station && !bump){
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
                         if(ros::Time::now()-rightnow>=ros::Duration(10.0))
                             break;
                     }
@@ -292,12 +363,14 @@ class AutoNav
                         decision.linear.x = 0;
                         while(!move_forward){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
                         }
                         decision.linear.x = 0.15;
                         decision.angular.z = 0;
                         ros::Time start = ros::Time::now();                                   
                         while(ros::Time::now()-start < ros::Duration(4.0)){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
                         }
                     }
                 }
@@ -306,8 +379,10 @@ class AutoNav
                     decision.linear.x = -0.2;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
-                    while(ros::Time::now()-start < ros::Duration(2.5))
+                    while(ros::Time::now()-start < ros::Duration(2.5)){
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                    }
                     float cur_yaw = yaw;
                     float target_yaw;
                     if(which_bumper == 0){
@@ -316,8 +391,10 @@ class AutoNav
                                target_yaw = pi;
                         decision.linear.x = 0.0;
                         decision.angular.z = 0.15;                                    
-                        while(yaw > target_yaw)
+                        while(yaw > target_yaw){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                        }
                     }
                     else if(which_bumper == 1){
                         target_yaw = cur_yaw+pi/2 > pi ? (cur_yaw-1.5*pi) : (cur_yaw+pi/2);
@@ -327,6 +404,7 @@ class AutoNav
                         decision.angular.z = 0.15; 
                         while (yaw<target_yaw){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
                         }
                     }
                     else{
@@ -335,14 +413,17 @@ class AutoNav
                             target_yaw = pi;
                         decision.linear.x = 0.0;
                         decision.angular.z = 0.15;
-                        while(yaw < target_yaw)
+                        while(yaw < target_yaw){
                             velocity.publish(decision);
+                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                        }
                     }
                     decision.linear.x = 0.2;
                     decision.angular.z = 0.0;
                     start = ros::Time::now();
                     while(ros::Time::now()-start < ros::Duration(3.0)){
                         velocity.publish(decision);
+                        std::this_thread::sleep_for (std::chrono::seconds(1));
                         if(!move_forward)
                             break;
                     }
@@ -479,13 +560,14 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", true); //For debugging, always set to true
+    node.setParam("drive", false); //For debugging, always set to true
 
-    AutoNav turtlebot(node); 
+    AutoNav turtlebot(node);
 
     //clean up
     node.deleteParam("drive_linearspeed");
     node.deleteParam("drive_angularspeed");
     node.deleteParam("drive");
+
     return 0;
 }
