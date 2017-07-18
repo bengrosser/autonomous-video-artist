@@ -15,6 +15,9 @@ import matplotlib.animation as animation
 from matplotlib.collections import PolyCollection
 import time
 import sys
+from scikits.audiolab import Sndfile
+from scikits.audiolab import wavread 
+
 
 # img = np.zeros((300,300,3), np.uint8)
 # cv2.rectangle(img,(55,55),(105,105),(255,255,255),-1)
@@ -80,8 +83,31 @@ def synthesis(x_freq, y_freq, complex_a, complex_b, row_size, col_size, complex_
     
 
 def visualize(frame_num, frame_count, camera):
-    print frame_num, frame_count
+    global audio_data
+    global audio_progress_indicator
+    global sound_frame_per_vid_frame
+    global max_audio_data
+    global min_audio_data
     
+    audio_length = audio_data.shape[0]
+    if audio_progress_indicator >= audio_length:
+        print "already consumed all the audio file"
+        return
+    sample_audio_data = audio_data[audio_progress_indicator:(audio_progress_indicator+sound_frame_per_vid_frame)]
+    sample_value = max(sample_audio_data)
+    if sample_value < 0:
+        sample_value = (float(sample_value)/min_audio_data)*500
+    else:
+        sample_value = (float(sample_value)/max_audio_data)*500
+
+    if sample_value < 1:
+        print "Need to change the scale if I appear so many fucking times"
+        sample_value = 1
+    audio_progress_indicator += sound_frame_per_vid_frame
+    frame_num = int(sample_value)
+    print frame_num, frame_count
+
+
     grabbed, frame = camera.read()
     if grabbed:
         # cv2.imshow("the result", frame)
@@ -107,8 +133,8 @@ def visualize(frame_num, frame_count, camera):
     if surf != None:
         surf.remove()
     # print frame_num
-    frame_num = frame_num % 500
-    print frame_num
+    # frame_num = frame_num % 500
+    # print frame_num
     for i in range(frame_num):
         i_index = int(i)/20
         j_index = int(i)%20 
@@ -158,20 +184,24 @@ frame_count = int(camera.get(cv2.CAP_PROP_FRAME_COUNT))
 frame_rate = 24 
 resolution = (142, 60)
 
+audio_data, fs, enc = wavread("source_audio.wav")
+#I am gonna use just a single channel 
+audio_data = audio_data[:,1]
+max_audio_data = max(audio_data)
+min_audio_data = min(audio_data)
+sound_frame_count = audio_data.shape[0]
+sound_frame_per_vid_frame = sound_frame_count/frame_count
+#To store the current progress of reading audio file
+audio_progress_indicator = 0
+
 
 FFwriter = animation.FFMpegFileWriter(bitrate = 5000000)
 anim = animation.FuncAnimation(fig, visualize, fargs=(frame_count, camera),
                                    interval=150, blit=False, repeat_delay=0,frames=frame_count, repeat=False)
-result_name = video_name[0:-4] + "_period"+ "_" +str(azim_value)+"_"+str(elev_value)+".mp4"
-plt.show()
+result_name = video_name[0:-4] + "_sound"+ "_" +str(azim_value)+"_"+str(elev_value)+".mp4"
+# plt.show()
 start_time = time.time()
-# anim.save(result_name, fps=24)
+anim.save(result_name, fps=24)
 end_time = time.time()
 print "it takes " , end_time - start_time ," to finish"
-
-
-
-
-
-
 
