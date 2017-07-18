@@ -33,7 +33,8 @@ def create_grid_flip(img):
     img_left = cv2.bitwise_or(img_hori, grid)
     img_right = cv2.flip(img_left, 1)
     result_image = cv2.bitwise_or(img_left, img_right)
-    cv2.imwrite("canvas_testing.jpg", result_image)
+    return result_image
+    # cv2.imwrite("canvas_testing.jpg", result_image)
 
 
 
@@ -44,14 +45,15 @@ def create_grid_copy(img):
     grid[0:row_size, col_size:(2*col_size)] = img
     grid[row_size:2*row_size, 0:col_size] = img
     grid[row_size:(2*row_size), col_size:(2*col_size)] = img
-    cv2.imwrite("canvas_testing.jpg", grid)
+    return grid
+    # cv2.imwrite("canvas_testing.jpg", grid)
     
 
 '''
 I am going to use cv2 version here to since it has both of the values
 '''
-def fft():
-    img = cv2.imread('./canvas_testing.jpg', 0)
+def fft(img):
+    # img = cv2.imread('./canvas_testing.jpg', 0)
     # img = cv2.imread('./canvas_testing.jpg', 0)
     x,y = img.shape
     #This dft has all the values we need for the recovery of the photo, I hope
@@ -61,7 +63,7 @@ def fft():
     result_magnititude = 20*np.log(cv2.magnitude(dft[:,:,0],dft[:,:,1]))
     result_magnititude = np.uint8(result_magnititude)
     result_color_magnititude = cv2.cvtColor(result_magnititude, cv2.COLOR_GRAY2RGB)
-    cv2.imwrite("wc_frequency_magnitude.jpg", result_color_magnititude)
+    # cv2.imwrite("wc_frequency_magnitude.jpg", result_color_magnititude)
     return dft, result_magnititude
 
 
@@ -78,6 +80,8 @@ def synthesis(x_freq, y_freq, complex_a, complex_b, row_size, col_size, complex_
     
 
 def visualize(frame_num, frame_count, camera):
+    print frame_num, frame_count
+    
     grabbed, frame = camera.read()
     if grabbed:
         # cv2.imshow("the result", frame)
@@ -88,8 +92,8 @@ def visualize(frame_num, frame_count, camera):
         return
     
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    create_grid_flip(img)
-    complex_dft_result,result_magnititude = fft()
+    grid_result = create_grid_flip(img)
+    complex_dft_result,result_magnititude = fft(grid_result)
     x,y,_ = complex_dft_result.shape
     Z_value = np.zeros((y,x))
 
@@ -102,6 +106,8 @@ def visualize(frame_num, frame_count, camera):
 
     if surf != None:
         surf.remove()
+    # print frame_num
+    frame_num = frame_num % 500
     print frame_num
     for i in range(frame_num):
         i_index = int(i)/20
@@ -131,6 +137,8 @@ def visualize(frame_num, frame_count, camera):
     Y_row, Y_col = Y_value.shape
     Z_row, Z_col = Z_value.shape
     surf = ax.plot_surface(X_value[0:(X_row/2),0:(X_col/2)], Y_value[0:(Y_row/2),0:(Y_col/2)], to_show[0:(Z_row/2),0:(Z_col/2)], cmap=cm.coolwarm,linewidth=0, antialiased=False)
+    # surf = ax.plot_wireframe(X_value[0:(X_row/2),0:(X_col/2)], Y_value[0:(Y_row/2),0:(Y_col/2)], to_show[0:(Z_row/2),0:(Z_col/2)],antialiased=False)
+
     return fig 
 
 
@@ -146,7 +154,7 @@ elev_value = int(sys.argv[2])
 ax.view_init(azim=azim_value, elev=elev_value)
 
 camera = cv2.VideoCapture(video_name)
-frame_count = int(camera.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
+frame_count = int(camera.get(cv2.CAP_PROP_FRAME_COUNT))
 frame_rate = 24 
 resolution = (142, 60)
 
@@ -154,9 +162,13 @@ resolution = (142, 60)
 FFwriter = animation.FFMpegFileWriter(bitrate = 5000000)
 anim = animation.FuncAnimation(fig, visualize, fargs=(frame_count, camera),
                                    interval=150, blit=False, repeat_delay=0,frames=frame_count, repeat=False)
-result_name = video_name[0:-4] + "_" +str(azim_value)+"_"+str(elev_value)+".mp4"
-# plt.show()
-anim.save(result_name)
+result_name = video_name[0:-4] + "_period"+ "_" +str(azim_value)+"_"+str(elev_value)+".mp4"
+plt.show()
+start_time = time.time()
+# anim.save(result_name, fps=24)
+end_time = time.time()
+print "it takes " , end_time - start_time ," to finish"
+
 
 
 
