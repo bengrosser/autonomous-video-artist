@@ -56,7 +56,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             ros::MultiThreadedSpinner threads(6);
             //create a thread for vision detection
@@ -243,15 +243,17 @@ class AutoNav
                 while(!client.waitForResult(ros::Duration(3))){
                     dock_state = client.getState();
                     ROS_INFO("Docking status: %s", dock_state.toString().c_str());
-                        
-                    if(ros::Time::now() > (time+ros::Duration(500))){
+                    in_charging = true;    
+                    if(ros::Time::now() > (time+ros::Duration(50))){
                         //Give it 500 seconds, or we say that auto docking fail.
-                        ROS_INFO("Docking took more than 500 seconds, canceling.");
+                        ROS_INFO("Docking took more than 50 seconds, canceling.");
                         client.cancelGoal();
+                        in_charging = false;
+                        //near_docking_station = false;   //test, not able to see the performance
                         break;
                     }
                 }
-                in_charging = true;
+                //in_charging = true;
             }
         }
 
@@ -273,6 +275,7 @@ class AutoNav
                 decision.linear.x = 0.2;
                 decision.angular.z = 0;
                 if(!bump){
+                    std::cout<<"No bumper event"<<std::endl;
                     ros::Time rightnow = ros::Time::now();
                     decision.linear.x = 0.15;
                     decision.angular.z = 0;
@@ -299,6 +302,7 @@ class AutoNav
                     }
                 }
                 else{//deal with bumper event
+                    std::cout<<"bumper event"<<std::endl;
                     decision.linear.x = -0.2;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
@@ -349,21 +353,27 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time)
         {
-            battery_is_good_action(time);
+            //battery_is_good_action(time);
             //std::cout<<"pilot"<<std::endl;
-            /*if(leave_docking_station){ //
+            if(leave_docking_station){ //
                 leave_station_action(time);
             }
             else if(battery_is_low == false){
                 battery_is_good_action(time);
             }
             else if(near_docking_station){
+                std::cout<<"auto docking"<<std::endl;
                 auto_docking_action(time);
             }
             else{
                 //battery is low (navigate to the docking station)
+                std::cout<<"move to docking station"<<std::endl;
+                ros::Time start = ros::Time::now();
+                while(ros::Time::now()-start < ros::Duration(5.0)){
+                    //do nothing, just to waste the time
+                }
                 battery_is_low_action(time);
-            }*/
+            }
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){

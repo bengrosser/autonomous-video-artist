@@ -66,7 +66,13 @@ On PC:
 
     To run the automatic navigation with depth image (Please make sure that compressedDepth image_transport plugin is installed on your system):
 
-        $ rosrun turtlebot depth_nav _image_transport:=compressedDepth
+        Open a terminal on the PC, run:
+
+            $ roslaunch kobuki_auto_docking minimal.launch --screen
+
+        Then open another terminal tab on the PC, run:
+
+            $ rosrun turtlebot depth_nav _image_transport:=compressedDepth
 
     To run the auto charging code:
        
@@ -74,7 +80,7 @@ On PC:
 
             $ roslaunch kobuki_auto_docking minimal.launch --screen
 
-        Then open another terminal tab, run:
+        Then open another terminal tab on the PC, run:
 
             $ rosrun turtlebot charging
 
