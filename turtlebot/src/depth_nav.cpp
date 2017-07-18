@@ -131,10 +131,10 @@ class AutoNav
                     }
                 }
                 if(sum % 42 == 0){
-                    printf("it is good\n");
+                    //printf("it is good\n");
                 }
                 else{
-                    printf("it is bad\n");
+                    //printf("it is bad\n");
                 }
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
@@ -220,14 +220,14 @@ class AutoNav
                 ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
                 while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0)){  //5.0
                     velocity.publish(OUT_OF_DOCKING_STATION);
-                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }
                 OUT_OF_DOCKING_STATION.linear.x = 0.0;
                 OUT_OF_DOCKING_STATION.angular.z = 1.0;
                 OUT_OF_DOCKING_TIME = ros::Time::now();
                 while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(3.6)){    //3.5
                     velocity.publish(OUT_OF_DOCKING_STATION);   //yaw value increase
-                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }
                 leave_docking_station = false;
             }
@@ -247,7 +247,7 @@ class AutoNav
                     ros::Time start = ros::Time::now();
                     while(ros::Time::now() - start < ros::Duration(5.0)){             
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                     }
                     //choose right and left by bumper
                     int direction = 1;
@@ -261,6 +261,7 @@ class AutoNav
                     else if(which_bumper == 0){
                         direction = -1;
                     }
+
                     else{
                         direction = 1;
                     }
@@ -269,7 +270,7 @@ class AutoNav
                     start = ros::Time::now();
                     while(ros::Time::now() - start < ros::Duration(3.0)){
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                     }
                 }
                 bump = false;
@@ -280,7 +281,7 @@ class AutoNav
                     decision.angular.z = 0;
                     if(DRIVE){
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                     }
                 }
                 else{
@@ -292,7 +293,7 @@ class AutoNav
                     if(DRIVE){
                         while(!move_forward){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
                 }
@@ -340,7 +341,7 @@ class AutoNav
                 decision.angular.z = 0.4;
                 while(abs(yaw-angle) > 0.02){
                     velocity.publish(decision);
-                    std::this_thread::sleep_for (std::chrono::seconds(1));
+                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }
                 decision.linear.x = 0.2;
                 decision.angular.z = 0;
@@ -351,7 +352,7 @@ class AutoNav
                     decision.angular.z = 0;
                     while(move_forward && !near_docking_station && !bump){
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         if(ros::Time::now()-rightnow>=ros::Duration(10.0))
                             break;
                     }
@@ -363,14 +364,14 @@ class AutoNav
                         decision.linear.x = 0;
                         while(!move_forward){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                         decision.linear.x = 0.15;
                         decision.angular.z = 0;
                         ros::Time start = ros::Time::now();                                   
                         while(ros::Time::now()-start < ros::Duration(4.0)){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
                 }
@@ -381,7 +382,7 @@ class AutoNav
                     ros::Time start = ros::Time::now();
                     while(ros::Time::now()-start < ros::Duration(2.5)){
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                     }
                     float cur_yaw = yaw;
                     float target_yaw;
@@ -393,7 +394,7 @@ class AutoNav
                         decision.angular.z = 0.15;                                    
                         while(yaw > target_yaw){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
                     else if(which_bumper == 1){
@@ -404,7 +405,7 @@ class AutoNav
                         decision.angular.z = 0.15; 
                         while (yaw<target_yaw){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
                     else{
@@ -415,7 +416,7 @@ class AutoNav
                         decision.angular.z = 0.15;
                         while(yaw < target_yaw){
                             velocity.publish(decision);
-                            std::this_thread::sleep_for (std::chrono::seconds(1));
+                            std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
                     decision.linear.x = 0.2;
@@ -423,7 +424,7 @@ class AutoNav
                     start = ros::Time::now();
                     while(ros::Time::now()-start < ros::Duration(3.0)){
                         velocity.publish(decision);
-                        std::this_thread::sleep_for (std::chrono::seconds(1));
+                        std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         if(!move_forward)
                             break;
                     }
@@ -560,7 +561,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", false); //For debugging, always set to true
+    node.setParam("drive", true); //For debugging, always set to true
 
     AutoNav turtlebot(node);
 
