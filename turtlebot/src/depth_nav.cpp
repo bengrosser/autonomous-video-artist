@@ -6,7 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
@@ -31,6 +31,7 @@ static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
 
+//This is a signal handler to elegantly exit the process and close all the image windows
 void my_handler(int s){
     printf("The program is killed");
     cv::destroyAllWindows();
@@ -70,7 +71,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 1000)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             //signal handler
             /*sigIntHandler.sa_handler = my_handler;
@@ -93,13 +94,35 @@ class AutoNav
             //create a thread for battery information
             ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 10, &AutoNav::battery, this);
             //create a thread for system information
-            ros::Timer sysInfo=node.createTimer(ros::Duration(1), &AutoNav::sysInfo, this);
+            ros::Timer sysInfo=node.createTimer(ros::Duration(60), &AutoNav::sysInfo, this);
             //create a thread for automatic charging with docking station
             ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::autoCharging, this);
             //create a thread for preliminary analysis of the rgb camera image
             ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
+        }
+
+        void videoCapture(ros::Duration d){
+            VideoCapture vcap(0);
+            if(!vcap.isOpened()){
+                cout<<"Erros openning the webcam"<<endl;
+                return;
+            }
+            int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
+            int frame_height = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
+            VideoWriter video("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), 10, Size(frame_width, frame_height), true);
+            
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now() - start <= d){
+            //for(;;){
+                Mat frame;
+                vcap >> frame;
+                video.write(frame);
+                imshow("Frame", frame);
+                char c = (char)waitKey(33);
+                if(c == 27) break;
+            }
         }
 
         //helper function for preAnalysis function
@@ -113,7 +136,7 @@ class AutoNav
         }
 
         void preAnalysis(const sensor_msgs::ImageConstPtr& msg){
-            cv_bridge::CvImageConstPtr cv_ptr;
+            /*cv_bridge::CvImageConstPtr cv_ptr;
             try{
                 if(enc::isColor(msg->encoding))
                     cv_ptr = cv_bridge::toCvShare(msg, enc::BGR8);
@@ -138,7 +161,8 @@ class AutoNav
                 }
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
-            }
+            }*/
+            videoCapture(ros::Duration(5.0));
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
@@ -509,9 +533,9 @@ class AutoNav
             struct sysinfo si;
             sysinfo(&si);
             ros::Time start = ros::Time::now();
-            while(ros::Time::now()-start < ros::Duration(60.0)){
+            /*while(ros::Time::now()-start < ros::Duration(60.0)){
                 //do nothing, print the system information once a minute
-            }
+            }*/
             printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
@@ -561,7 +585,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", true); //For debugging, always set to true
+    node.setParam("drive", false); //For debugging, always set to true
 
     AutoNav turtlebot(node);
 
