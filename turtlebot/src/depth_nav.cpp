@@ -6,7 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
