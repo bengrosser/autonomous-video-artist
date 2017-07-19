@@ -30,12 +30,40 @@ static const long hour = 3600; //minute*60
 static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
+int video_idx;
 
 //This is a signal handler to elegantly exit the process and close all the image windows
 void my_handler(int s){
     printf("The program is killed");
     cv::destroyAllWindows();
     exit(1);
+}
+
+void videoCapture(double duration){
+    VideoCapture vcap(0);
+    if(!vcap.isOpened()){
+        cout<<"Erros openning video stream or file"<<endl;
+        return;
+    }
+    int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
+    int frame_height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    string output_file = "output"+to_string(video_idx)+".avi";
+    VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),10, Size(frame_width, frame_height), true);
+   
+    time_t start = time(NULL);
+    while(difftime(time(NULL), start) < duration){
+        double elapsed = difftime(time(NULL), start);
+        std::cout<<"How long is the time elapsed: "<<elapsed<<std::endl;
+        Mat frame;
+        vcap >> frame;
+        video.write(frame);
+        imshow("Frame", frame);
+        char c = (char)waitKey(33);
+        if(c == 27) break;
+    }
+    vcap.release();
+    video.release();
+    ++video_idx;
 }
 
 //for the angular velocity, positive means counterclockwise, negative means clockwise
@@ -78,13 +106,14 @@ class AutoNav
             sigemptyset(&sigIntHandler.sa_mask);
             sigIntHandler.sa_flags = 0;
             sigaction(SIGINT, &sigIntHandler, NULL);*/
-
+            //videoCapture(15.0);
             ros::MultiThreadedSpinner threads(7);
             //create a thread for vision detection
             //subscribe the compressed depth image 
             image_transport::ImageTransport it(node);
             image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image",1, &AutoNav::frontEnv, this);
             //ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
+            
             //create a thread to control the base 
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
@@ -103,7 +132,8 @@ class AutoNav
             threads.spin();
         }
 
-        void videoCapture(ros::Duration d){
+        /*void videoCapture(double duration){
+            cout<<"in videoCapture"<<endl;
             VideoCapture vcap(0);
             if(!vcap.isOpened()){
                 cout<<"Erros openning the webcam"<<endl;
@@ -111,11 +141,15 @@ class AutoNav
             }
             int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
             int frame_height = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
-            VideoWriter video("out.avi", CV_FOURCC('M', 'J', 'P', 'G'), 10, Size(frame_width, frame_height), true);
             
-            ros::Time start = ros::Time::now();
-            while(ros::Time::now() - start <= d){
+            string output_file = "output"+to_string(video_idx)+".avi";
+            VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),10, Size(frame_width, frame_height), true);
+            
+            namedWindow("Frame", 1);
+            time_t start = time(NULL);
+            while(difftime(time(NULL), start) < duration){
             //for(;;){
+                std::cout<<"time elapsed: "<<difftime(time(NULL),start)<<endl;
                 Mat frame;
                 vcap >> frame;
                 video.write(frame);
@@ -123,7 +157,12 @@ class AutoNav
                 char c = (char)waitKey(33);
                 if(c == 27) break;
             }
-        }
+            vcap.release();
+            video.release();
+            ++video_idx;
+            std::cout<<"return from videoCapture"<<std::endl;
+            return;
+        }*/
 
         //helper function for preAnalysis function
         unsigned int count_bits(int n){
@@ -133,9 +172,10 @@ class AutoNav
                 count ++;
             }
             return count;
-        }
+        } 
 
         void preAnalysis(const sensor_msgs::ImageConstPtr& msg){
+            cout<<"preAnalysis"<<endl;
             /*cv_bridge::CvImageConstPtr cv_ptr;
             try{
                 if(enc::isColor(msg->encoding))
@@ -162,7 +202,7 @@ class AutoNav
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }*/
-            videoCapture(ros::Duration(5.0));
+            videoCapture(10.0);
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
@@ -577,6 +617,8 @@ class AutoNav
             yaw = std::atan2(t3, t4);
         }
 };
+
+
 
 int main(int argc, char** argv){
     ros::init(argc, argv, "navigation");
