@@ -31,12 +31,13 @@ static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
 int video_idx;
+bool shutdown;
 
 //This is a signal handler to elegantly exit the process and close all the image windows
-void my_handler(int s){
-    printf("The program is killed");
+void my_handler(int sig){
+    shutdown = true;
+    ros::shutdown();
     cv::destroyAllWindows();
-    exit(1);
 }
 
 void videoCapture(double duration){
@@ -51,7 +52,7 @@ void videoCapture(double duration){
     VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),10, Size(frame_width, frame_height), true);
    
     time_t start = time(NULL);
-    while(difftime(time(NULL), start) < duration){
+    while(difftime(time(NULL), start) < duration && !shutdown){
         double elapsed = difftime(time(NULL), start);
         std::cout<<"How long is the time elapsed: "<<elapsed<<std::endl;
         Mat frame;
@@ -94,19 +95,22 @@ class AutoNav
         float roll;
         float pitch;
         float yaw;
-        struct sigaction sigIntHandler;
+        //struct sigaction sigIntHandler;
 
 
     public:
         //constructor
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
+            shutdown = false;
             //signal handler
             /*sigIntHandler.sa_handler = my_handler;
             sigemptyset(&sigIntHandler.sa_mask);
             sigIntHandler.sa_flags = 0;
             sigaction(SIGINT, &sigIntHandler, NULL);*/
-            //videoCapture(15.0);
+            signal(SIGINT, my_handler);
+
+
             ros::MultiThreadedSpinner threads(7);
             //create a thread for vision detection
             //subscribe the compressed depth image 
@@ -131,38 +135,6 @@ class AutoNav
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
-
-        /*void videoCapture(double duration){
-            cout<<"in videoCapture"<<endl;
-            VideoCapture vcap(0);
-            if(!vcap.isOpened()){
-                cout<<"Erros openning the webcam"<<endl;
-                return;
-            }
-            int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
-            int frame_height = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
-            
-            string output_file = "output"+to_string(video_idx)+".avi";
-            VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),10, Size(frame_width, frame_height), true);
-            
-            namedWindow("Frame", 1);
-            time_t start = time(NULL);
-            while(difftime(time(NULL), start) < duration){
-            //for(;;){
-                std::cout<<"time elapsed: "<<difftime(time(NULL),start)<<endl;
-                Mat frame;
-                vcap >> frame;
-                video.write(frame);
-                imshow("Frame", frame);
-                char c = (char)waitKey(33);
-                if(c == 27) break;
-            }
-            vcap.release();
-            video.release();
-            ++video_idx;
-            std::cout<<"return from videoCapture"<<std::endl;
-            return;
-        }*/
 
         //helper function for preAnalysis function
         unsigned int count_bits(int n){
@@ -209,7 +181,6 @@ class AutoNav
             //std::cout<<"frontEnv function"<<std::endl;
             cv_bridge::CvImageConstPtr cv_ptr;
             try{
-                //cv_bridge::CvImageConstPtr cv_ptr;
                 cv_ptr = cv_bridge::toCvShare(msg);
                 cv::Mat depth_img;
                 const std::string& enc = msg->encoding;
