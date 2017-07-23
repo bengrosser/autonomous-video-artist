@@ -49,12 +49,12 @@ void videoCapture(double duration){
     int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
     int frame_height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
     string output_file = "output"+to_string(video_idx)+".avi";
-    VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),10, Size(frame_width, frame_height), true);
+    VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),22, Size(frame_width, frame_height), true);
    
     time_t start = time(NULL);
     while(difftime(time(NULL), start) < duration && !shutdown){
         double elapsed = difftime(time(NULL), start);
-        std::cout<<"How long is the time elapsed: "<<elapsed<<std::endl;
+        //std::cout<<"How long is the time elapsed: "<<elapsed<<std::endl;
         Mat frame;
         vcap >> frame;
         video.write(frame);
@@ -86,6 +86,7 @@ class AutoNav
         bool near_docking_station;
         bool leave_docking_station;
         bool avoid_from_right;   
+        bool acc_speed;
         double near_docking_station_x;
         double near_docking_station_y;
         double docking_station_x;
@@ -100,9 +101,10 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(true), battery_is_full(false), near_docking_station(false), in_charging(false), leave_docking_station(false), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_speed(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             shutdown = false;
+
             //signal handler
             /*sigIntHandler.sa_handler = my_handler;
             sigemptyset(&sigIntHandler.sa_mask);
@@ -122,8 +124,6 @@ class AutoNav
             ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
             //create a thread to detect bumper event
             ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",10, &AutoNav::bumperCommand, this);
-            //create a thread to record the position
-            //ros::Subscriber position=node.subscribe("/odom", 1000, &AutoNav::position, this);
             //create a thread for battery information
             ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 10, &AutoNav::battery, this);
             //create a thread for system information
@@ -147,7 +147,7 @@ class AutoNav
         } 
 
         void preAnalysis(const sensor_msgs::ImageConstPtr& msg){
-            cout<<"preAnalysis"<<endl;
+            //cout<<"preAnalysis"<<endl;
             /*cv_bridge::CvImageConstPtr cv_ptr;
             try{
                 if(enc::isColor(msg->encoding))
@@ -174,7 +174,7 @@ class AutoNav
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }*/
-            videoCapture(10.0);
+            //videoCapture(10.0);
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
@@ -245,15 +245,50 @@ class AutoNav
             }
         }
         
+        //A helper function, accelerate the speed to target_velocity in the duration time
+        //Duration needs to be an integer
+        void accelerate(const ros::TimerEvent& time, double target_velocity, double duration){
+            geometry_msgs::Twist acc_velocity;
+            acc_velocity.linear.x = 0.0;
+            acc_velocity.angular.z = 0.0;
+            double acc = target_velocity/duration;
+            double i;
+            for(i = 1.0; i < duration; ++i){
+                ros::Time current_time = ros::Time::now();
+                acc_velocity.linear.x += acc;
+                if(!move_forward)
+                    break;
+                while(ros::Time::now() - current_time <= ros::Duration(1.0)){
+                    velocity.publish(acc_velocity);
+                }
+            }
+            acc_velocity.linear.x = target_velocity;
+            ros::Time current_time = ros::Time::now();
+            while(ros::Time::now() - current_time <= ros::Duration(1.0) && move_forward)
+                velocity.publish(acc_velocity);
+            leave_docking_station = false;
+        }
+
         void leave_station_action(const ros::TimerEvent& time){
             bool DRIVE;
             node.getParamCached("drive", DRIVE);
             if(DRIVE){
+                accelerate(time, -0.16, 5.0);
                 geometry_msgs::Twist OUT_OF_DOCKING_STATION;
                 OUT_OF_DOCKING_STATION.linear.x = -0.16;
+                //OUT_OF_DOCKING_STATION.linear.x = 0.0;
                 OUT_OF_DOCKING_STATION.angular.z = 0.0;
                 ros::Time OUT_OF_DOCKING_TIME = ros::Time::now();
-                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(5.0)){  //5.0
+                //accumulatly accelerate the speed
+                /*while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(4.0)){
+                    OUT_OF_DOCKING_STATION.linear.x = OUT_OF_DOCKING_STATION.linear.x - 0.0005;
+                    std::cout<<"The speed now: "<< OUT_OF_DOCKING_STATION.linear.x<<endl;
+                    velocity.publish(OUT_OF_DOCKING_STATION);
+                    if(OUT_OF_DOCKING_STATION.linear.x <= -0.16)
+                        break;
+                    //std::this_thread::sleep_for (std::chrono::milliseconds(10));
+                }*/
+                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(2.0)){  //5.0
                     velocity.publish(OUT_OF_DOCKING_STATION);
                     std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }
@@ -277,10 +312,11 @@ class AutoNav
             geometry_msgs::Twist decision;
             if(bump){//deal with the bumper info
                 if(DRIVE){
+                    accelerate(time, -DRIVE_LINEARSPEED, 5.0);
                     decision.linear.x = -DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
-                    while(ros::Time::now() - start < ros::Duration(5.0)){             
+                    while(ros::Time::now() - start < ros::Duration(2.0)){             
                         velocity.publish(decision);
                         std::this_thread::sleep_for (std::chrono::milliseconds(10));
                     }
@@ -311,6 +347,10 @@ class AutoNav
                 bump = false;
             }
             else{//bumper is safe
+                if(acc_speed){
+                    accelerate(time, DRIVE_LINEARSPEED, 5.0);
+                    acc_speed = false;
+                }
                 if(move_forward){
                     decision.linear.x = DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
@@ -331,6 +371,7 @@ class AutoNav
                             std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
+                    acc_speed = true;
                 }
 
             }
@@ -470,9 +511,14 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time)
         {
-            //battery_is_good_action(time);
             //std::cout<<"pilot"<<std::endl;
-            if(leave_docking_station){ //
+            if(leave_docking_station){
+                leave_station_action(time);
+            }
+           
+            //battery_is_good_action(time);
+            
+            /*if(leave_docking_station){ //
                 leave_station_action(time);
             }
             else if(battery_is_low == false){
@@ -490,7 +536,7 @@ class AutoNav
                     //do nothing, just to waste the time
                 }
                 battery_is_low_action(time);
-            }
+            }*/
         }
 
         void bumperCommand(const kobuki_msgs::BumperEvent msg){
@@ -598,7 +644,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", false); //For debugging, always set to true
+    node.setParam("drive", true); //For debugging, always set to true
 
     AutoNav turtlebot(node);
 
