@@ -82,6 +82,7 @@ class AutoNav
         bool go_right;  
         bool battery_is_low;
         bool battery_is_full;   //when battery is charged to full, turtlebot should leave docking station
+        bool half_battery;  //when the battery is only 50% and near docking station, auto docking
         bool in_charging;  //this boolean variable means the robot is charging
         bool near_docking_station;
         bool leave_docking_station;
@@ -101,7 +102,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_speed(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), half_battery(false), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_speed(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             shutdown = false;
 
@@ -521,6 +522,9 @@ class AutoNav
             /*if(leave_docking_station){ //
                 leave_station_action(time);
             }
+            else if(half_battery && near_docking_station){
+                auto_docking_action(time);
+            }
             else if(battery_is_low == false){
                 battery_is_good_action(time);
             }
@@ -569,9 +573,9 @@ class AutoNav
                     battery_is_full = false;
                 }
                 //while battery has less than 50% battery, and it is near the docking station, auto docking
-                /*if(percentage < 50){
-                    
-                }*/
+                if(percentage <= 50){
+                    half_battery = true;
+                }
             }
             else{
                 ros::Time start = ros::Time::now();
@@ -580,6 +584,7 @@ class AutoNav
                     battery_is_full = true;
                     in_charging = false;
                     battery_is_low = false;
+                    half_battery = false;
                     near_docking_station = false;
                 }
             }
