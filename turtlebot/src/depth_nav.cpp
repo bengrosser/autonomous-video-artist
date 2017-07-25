@@ -248,33 +248,53 @@ class AutoNav
         
         //A helper function, accelerate the speed to target_velocity in the duration time
         //Duration needs to be an integer
-        void accelerate(const ros::TimerEvent& time, double target_velocity, double duration){
+        void accelerate(const ros::TimerEvent& time, double target_velocity, double duration, double interval){
+            printf("accelerate\n");
             geometry_msgs::Twist acc_velocity;
             acc_velocity.linear.x = 0.0;
             acc_velocity.angular.z = 0.0;
-            double acc = target_velocity/duration;
+            double acc = target_velocity/(duration*(1.0/interval));
             double i;
-            for(i = 1.0; i < duration; ++i){
-                ros::Time current_time = ros::Time::now();
+            for(i = interval; i < duration; i = i+interval){
                 acc_velocity.linear.x += acc;
+                ros::Time current_time = ros::Time::now();
                 if(!move_forward)
                     break;
-                while(ros::Time::now() - current_time <= ros::Duration(1.0)){
+                while(ros::Time::now() - current_time <= ros::Duration(interval)){
                     velocity.publish(acc_velocity);
+                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }
             }
             acc_velocity.linear.x = target_velocity;
             ros::Time current_time = ros::Time::now();
-            while(ros::Time::now() - current_time <= ros::Duration(1.0) && move_forward)
+            while(ros::Time::now() - current_time <= ros::Duration(interval) && move_forward){
                 velocity.publish(acc_velocity);
-            leave_docking_station = false;
+                std::this_thread::sleep_for (std::chrono::milliseconds(10)); 
+            }
+            //leave_docking_station = false;
+        }
+
+        void decelerate(const ros::TimerEvent& time, double start_velocity, double duration, double interval){
+            geometry_msgs::Twist decision;
+            decision.linear.x = 0.0;
+            decision.angular.z = 0.0;
+            double dec = start_velocity/(duration*(1.0/interval));
+            double i;
+            for(i = interval; i < duration; i = i+interval){
+                decision.linear.x -= dec;
+                ros::Time current_time = ros::Time::now();
+                while(ros::Time::now() - current_time <= ros::Duration(interval)){
+                    velocity.publish(decision);
+                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
+                }
+            }            
         }
 
         void leave_station_action(const ros::TimerEvent& time){
             bool DRIVE;
             node.getParamCached("drive", DRIVE);
             if(DRIVE){
-                accelerate(time, -0.16, 5.0);
+                accelerate(time, -0.16, 10.0, 0.01);
                 geometry_msgs::Twist OUT_OF_DOCKING_STATION;
                 OUT_OF_DOCKING_STATION.linear.x = -0.16;
                 //OUT_OF_DOCKING_STATION.linear.x = 0.0;
@@ -289,10 +309,10 @@ class AutoNav
                         break;
                     //std::this_thread::sleep_for (std::chrono::milliseconds(10));
                 }*/
-                while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(2.0)){  //5.0
+                /*while(ros::Time::now() - OUT_OF_DOCKING_TIME < ros::Duration(2.0)){  //5.0
                     velocity.publish(OUT_OF_DOCKING_STATION);
                     std::this_thread::sleep_for (std::chrono::milliseconds(10));
-                }
+                }*/
                 OUT_OF_DOCKING_STATION.linear.x = 0.0;
                 OUT_OF_DOCKING_STATION.angular.z = 1.0;
                 OUT_OF_DOCKING_TIME = ros::Time::now();
@@ -313,7 +333,7 @@ class AutoNav
             geometry_msgs::Twist decision;
             if(bump){//deal with the bumper info
                 if(DRIVE){
-                    accelerate(time, -DRIVE_LINEARSPEED, 5.0);
+                    accelerate(time, -DRIVE_LINEARSPEED, 5.0, 0.01);
                     decision.linear.x = -DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
@@ -349,7 +369,7 @@ class AutoNav
             }
             else{//bumper is safe
                 if(acc_speed){
-                    accelerate(time, DRIVE_LINEARSPEED, 5.0);
+                    accelerate(time, DRIVE_LINEARSPEED, 5.0, 0.01);
                     acc_speed = false;
                 }
                 if(move_forward){
@@ -512,10 +532,23 @@ class AutoNav
 
         void pilot(const ros::TimerEvent& time)
         {
-            //std::cout<<"pilot"<<std::endl;
-            if(leave_docking_station){
-                leave_station_action(time);
+            printf("pilot\n");
+            if(leave_docking_station)
+            accelerate(time, -0.16, 5.0, 0.01);
+            geometry_msgs::Twist decision;
+            decision.linear.x = -0.16;
+            decision.angular.z = 0.0;
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now() - start < ros::Duration(5.0)){
+                velocity.publish(decision);
+                std::this_thread::sleep_for (std::chrono::milliseconds(10));
             }
+                
+            //std::cout<<"pilot"<<std::endl;
+            /*if(leave_docking_station){
+                leave_station_action(time);
+            }*/
+            
            
             //battery_is_good_action(time);
             
@@ -649,7 +682,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", true); //For debugging, always set to true
+    node.setParam("drive", false); //For debugging, always set to true
 
     AutoNav turtlebot(node);
 
