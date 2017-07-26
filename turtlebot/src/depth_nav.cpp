@@ -48,6 +48,8 @@ void videoCapture(double duration){
     }
     int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
     int frame_height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
+    std::cout<<"frame_width: "<<frame_width<<endl;
+    std::cout<<"frame_height: "<<frame_height<<endl;
     string output_file = "output"+to_string(video_idx)+".avi";
     VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),22, Size(frame_width, frame_height), true);
    
@@ -59,8 +61,9 @@ void videoCapture(double duration){
         vcap >> frame;
         video.write(frame);
         imshow("Frame", frame);
-        char c = (char)waitKey(33);
-        if(c == 27) break;
+        waitKey(1);
+        /*char c = (char)waitKey(33);
+        if(c == 27) break;*/
     }
     vcap.release();
     video.release();
@@ -114,7 +117,7 @@ class AutoNav
             signal(SIGINT, my_handler);
 
 
-            ros::MultiThreadedSpinner threads(7);
+            ros::MultiThreadedSpinner threads(9);
             //create a thread for vision detection
             //subscribe the compressed depth image 
             image_transport::ImageTransport it(node);
@@ -133,8 +136,42 @@ class AutoNav
             ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::autoCharging, this);
             //create a thread for preliminary analysis of the rgb camera image
             ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
+            //create a thread for webcam0
+            ros::Subscriber webcam0 = node.subscribe("/webcam0/usb_cam0/image_raw", 1, &AutoNav::webcam0, this);
+            //create a thread for webcam1
+            ros::Subscriber webcam1 = node.subscribe("/webcam1/usb_cam1/image_raw", 1, &AutoNav::webcam1, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
+        }
+
+        void webcam0(const sensor_msgs::ImageConstPtr& msg){
+            cv_bridge::CvImageConstPtr cv_ptr;
+            try{
+                if(enc::isColor(msg->encoding))
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::BGR8);
+                else
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
+                cv::Mat rgb_img = cv_ptr->image;
+                cv::imshow("webcam0", rgb_img);
+                cv::waitKey(1);
+            } catch (const cv_bridge::Exception& e){
+                ROS_ERROR("cv_bridge exception: %s", e.what());
+            }
+        }
+
+        void webcam1(const sensor_msgs::ImageConstPtr& msg){
+            cv_bridge::CvImageConstPtr cv_ptr;
+            try{
+                if(enc::isColor(msg->encoding))
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::BGR8);
+                else
+                    cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
+                cv::Mat rgb_img = cv_ptr->image;
+                cv::imshow("webcam1", rgb_img);
+                cv::waitKey(1);
+            } catch (const cv_bridge::Exception& e){
+                ROS_ERROR("cv_bridge exception: %s", e.what());
+            }
         }
 
         //helper function for preAnalysis function
@@ -148,7 +185,7 @@ class AutoNav
         } 
 
         void preAnalysis(const sensor_msgs::ImageConstPtr& msg){
-            //cout<<"preAnalysis"<<endl;
+            cout<<"preAnalysis"<<endl;
             /*cv_bridge::CvImageConstPtr cv_ptr;
             try{
                 if(enc::isColor(msg->encoding))
@@ -175,7 +212,7 @@ class AutoNav
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }*/
-            //videoCapture(10.0);
+            videoCapture(10.0);
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
@@ -573,7 +610,7 @@ class AutoNav
 
             /*test angular accelerate/decelerate functions
              *Set acc_or_not to true before running this test*/
-            if(acc_or_not){
+            /*if(acc_or_not){
             printf("accelerate\n");
             angular_accelerate(time, 0.5, 5.0);
             printf("keep the speed\n");
@@ -589,7 +626,7 @@ class AutoNav
             angular_decelerate(time, 0.5, 5.0);
             printf("stop\n");
             acc_or_not = false;
-            }
+            }*/
             
 
 
@@ -726,7 +763,7 @@ int main(int argc, char** argv){
     //initial parameter value
     node.setParam("drive_linearspeed",0.07); //Set the linear speed for the turtlebot
     node.setParam("drive_angularspeed",0.18);  //Set the angular spped
-    node.setParam("drive", true); //For debugging, always set to true
+    node.setParam("drive", false); //For debugging, always set to true
 
     AutoNav turtlebot(node);
 
