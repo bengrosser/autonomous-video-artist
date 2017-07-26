@@ -87,7 +87,7 @@ class AutoNav
         bool near_docking_station;
         bool leave_docking_station;
         bool avoid_from_right;   
-        bool acc_speed;
+        bool acc_or_not;
         double near_docking_station_x;
         double near_docking_station_y;
         double docking_station_x;
@@ -102,7 +102,7 @@ class AutoNav
 
     public:
         //constructor
-        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), half_battery(false), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_speed(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
+        AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), half_battery(false), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_or_not(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             shutdown = false;
 
@@ -246,55 +246,49 @@ class AutoNav
             }
         }
         
-        //A helper function, accelerate the speed to target_velocity in the duration time
-        //Duration needs to be an integer
-        void accelerate(const ros::TimerEvent& time, double target_velocity, double duration, double interval){
+        //Funtion to calculate accelerate speed
+        float acc_speed(double target_velocity, double duration, double time_elapsed){
+            return (target_velocity/(duration*duration))*time_elapsed*time_elapsed;
+        }
+
+        void accelerate(const ros::TimerEvent& time, double target_velocity, double duration){
             printf("accelerate\n");
-            geometry_msgs::Twist acc_velocity;
-            acc_velocity.linear.x = 0.0;
-            acc_velocity.angular.z = 0.0;
-            double acc = target_velocity/(duration*(1.0/interval));
-            double i;
-            for(i = interval; i < duration; i = i+interval){
-                acc_velocity.linear.x += acc;
-                ros::Time current_time = ros::Time::now();
-                if(!move_forward)
-                    break;
-                while(ros::Time::now() - current_time <= ros::Duration(interval)){
-                    velocity.publish(acc_velocity);
-                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
-                }
-            }
-            acc_velocity.linear.x = target_velocity;
+            geometry_msgs::Twist decision;
+            decision.linear.x = 0.0;
+            decision.angular.z = 0.0;
             ros::Time current_time = ros::Time::now();
-            while(ros::Time::now() - current_time <= ros::Duration(interval) && move_forward){
-                velocity.publish(acc_velocity);
-                std::this_thread::sleep_for (std::chrono::milliseconds(10)); 
+            while(ros::Time::now() - current_time <= ros::Duration(duration) && move_forward){
+                double time_elapsed = (ros::Time::now()-current_time).toSec();
+                decision.linear.x = acc_speed(target_velocity, duration, time_elapsed);
+                velocity.publish(decision);
+                std::this_thread::sleep_for (std::chrono::milliseconds(10));
             }
             //leave_docking_station = false;
         }
 
-        void decelerate(const ros::TimerEvent& time, double start_velocity, double duration, double interval){
+        //Function to calculate decelerate speed
+        float dec_speed(double start_velocity, double duration, double time_elapsed){
+            return (-start_velocity/(duration*duration))*time_elapsed*time_elapsed+start_velocity;
+        }
+
+        void decelerate(const ros::TimerEvent& time, double start_velocity, double duration){
             geometry_msgs::Twist decision;
             decision.linear.x = 0.0;
             decision.angular.z = 0.0;
-            double dec = start_velocity/(duration*(1.0/interval));
-            double i;
-            for(i = interval; i < duration; i = i+interval){
-                decision.linear.x -= dec;
-                ros::Time current_time = ros::Time::now();
-                while(ros::Time::now() - current_time <= ros::Duration(interval)){
-                    velocity.publish(decision);
-                    std::this_thread::sleep_for (std::chrono::milliseconds(10));
-                }
-            }            
+            ros::Time current_time = ros::Time::now();
+            while(ros::Time::now() - current_time <= ros::Duration(duration)){
+                double time_elapsed = (ros::Time::now()-current_time).toSec();
+                decision.linear.x = dec_speed(start_velocity, duration, time_elapsed);
+                velocity.publish(decision);
+                std::this_thread::sleep_for (std::chrono::milliseconds(10));
+            }         
         }
 
         void leave_station_action(const ros::TimerEvent& time){
             bool DRIVE;
             node.getParamCached("drive", DRIVE);
             if(DRIVE){
-                accelerate(time, -0.16, 10.0, 0.01);
+                accelerate(time, -0.16, 10.0);
                 geometry_msgs::Twist OUT_OF_DOCKING_STATION;
                 OUT_OF_DOCKING_STATION.linear.x = -0.16;
                 //OUT_OF_DOCKING_STATION.linear.x = 0.0;
@@ -333,7 +327,7 @@ class AutoNav
             geometry_msgs::Twist decision;
             if(bump){//deal with the bumper info
                 if(DRIVE){
-                    accelerate(time, -DRIVE_LINEARSPEED, 5.0, 0.01);
+                    accelerate(time, -DRIVE_LINEARSPEED, 5.0);
                     decision.linear.x = -DRIVE_LINEARSPEED;
                     decision.angular.z = 0;
                     ros::Time start = ros::Time::now();
@@ -368,9 +362,9 @@ class AutoNav
                 bump = false;
             }
             else{//bumper is safe
-                if(acc_speed){
-                    accelerate(time, DRIVE_LINEARSPEED, 5.0, 0.01);
-                    acc_speed = false;
+                if(acc_or_not){
+                    accelerate(time, DRIVE_LINEARSPEED, 5.0);
+                    acc_or_not = false;
                 }
                 if(move_forward){
                     decision.linear.x = DRIVE_LINEARSPEED;
@@ -392,7 +386,7 @@ class AutoNav
                             std::this_thread::sleep_for (std::chrono::milliseconds(10));
                         }
                     }
-                    acc_speed = true;
+                    acc_or_not = true;
                 }
 
             }
@@ -534,7 +528,7 @@ class AutoNav
         {
             printf("pilot\n");
             if(leave_docking_station)
-            accelerate(time, -0.16, 5.0, 0.01);
+            accelerate(time, -0.16, 5.0);
             geometry_msgs::Twist decision;
             decision.linear.x = -0.16;
             decision.angular.z = 0.0;
