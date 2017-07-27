@@ -144,6 +144,31 @@ class AutoNav
             threads.spin();
         }
 
+        vector<double> colorPercent(cv_bridge::CvImageConstPtr cv_ptr, int group_num){
+            vector<double> ret(pow(group_num, 3), 0.0);
+            cv::Mat rgb_img = cv_ptr->image;
+            int num_per_group = 255/group_num;
+            for(int i = 0; i < img_height; ++i){
+                for(int j = 0; j < img_width; ++j){
+                    int b = rgb_img.at<cv::Vec3b>(i,j)[0]/num_per_group;
+                    if(b == group_num)
+                        b=b-1;
+                    int g = rgb_img.at<cv::Vec3b>(i,j)[1]/num_per_group;
+                    if(g == group_num)
+                        g=g-1;
+                    int r = rgb_img.at<cv::Vec3b>(i,j)[2]/num_per_group;
+                    if(r == group_num)
+                        r=r-1;
+                    ret[r*pow(group_num, 2) + g*group_num + b]++;
+                }
+            }
+            int total_pix = img_height*img_width;
+            for(int i = 0; i<ret.size(); ++i){
+                ret[i] = ret[i]/total_pix;    
+            }
+            return ret;
+        }
+
         void webcam0(const sensor_msgs::ImageConstPtr& msg){
             cv_bridge::CvImageConstPtr cv_ptr;
             try{
