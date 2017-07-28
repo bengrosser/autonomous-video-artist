@@ -44,21 +44,27 @@ On PC:
 
         $ catkin_make
 
-3. Place the turtlebot folder in this repo to directory /catkin_ws/src in your PC.
+3. Create a turtlebot package in the workspace
 
-4. Change the directory to the repository folder
+        $ cd ~/catkin_ws/src
+
+        $ catkin_create_pkg turtlebot std_msgs rospy roscpp
+
+4. Place the files in turtlebot folder in this repo to directory /catkin_ws/src/turtlebot in your PC.
+
+5. Change the directory to the repository folder
 
         $ cd catkin_ws
 
-5. Compile the code
+6. Compile the code
 
         $ catkin_make
 
-6. Source the setup bash
+7. Source the setup bash
 
         $ source devel/setup.bash
 
-7. Run the code
+8. Run the code
 
     To run the automatic navigation with point cloud (including position tracking and battery information):
     
@@ -84,4 +90,4 @@ On PC:
 
             $ rosrun turtlebot charging
 
-8. To stop the robot just press ctrl+c to break the process
+9. To stop the robot just press ctrl+c to break the process
