@@ -2,9 +2,11 @@
 #include "std_msgs/Int32.h"
 #include <sys/sysinfo.h>
 
+using namespace std;
+
 int main(int argc, char ** argv)
 {
-    ros::init(argv, argv, "publisher");
+    ros::init(argc, argv, "publisher");
     ros::NodeHandle n;
 
     ros::Publisher sys_pub = n.advertise<std_msgs::Int32>("sys/RAM", 1000);
@@ -21,7 +23,7 @@ int main(int argc, char ** argv)
         ros::spinOnce();
         loop_rate.sleep();
         ++count;
-        std::cout<<count<<" loop"<<endl;
+        cout<<count<<" loop"<<endl;
     }
     
     return 0;
