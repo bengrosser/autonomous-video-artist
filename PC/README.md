@@ -1,4 +1,4 @@
-The main code for this project is in directory: turtlebot/src
+The code in this directory should be on your PC.
 
 To run this code, at first, you need to make sure that your PC has Ubuntu 14.04 OS. And then, you need to make sure that the network configuration is already set up between your PC and the turtlebot.
 Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration .
@@ -11,6 +11,7 @@ Make sure that compressedDepth image_transport plugin is installed on your PC. Y
 
 in your terminal. "image_transport/compressedDepth" should show up in your terminal. 
 
+After these, your should bringup your turtlebot at first. Please check the robot directory https://github.com/bengrosser/autonomous-video-artist/tree/master/robot.
 
 -------------------------------------
 
