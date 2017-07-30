@@ -30,7 +30,6 @@ static const long hour = 3600; //minute*60
 static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
-int video_idx;
 bool shutdown;
 
 //This is a signal handler to elegantly exit the process and close all the image windows
@@ -40,7 +39,7 @@ void my_handler(int sig){
     cv::destroyAllWindows();
 }
 
-void videoCapture(double duration){
+void videoCapture(double duration, int camera_idx, int video_idx){
     VideoCapture vcap(0);
     if(!vcap.isOpened()){
         cout<<"Erros openning video stream or file"<<endl;
@@ -48,9 +47,7 @@ void videoCapture(double duration){
     }
     int frame_width = vcap.get(CV_CAP_PROP_FRAME_WIDTH);
     int frame_height = vcap.get(CV_CAP_PROP_FRAME_HEIGHT);
-    std::cout<<"frame_width: "<<frame_width<<endl;
-    std::cout<<"frame_height: "<<frame_height<<endl;
-    string output_file = "output"+to_string(video_idx)+".avi";
+    string output_file = "camera"+to_string(camera_idx)+"output"+to_string(video_idx)+".avi";
     VideoWriter video(output_file, CV_FOURCC('M','J','P','G'),22, Size(frame_width, frame_height), true);
    
     time_t start = time(NULL);
@@ -237,7 +234,6 @@ class AutoNav
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }*/
-            videoCapture(10.0);
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
