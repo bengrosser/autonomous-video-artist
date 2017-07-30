@@ -11,8 +11,7 @@ int main(int argc, char ** argv)
 
     ros::Publisher sys_pub = n.advertise<std_msgs::Int32>("sys/RAM", 1000);
     ros::Rate loop_rate(10);
-
-    int count = 0;    
+   
     while(ros::ok())
     {
         struct sysinfo si;
@@ -22,8 +21,6 @@ int main(int argc, char ** argv)
         sys_pub.publish(msg);
         ros::spinOnce();
         loop_rate.sleep();
-        ++count;
-        cout<<count<<" loop"<<endl;
     }
     
     return 0;
