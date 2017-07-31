@@ -11,6 +11,8 @@ After installing this package, change directory to usb_cam by
 
 Put multi_usb_cam.launch in the launch folder under directory of usb_cam.
 
-Then, you can start your usb cam on the turtlebot by running roslaunch usb_cam multi_usb_cam.launch.
+Then, you can start your usb cam on the turtlebot by running 
+
+    $ roslaunch usb_cam multi_usb_cam.launch.
 
 If you meet usb_cam VIDIOC_streamon error 28, please check this link: http://answers.ros.org/question/12582/usb_cam-vidioc_streamon-error-28/ .
