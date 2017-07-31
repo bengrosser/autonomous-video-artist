@@ -10,6 +10,7 @@
 #include <geometry_msgs/Twist.h>
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
+#include <std_msgs/Int32.h>
 #include <kobuki_msgs/SensorState.h>
 #include <sys/sysinfo.h> //for system infomation
 #include <actionlib/server/simple_action_server.h>
@@ -31,6 +32,8 @@ static const long day = 86400; //hour*24
 static const double megabyte = 1024 * 1024;
 static const double pi = 4*atan(1);   //pre-define pi
 bool shutdown;
+int usb_cam0 = 0;
+int usb_cam1 = 0;
 
 //This is a signal handler to elegantly exit the process and close all the image windows
 void my_handler(int sig){
@@ -39,8 +42,16 @@ void my_handler(int sig){
     cv::destroyAllWindows();
 }
 
+/*void videoCapture(string output_file, VideoWriter& video, const cv::Mat& frame){
+    time_t start = time(NULL);
+    video.write(frame);
+    imshow("Frame", frame);
+    waitKey(1);
+}*/
+
 void videoCapture(double duration, int camera_idx, int video_idx){
-    VideoCapture vcap(0);
+    cout<<"camera"<<camera_idx<<endl;
+    VideoCapture vcap(camera_idx);
     if(!vcap.isOpened()){
         cout<<"Erros openning video stream or file"<<endl;
         return;
@@ -59,8 +70,6 @@ void videoCapture(double duration, int camera_idx, int video_idx){
         video.write(frame);
         imshow("Frame", frame);
         waitKey(1);
-        /*char c = (char)waitKey(33);
-        if(c == 27) break;*/
     }
     vcap.release();
     video.release();
@@ -114,7 +123,7 @@ class AutoNav
             signal(SIGINT, my_handler);
 
 
-            ros::MultiThreadedSpinner threads(9);
+            ros::MultiThreadedSpinner threads(10);
             //create a thread for vision detection
             //subscribe the compressed depth image 
             image_transport::ImageTransport it(node);
@@ -128,7 +137,8 @@ class AutoNav
             //create a thread for battery information
             ros::Subscriber battery=node.subscribe("/mobile_base/sensors/core", 10, &AutoNav::battery, this);
             //create a thread for system information
-            ros::Timer sysInfo=node.createTimer(ros::Duration(60), &AutoNav::sysInfo, this);
+            //ros::Timer sysInfo=node.createTimer(ros::Duration(60), &AutoNav::sysInfo, this);
+            ros::Subscriber sysInfo=node.subscribe("/sys/freeRAM", 1, &AutoNav::sysInfo, this);
             //create a thread for automatic charging with docking station
             ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::autoCharging, this);
             //create a thread for preliminary analysis of the rgb camera image
@@ -137,8 +147,14 @@ class AutoNav
             ros::Subscriber webcam0 = node.subscribe("/webcam0/usb_cam0/image_raw", 1, &AutoNav::webcam0, this);
             //create a thread for webcam1
             ros::Subscriber webcam1 = node.subscribe("/webcam1/usb_cam1/image_raw", 1, &AutoNav::webcam1, this);
+            ros::Timer test=node.createTimer(ros::Duration(1), &AutoNav::test, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
+        }
+
+        void test(const ros::TimerEvent& time){
+            std::cout<<"testtesttest"<<endl;
+            ros::Subscriber aha=node.subscribe("/webcam0/usb_cam0/image_raw", 1, &AutoNav::webcam0, this);
         }
 
         vector<double> colorPercent(cv_bridge::CvImageConstPtr cv_ptr, int group_num){
@@ -167,6 +183,7 @@ class AutoNav
         }
 
         void webcam0(const sensor_msgs::ImageConstPtr& msg){
+            std::cout<<"webcam0"<<std::endl;
             cv_bridge::CvImageConstPtr cv_ptr;
             try{
                 if(enc::isColor(msg->encoding))
@@ -725,18 +742,22 @@ class AutoNav
             }
         }
 
-        void sysInfo(const ros::TimerEvent& time){
+        //This function is used to get the local system information
+        /*void sysInfo(const ros::TimerEvent& time){
             //files in /proc are about system info like "/proc/meminfo" 
             struct sysinfo si;
             sysinfo(&si);
             ros::Time start = ros::Time::now();
-            /*while(ros::Time::now()-start < ros::Duration(60.0)){
-                //do nothing, print the system information once a minute
-            }*/
             printf ("system uptime : %ld days, %ld:%02ld:%02ld\n", si.uptime / day, (si.uptime % day) / hour, (si.uptime % hour) / minute, si.uptime % minute);
             printf ("total RAM   : %5.1f MB\n", si.totalram / megabyte);
             printf ("free RAM   : %5.1f MB\n", si.freeram / megabyte);
             printf ("process count : %d\n", si.procs);
+        }*/
+
+        //This function is used to get the system inforamtion on the turtlebot from ros nodes
+        void sysInfo(const std_msgs::Int32::ConstPtr& msg){
+            int ram = msg->data;
+            std::cout<<"freeRAM: "<<ram<<endl;
         }
         
         void autoCharging(const nav_msgs::Odometry::ConstPtr& msg){
