@@ -9,7 +9,7 @@ int main(int argc, char ** argv)
     ros::init(argc, argv, "publisher");
     ros::NodeHandle n;
 
-    ros::Publisher sys_pub = n.advertise<std_msgs::Int32>("sys/RAM", 1000);
+    ros::Publisher sys_pub = n.advertise<std_msgs::Int32>("sys/freeRAM", 1000);
     ros::Rate loop_rate(10);
    
     while(ros::ok())
