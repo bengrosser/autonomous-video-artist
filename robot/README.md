@@ -1,3 +1,9 @@
+The code in this directory should be on your turtlebot.
+
+To run this code, you need to make sure that the network configuration is already set up between your PC and the turtlebot. Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration .
+
+-----------------------------------------------
+
 HOW TO BRINGUP YOUR TURTLEBOT:
 
 Open two terminal tabs on your turtlebot, and run:

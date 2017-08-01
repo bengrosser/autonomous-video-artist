@@ -17,15 +17,7 @@ After these, your should bringup your turtlebot at first. Please check the robot
 
 HOW TO RUN THIS CODE:
 
-On the turtlebot:
-
-You need to bring up the turtlebot at first, open two terminal, and run
-
-    $ roslaunch turtlebot_bringup minimal.launch --screen
-
-    $ roslaunch turtlebot_bringup 3dsensor.launch
-
-in each of them.
+At first, please check autonomous-video-artist/robot directory to bring up your turtlebot.
 
 On PC:
 
