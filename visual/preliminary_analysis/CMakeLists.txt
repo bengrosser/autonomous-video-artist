@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( preliminary_analysis )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( preliminary_analysis preliminary_analysis.cpp )
+target_link_libraries( preliminary_analysis ${OpenCV_LIBS} )

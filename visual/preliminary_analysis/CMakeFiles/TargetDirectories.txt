@@ -1,0 +1,3 @@
+/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/preliminary_analysis/CMakeFiles/rebuild_cache.dir
+/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/preliminary_analysis/CMakeFiles/edit_cache.dir
+/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/preliminary_analysis/CMakeFiles/preliminary_analysis.dir
