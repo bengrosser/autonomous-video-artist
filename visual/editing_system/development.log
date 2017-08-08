@@ -1,0 +1,6 @@
+1: Gotta use the same ip address to set up connection in rabbitmq so that we can connect the robot through the message?, it all depends on the difficulties on the robot side(
+	 how good the c++ api is for rabbitmq)       <-------- Nuh, we need to make two separate systems
+
+2: It looks like now we need to have a very fast updating systems for the editing part
+
+3: 

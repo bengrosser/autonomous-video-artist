@@ -1,0 +1,6 @@
+uptime /* Seconds since boot*/
+loads[3] /* 1, 5 and 15 minute load averages */ totalram /* Total usable main memory size */ freeram /* Available memory size */
+sharedram /* Amount of shared memory */ bufferram /* Memory used for buffer */ totalswap /* Total swap space size */
+freeswap /* Swap space still available */
+procs /* Number of current processes */
+
