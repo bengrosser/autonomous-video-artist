@@ -2,9 +2,9 @@
   <group ns="webcam0">
     <node name="usb_cam0" pkg="usb_cam" type="usb_cam_node" output="screen" >
       <param name="video_device" value="/dev/video0" />
-      <param name="image_width" value="640" />
-      <param name="image_height" value="480" />
-      <param name="pixel_format" value="yuyv" />
+      <param name="image_width" value="1920" />
+      <param name="image_height" value="1080" />
+      <param name="pixel_format" value="mjpeg" />
       <param name="camera_fram_id" value="usb_cam" />
       <param name="io_method" value="mmap" />
     </node>
@@ -17,9 +17,9 @@
   <group ns="webcam1">
     <node name="usb_cam1" pkg="usb_cam" type="usb_cam_node" output="screen" >
       <param name="video_device" value="/dev/video1" />
-      <param name="image_width" value="640" />
-      <param name="image_height" value="480" />
-      <param name="pixel_format" value="yuyv" />
+      <param name="image_width" value="1920" />
+      <param name="image_height" value="1080" />
+      <param name="pixel_format" value="mjpeg" />
       <param name="camera_fram_id" value="usb_cam" />
       <param name="io_method" value="mmap" />
     </node>
