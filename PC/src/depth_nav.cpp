@@ -34,6 +34,7 @@ static const double pi = 4*atan(1);   //pre-define pi
 bool shutdown;
 int usb_cam0 = 0;
 int usb_cam1 = 0;
+bool shoot;
 
 //This is a signal handler to elegantly exit the process and close all the image windows
 void my_handler(int sig){
@@ -114,7 +115,7 @@ class AutoNav
         AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("/cmd_vel_mux/input/teleop", 10)), move_forward(true), bump(false), img_height(480), img_width(640), go_right(false), avoid_from_right(false), battery_is_low(false), battery_is_full(true), half_battery(false), near_docking_station(false), in_charging(false), leave_docking_station(true), acc_or_not(true), near_docking_station_x(-0.8), near_docking_station_y(0.0), docking_station_x(0.0), docking_station_y(0.0), current_x(0.0), current_y(0.0), roll(0.0), pitch(0.0), yaw(0.0){
 
             shutdown = false;
-
+            shoot = true;
             //signal handler
             /*sigIntHandler.sa_handler = my_handler;
             sigemptyset(&sigIntHandler.sa_mask);
@@ -123,7 +124,7 @@ class AutoNav
             signal(SIGINT, my_handler);
 
 
-            ros::MultiThreadedSpinner threads(10);
+            ros::MultiThreadedSpinner threads(9);
             //create a thread for vision detection
             //subscribe the compressed depth image 
             image_transport::ImageTransport it(node);
@@ -147,15 +148,15 @@ class AutoNav
             ros::Subscriber webcam0 = node.subscribe("/webcam0/usb_cam0/image_raw", 1, &AutoNav::webcam0, this);
             //create a thread for webcam1
             ros::Subscriber webcam1 = node.subscribe("/webcam1/usb_cam1/image_raw", 1, &AutoNav::webcam1, this);
-            ros::Timer test=node.createTimer(ros::Duration(1), &AutoNav::test, this);
+            //ros::Timer test=node.createTimer(ros::Duration(1), &AutoNav::test, this);
             //the thread will loop until SIGINT (ctrl+c) is sent
             threads.spin();
         }
 
-        void test(const ros::TimerEvent& time){
+        /*void test(const ros::TimerEvent& time){
             std::cout<<"testtesttest"<<endl;
             ros::Subscriber aha=node.subscribe("/webcam0/usb_cam0/image_raw", 1, &AutoNav::webcam0, this);
-        }
+        }*/
 
         vector<double> colorPercent(cv_bridge::CvImageConstPtr cv_ptr, int group_num){
             vector<double> ret(pow(group_num, 3), 0.0);
@@ -251,6 +252,10 @@ class AutoNav
             } catch (const cv_bridge::Exception& e){
                 ROS_ERROR("cv_bridge exception: %s", e.what());
             }*/
+            if(shoot){
+            videoCapture(10.0, 0, 0);
+            shoot = false;
+            }
         }
 
         void frontEnv(const sensor_msgs::ImageConstPtr& msg){
@@ -524,7 +529,7 @@ class AutoNav
                 if(current_y >= 0)
                     angle = atan2(current_y, current_x-near_docking_station_x)-pi;
                 else
-                    angle = atan2(current_y, current_x-near_docking_station_y)+pi;
+                    angle = atan2(current_y, current_x-near_docking_station_x)+pi;
 
                 if(angle < -pi+0.02)
                     angle = pi;
