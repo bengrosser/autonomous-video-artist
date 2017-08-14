@@ -38,9 +38,9 @@ On PC:
 
         $ cd ~/catkin_ws/src
 
-        $ catkin_create_pkg turtlebot std_msgs rospy roscpp
+        $ catkin_create_pkg autonomous_video_artist std_msgs rospy roscpp
 
-4. Place the files in PC folder in this repo to directory ~/catkin_ws/src/turtlebot in your PC.
+4. Place the files in PC/autonomous_video_artist folder in this repo to directory ~/catkin_ws/src/autonomous_video_artist in your PC.
 
 5. Change the directory to the repository folder.
 
@@ -56,28 +56,12 @@ On PC:
 
 8. Run the code
 
-    To run the automatic navigation with point cloud (including position tracking and battery information):
+    Make sure that you have bringup the robot. Please check https://github.com/bengrosser/autonomous-video-artist/tree/master/robot.
+
+    Then run
+
+        $ rosrun autonomous_video_artist ava
     
-        $ rosrun turtlebot navigation
-
-    To run the automatic navigation with depth image (Please make sure that compressedDepth image_transport plugin is installed on your system):
-
-        Open a terminal on the PC, run:
-
-            $ roslaunch kobuki_auto_docking minimal.launch --screen
-
-        Then open another terminal tab on the PC, run:
-
-            $ rosrun turtlebot depth_nav _image_transport:=compressedDepth
-
-    To run the auto charging code:
-       
-        Open a terminal on the PC, run:
-
-            $ roslaunch kobuki_auto_docking minimal.launch --screen
-
-        Then open another terminal tab on the PC, run:
-
-            $ rosrun turtlebot charging
+    on the PC.
 
 9. To stop the robot just press ctrl+c to break the process.
