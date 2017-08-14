@@ -11,7 +11,7 @@
 
 #include "AutoNav.h"
 
-vector<double> AutoNav::colorPercent(cv_bridge::CvImageConstPtr cv_ptr, int group_num)
+vector<double> AutoNav::colorPercent(const cv_bridge::CvImageConstPtr cv_ptr, int group_num)
 {
     vector<double> ret(pow(group_num, 3), 0.0);
     cv::Mat rgb_img = cv_ptr->image;
@@ -86,4 +86,31 @@ void AutoNav::bitAnalysis(const sensor_msgs::ImageConstPtr& msg)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
     }
+}
+
+double AutoNav::avg_distance(const cv::Mat depth_img)
+{
+    cv::Scalar avg_pixel = cv::mean(depth_img);
+    return avg_pixel.val[0];
+}
+
+double AutoNav::image_entropy(const cv::Mat image)
+{
+    if(image.channels() == 3)
+        cvtColor(image, image, CV_BGR2GRAY);
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float* histRange = {range};
+    bool uniform = true;
+    bool accumulate = false;
+
+    cv::Mat hist;
+    calcHist(&image, 1, 0, Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
+    hist /= image.total();
+    
+    cv::Mat logP;
+    cv::log(hist, logP);
+    
+    double entropy = -1*sum(hist.mul(logP)).val[0];
+    return entropy;
 }
