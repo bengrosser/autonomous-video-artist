@@ -14,7 +14,12 @@ void my_handler(int sig)
 {
     shutdown = true;
     ros::shutdown();
-    cv::destroyAllWindows();    
+    cv::destroyAllWindows();
+    Json::StyledWriter styledWriter;
+    std::ofstream fid;
+    fid.open("metadata.json");
+    fid << styledWriter.write(jsonarray);
+    fid.close();
 }
  
 
@@ -49,7 +54,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     signal(SIGINT, my_handler);
 
-    ros::MultiThreadedSpinner threads(7);
+    ros::MultiThreadedSpinner threads(8);
 
     image_transport::ImageTransport it(node);
     image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
@@ -65,6 +70,8 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
 
     ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::bitAnalysis, this);
+
+    ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
 
     threads.spin();
     

@@ -33,6 +33,9 @@
 #include <signal.h>
 #include <thread>
 #include <chrono>
+#include <jsoncpp/json/writer.h>
+#include <jsoncpp/json/json.h>
+#include <fstream>
 
 using namespace std;
 using namespace cv;
@@ -41,6 +44,7 @@ namespace enc = sensor_msgs::image_encodings;
 extern bool shutdown;
 extern const double pi;
 extern const uint8_t MAX_BATTERY;
+extern Json::Value jsonarray;
 void my_handler(int sig);
 
 class AutoNav{
@@ -78,10 +82,15 @@ private:
     double linear_speed;
     double angular_speed;
 
+
+    
+
     //Preliminary analysis
-    vector<double> colorPercent(cv_bridge::CvImageConstPtr cv_ptr, int group_num);
+    vector<double> colorPercent(const cv_bridge::CvImageConstPtr cv_ptr, int group_num);
     unsigned int count_bits(int n);
     void bitAnalysis(const sensor_msgs::ImageConstPtr& msg);
+    double avg_distance(const cv::Mat depth_img);
+    double image_entropy(const cv::Mat image);
     //take videos
     void webcam0(const sensor_msgs::ImageConstPtr& msg);
     void webcam1(const sensor_msgs::ImageConstPtr& msg);
@@ -105,6 +114,7 @@ private:
     void sysInfo(const std_msgs::Int32::ConstPtr& msg);
     void angle(const nav_msgs::Odometry::ConstPtr& msg);
     void toEulerianAngle(const float x, const float y, const float z, const float w, float& roll, float& pitch, float& yaw);
+    void writeJson(const ros::TimerEvent& time);
     
 
 public:

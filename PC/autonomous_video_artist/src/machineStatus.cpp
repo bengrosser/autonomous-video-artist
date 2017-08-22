@@ -11,6 +11,7 @@
 #include "AutoNav.h"
 
 const uint8_t MAX_BATTERY = 162;
+Json::Value jsonarray;
 
 void AutoNav::bumperStatus(const kobuki_msgs::BumperEvent msg)
 {
@@ -92,4 +93,13 @@ void AutoNav::toEulerianAngle(const float x, const float y, const float z, const
     float t3 = +2.0*(w*z+x*y);
     float t4 = +1.0-2.0*(ysqr+z*z);
     yaw = std::atan2(t3, t4);
+}
+
+void AutoNav::writeJson(const ros::TimerEvent& time)
+{
+    Json::Value v;
+    v["position_x"] = current_x;
+    v["position_y"] = current_y;
+    v["has_obstacle"] = !move_forward;
+    jsonarray.append(v);
 }
