@@ -21,6 +21,10 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
 )
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(JSONCPP jsoncpp)
+link_libraries(${JSONCPP_LIBRARIES})
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -158,7 +162,7 @@ add_executable (ava src/main.cpp src/AutoNav.cpp src/navigation.cpp src/preAnaly
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(ava ${catkin_LIBRARIES})
+target_link_libraries(ava ${catkin_LIBRARIES} ${JSONCPP_LIBRARY})
 
 #############
 ## Install ##
