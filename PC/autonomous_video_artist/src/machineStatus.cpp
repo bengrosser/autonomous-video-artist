@@ -101,5 +101,11 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     v["position_x"] = current_x;
     v["position_y"] = current_y;
     v["has_obstacle"] = !move_forward;
+    v["direction"] = roll;
+    ros::Time current_time = ros::Time::now();
+    uint32_t second_value = current_time.toSec();
+    uint32_t nsecond_value = current_time.toNSec();
+    double timestamp = second_value+(nsecond_value/pow(10,9));
+    v["timestamp"] = timestamp;
     jsonarray.append(v);
 }
