@@ -28,6 +28,7 @@ void AutoNav::battery(const kobuki_msgs::SensorState msg)
     {
         ros::Time start = ros::Time::now();
         while(ros::Time::now()-start < ros::Duration(5.0)){}
+        battery_value = msg.battery;
         float percentage = ((float) msg.battery)/((float)MAX_BATTERY)*100.00;
         if(percentage <= 50)
             half_battery = true;
@@ -107,5 +108,6 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     uint32_t nsecond_value = current_time.toNSec();
     double timestamp = second_value+(nsecond_value/pow(10,9));
     v["timestamp"] = timestamp;
+    v["battery"] = battery_value;
     jsonarray.append(v);
 }

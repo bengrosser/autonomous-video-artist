@@ -25,7 +25,7 @@
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Int32.h>
 #include <kobuki_msgs/SensorState.h>
-#include <sys/sysinfo.h> //for system infomation
+#include <sys/sysinfo.h>
 #include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
@@ -60,6 +60,7 @@ private:
     bool battery_is_low;
     bool battery_is_full;
     bool half_battery;
+    int battery_value;
     bool in_charging;
     bool near_docking_station;
     bool leave_docking_station;
