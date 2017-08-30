@@ -33,36 +33,13 @@ void recorder(const sensor_msgs::ImageConstPtr& msg)
         }
         cv::Mat diff = cv::Mat::zeros(640, 480, CV_32FC1);
         cv::Mat diff_after = cv::Mat::zeros(640,480,CV_32FC1);
-        /*cv::Mat mask1 = cv::Mat::zeros(640, 480, CV_8U);
-        cv::Mat mask2 = cv::Mat::zeros(640, 480, CV_8U);
-        cv::Mat mask3 = cv::Mat::zeros(640, 480, CV_8U);
-        cv::Mat mask4 = cv::Mat::zeros(640, 480, CV_8U);*/
 
         if(first_time){
             prev_frame = depth_img;
             first_time = false;
         }
-        /*if(count_num < 5)
-        {
-            ++count_num;
-            prev_frame = depth_img;
-        }*/
         else
         {
-            //cv::Mat mask = cv::Mat::zeros(640,480, CV_8U);
-            /*cv::Mat mask = depth_img < 8000;
-            cv::Mat after = cv::Mat::zeros(640,480, CV_32FC1);
-            depth_img.copyTo(after, mask);
-            double min = 0.0;
-            double max = 0.0;
-            cv::minMaxLoc(after, &min, &max);
-            printf("after max value in the image: %f\n", max);
-            printf("after min value in the iamge: %f\n", min);         
-
-            cv::minMaxLoc(depth_img, &min, &max);
-            printf("depth_img max value in the image: %f\n", max);
-            printf("depth_img min value in the iamge: %f\n", min);*/
-            
             cv::Mat mask1 = prev_frame > 0;
             cv::Mat mask2 = depth_img > 0;
             cv::Mat mask3;
@@ -72,52 +49,22 @@ void recorder(const sensor_msgs::ImageConstPtr& msg)
             bitwise_and(mask1, mask3, mask2);
             mask3 = diff > 1000;
             bitwise_and(mask2, mask3, mask1);
-
-            cv::imshow("mask", mask1);
-            cv::waitKey(1);
-            
-            prev_frame = depth_img;
-            diff.copyTo(diff_after, mask1);
-            cv::imshow("after", diff_after);
-            cv::waitKey(1);
-
-            /*count_num = 0;
-            mask1 = prev_frame > 0;
-            mask2 = depth_img > 0;
-            //mask3 = depth_img < 5000;
-            mask4 = depth_img > 100;
-            //diff = depth_img-prev_frame;
-            cv::absdiff(depth_img, prev_frame, diff);
-            mask3 = diff < 5000;
-            prev_frame = depth_img;
-            
-            cv::imshow("depth_img", depth_img);
-            cv::waitKey(1);
-            double min = 0.0;
-            double max = 0.0;
-            cv::Mat mask;
-            bitwise_and(mask1, mask2, mask);
-            bitwise_and(mask3, mask, mask);
-            bitwise_and(mask4, mask, mask);
-            imshow("before", diff);
-            cv::waitKey(1);
-            diff.copyTo(diff, mask);
-            cv::Mat test = cv::Mat::ones(640,480,CV_8U);
-            test = diff < 5000.0;
-            imshow("test", test);
-            cv::waitKey(1);
-            diff.copyTo(diff, test);
-            cv::minMaxLoc(diff, &min, &max);
-            printf("max value in the image: %f\n", max);
-            printf("min value in the iamge: %f\n", min);
-            imshow("after", diff);
-            cv::waitKey(1);
             cv::Mat norm;
-            diff.convertTo(norm, CV_32F, 1.0/max, 0);
-            //cv::imshow("norm", norm);
-            //cv::waitKey(1);
-            norm.convertTo(norm, CV_8U, 255.0);
-            video.write(norm);*/
+            mask1.convertTo(norm, CV_8U, 255.0);           
+
+            //blur(mask1, mask1, Size(6,6));
+            blur(norm, norm, Size(10,10));
+            blur(norm, norm, Size(10,10));
+            cv::Mat new_mask = norm>180;
+            cv::imshow("norm", norm);
+            cv::imshow("mask", new_mask);
+            cv::waitKey(1);
+            
+            prev_frame = depth_img;
+            
+
+            
+            //video.write(norm);
         }
         
     }
