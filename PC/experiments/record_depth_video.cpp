@@ -52,7 +52,7 @@ void recorder(const sensor_msgs::ImageConstPtr& msg)
             cv::Mat norm;
             mask1.convertTo(norm, CV_8U, 255.0);           
 
-            //blur(mask1, mask1, Size(6,6));
+
             blur(norm, norm, Size(10,10));
             blur(norm, norm, Size(10,10));
             cv::Mat new_mask = norm>180;
@@ -67,7 +67,10 @@ void recorder(const sensor_msgs::ImageConstPtr& msg)
             center.y = mu.m01 / mu.m00;
             Mat3b res;
             cvtColor(new_mask, res, CV_GRAY2BGR);
-            circle(res, center, 20, Scalar(0,0,255));
+            /*cout<<"center x: "<<center.x<<endl;
+            cout<<"center y: "<<center.y<<endl;*/
+            if(center.x > 0 && center.y > 0)
+                circle(res, center, 20, Scalar(0,0,255), 4, 8, 0);
 
             imshow("result", res);
             cv::waitKey(1);
