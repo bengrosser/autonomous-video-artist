@@ -60,11 +60,21 @@ void recorder(const sensor_msgs::ImageConstPtr& msg)
             cv::imshow("mask", new_mask);
             cv::waitKey(1);
             
+            
+            Moments mu = moments(new_mask, true);
+            Point center;
+            center.x = mu.m10 / mu.m00;
+            center.y = mu.m01 / mu.m00;
+            Mat3b res;
+            cvtColor(new_mask, res, CV_GRAY2BGR);
+            circle(res, center, 20, Scalar(0,0,255));
+
+            imshow("result", res);
+            cv::waitKey(1);
+    
             prev_frame = depth_img;
             
-
-            
-            //video.write(norm);
+            video.write(res);
         }
         
     }
@@ -91,7 +101,7 @@ int main(int argc, char** argv)
     first_time = true;
     count_num = 0;
     //video.open("no_motion.avi", CV_FOURCC('D','I','B',' '), 10, Size(640,480), false);
-    video.open("no_motion.avi", CV_FOURCC('M','J','P','G'), 1, Size(640,480), false);
+    video.open("no_motion.avi", CV_FOURCC('M','J','P','G'), 20, Size(640,480), true);
     if(!video.isOpened())
         printf("Not opened!\n");
     ros::init(argc, argv, "recorder");
