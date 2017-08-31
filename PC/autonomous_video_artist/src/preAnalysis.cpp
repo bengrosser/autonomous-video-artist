@@ -114,3 +114,13 @@ double AutoNav::image_entropy(const cv::Mat image)
     double entropy = -1*sum(hist.mul(logP)).val[0];
     return entropy;
 }
+
+double AutoNav::avg_brightness(const cv::Mat image)
+{
+    cv::Mat hsv_img;
+    cvtColor(image, hsv_img, CV_BGR2HSV);
+    vector<Mat> channel;
+    split(hsv_img, channel);
+    Scalar m = mean(channel[2]);
+    return m[0];
+}

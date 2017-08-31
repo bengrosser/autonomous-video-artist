@@ -94,6 +94,7 @@ private:
     void bitAnalysis(const sensor_msgs::ImageConstPtr& msg);
     double avg_distance(const cv::Mat depth_img);
     double image_entropy(const cv::Mat image);
+    double avg_brightness(const cv::Mat image);
     //take videos
     void webcam0(const sensor_msgs::ImageConstPtr& msg);
     void webcam1(const sensor_msgs::ImageConstPtr& msg);
