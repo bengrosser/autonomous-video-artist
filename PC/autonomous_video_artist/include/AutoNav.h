@@ -85,13 +85,17 @@ private:
     double linear_speed;
     double angular_speed;
 
-
+    bool bit;
+    double entropy;
+    double brightness;
+    
     
 
     //Preliminary analysis
     vector<double> colorPercent(const cv_bridge::CvImageConstPtr cv_ptr, int group_num);
     unsigned int count_bits(int n);
-    void bitAnalysis(const sensor_msgs::ImageConstPtr& msg);
+    bool bitAnalysis(const cv::Mat rgb_img);
+    void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
     double avg_distance(const cv::Mat depth_img);
     double image_entropy(const cv::Mat image);
     double avg_brightness(const cv::Mat image);

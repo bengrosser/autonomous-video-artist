@@ -69,7 +69,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
 
-    ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::bitAnalysis, this);
+    ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
 
     ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
 

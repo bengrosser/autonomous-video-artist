@@ -50,8 +50,32 @@ unsigned int AutoNav::count_bits(int n)
     }
     return count;
 }
+bool AutoNav::bitAnalysis(const cv::Mat rgb_img)
+{
+    Mat gray_img;
+    cvtColor(rgb_img, gray_img, COLOR_BGR2GRAY);
+    int sum = 0;
+    for(int i=0; i < gray_img.rows; ++i)
+    {
+        for(int j = 0; j < gray_img.cols; ++j)
+        {
+            int gray_intensity = gray_img.at<uint8_t> (i,j);
+            sum += count_bits(gray_intensity);
+        }
+    }
+    if(sum % 42 == 0)
+    {
+        printf("bit analysis is good\n");
+        return true;
+    }
+    else
+    {
+        printf("bit analysis is bad\n");
+        return false;
+    }
+}
 
-void AutoNav::bitAnalysis(const sensor_msgs::ImageConstPtr& msg)
+void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 {
     cv_bridge::CvImageConstPtr cv_ptr;
     try
@@ -62,25 +86,9 @@ void AutoNav::bitAnalysis(const sensor_msgs::ImageConstPtr& msg)
             cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
         cv::Mat rgb_img = cv_ptr->image;
         cv::imshow("view", rgb_img);
-        cv::Mat gray_img;
-        cv::cvtColor(rgb_img, gray_img, COLOR_BGR2GRAY);
-        int sum = 0;
-        for(int i = 0; i < gray_img.rows; ++i)
-        {
-            for(int j = 0; j < gray_img.cols; ++j)
-            {
-                int gray_intensity = gray_img.at<uint8_t> (i,j);
-                sum += count_bits(gray_intensity);
-            }
-        }
-        if(sum % 42 == 0)
-        {
-            printf("it is good\n");
-        }
-        else
-        {
-            printf("it is bad\n");
-        }
+        bit = bitAnalysis(rgb_img);
+        entropy = image_entropy(rgb_img);
+        brightness = avg_brightness(rgb_img);
     }
     catch(const cv_bridge::Exception& e)
     {
@@ -94,10 +102,11 @@ double AutoNav::avg_distance(const cv::Mat depth_img)
     return avg_pixel.val[0];
 }
 
-double AutoNav::image_entropy(const cv::Mat image)
+double AutoNav::image_entropy(const cv::Mat rgb_img)
 {
-    if(image.channels() == 3)
-        cvtColor(image, image, CV_BGR2GRAY);
+    Mat gray_img;
+    if(rgb_img.channels() == 3)
+        cvtColor(rgb_img, gray_img, CV_BGR2GRAY);
     int histSize = 256;
     float range[] = {0, 256};
     const float* histRange = {range};
@@ -105,8 +114,8 @@ double AutoNav::image_entropy(const cv::Mat image)
     bool accumulate = false;
 
     cv::Mat hist;
-    calcHist(&image, 1, 0, Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
-    hist /= image.total();
+    calcHist(&gray_img, 1, 0, Mat(), hist, 1, &histSize, &histRange, uniform, accumulate);
+    hist /= gray_img.total();
     
     cv::Mat logP;
     cv::log(hist, logP);
@@ -115,10 +124,10 @@ double AutoNav::image_entropy(const cv::Mat image)
     return entropy;
 }
 
-double AutoNav::avg_brightness(const cv::Mat image)
+double AutoNav::avg_brightness(const cv::Mat rgb_img)
 {
     cv::Mat hsv_img;
-    cvtColor(image, hsv_img, CV_BGR2HSV);
+    cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
     vector<Mat> channel;
     split(hsv_img, channel);
     Scalar m = mean(channel[2]);
