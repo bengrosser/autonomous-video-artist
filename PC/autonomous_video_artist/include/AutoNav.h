@@ -67,12 +67,14 @@ private:
     bool avoid_from_right;
     bool acc_or_not;
     
+
     double near_docking_station_x;
     double near_docking_station_y;
     double docking_station_x;
     double docking_station_y;
     double current_x;
     double current_y;
+    double distance_to_docking;
     float roll;
     float pitch;
     float yaw;

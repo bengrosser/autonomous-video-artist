@@ -64,7 +64,7 @@ void AutoNav::angle(const nav_msgs::Odometry::ConstPtr& msg)
 {
     current_x = msg->pose.pose.position.x;
     current_y = msg->pose.pose.position.y;
-    float distance_to_docking = sqrt(pow(current_x, 2.0)+pow(current_y, 2.0));
+    distance_to_docking = sqrt(pow(current_x, 2.0)+pow(current_y, 2.0)); 
     if(battery_is_low == true && distance_to_docking < 1.5)
         near_docking_station = true;
 
@@ -109,5 +109,6 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     double timestamp = second_value+(nsecond_value/pow(10,9));
     v["timestamp"] = timestamp;
     v["battery"] = battery_value;
+    v["distance_to_docking"] = distance_to_docking;
     jsonarray.append(v);
 }
