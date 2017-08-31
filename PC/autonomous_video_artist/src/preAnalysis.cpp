@@ -99,7 +99,7 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 double AutoNav::avg_distance(const cv::Mat depth_img)
 {
     cv::Scalar avg_pixel = cv::mean(depth_img);
-    return avg_pixel.val[0];
+    return (double)avg_pixel.val[0]/1000.0;
 }
 
 double AutoNav::image_entropy(const cv::Mat rgb_img)

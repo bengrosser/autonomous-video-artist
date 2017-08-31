@@ -88,6 +88,7 @@ private:
     bool bit;
     double entropy;
     double brightness;
+    double avg_front_distance;
     
     
 

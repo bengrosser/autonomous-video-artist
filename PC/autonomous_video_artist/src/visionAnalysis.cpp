@@ -18,11 +18,16 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         cv_ptr = cv_bridge::toCvShare(msg);
         cv::Mat depth_img;
         const std::string& enc = msg->encoding;
-        if(enc.compare("16UC1") == 0)
-            depth_img = cv_bridge::toCvShare(msg)->image;
-        else if(enc.compare("32FC1") == 0)
+        if(enc.compare("16UC1") == 0){
+            depth_img = cv_ptr->image;
+            printf("herhe\n");
+        }
+        else if(enc.compare("32FC1") == 0){
             cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
-        
+            printf("really\n");
+        }        
+
+        avg_front_distance = avg_distance(depth_img);
         cv::Mat crop_front = depth_img(cv::Rect_<int>(180,200,280,270));
         cv::Mat mask = crop_front>0;
         int num = countNonZero(crop_front);
