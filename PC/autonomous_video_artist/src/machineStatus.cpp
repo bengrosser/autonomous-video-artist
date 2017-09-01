@@ -113,5 +113,6 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     v["avg_brightness"] = brightness;
     v["entropy"] = entropy;
     v["avg_distance"] = avg_front_distance;
+    v["motion"] = motion;
     jsonarray.append(v);
 }

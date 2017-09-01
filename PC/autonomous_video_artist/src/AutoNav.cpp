@@ -47,6 +47,8 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     roll = 0.0;
     pitch = 0.0;
     yaw = 0.0;
+    motion = false;
+    first_time = true;
 
     node.getParamCached("drive", DRIVE);
     node.getParamCached("drive_linearspeed", linear_speed);
@@ -54,7 +56,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     signal(SIGINT, my_handler);
 
-    ros::MultiThreadedSpinner threads(8);
+    ros::MultiThreadedSpinner threads(9);
 
     image_transport::ImageTransport it(node);
     image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);

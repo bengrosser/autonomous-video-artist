@@ -98,8 +98,11 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 
 double AutoNav::avg_distance(const cv::Mat depth_img)
 {
-    cv::Scalar avg_pixel = cv::mean(depth_img);
-    return (double)avg_pixel.val[0]/1000.0;
+    Mat mask = depth_img > 0;
+    int pixel_num = countNonZero(mask);
+    cv::Mat depth = depth_img/1000.0;
+    //cv::Scalar avg_pixel = cv::mean(depth_img);
+    return (double)sum(depth)[0]/(double)pixel_num;
 }
 
 double AutoNav::image_entropy(const cv::Mat rgb_img)
@@ -132,4 +135,55 @@ double AutoNav::avg_brightness(const cv::Mat rgb_img)
     split(hsv_img, channel);
     Scalar m = mean(channel[2]);
     return m[0];
+}
+
+bool AutoNav::motion_detection(const cv::Mat depth_img)
+{
+    Mat diff=cv::Mat::zeros(640,480,CV_32FC1);
+    Mat diff_after = cv::Mat::zeros(640,480,CV_32FC1);
+    
+    if(first_time)
+    {
+        prev_frame = depth_img;
+        first_time = false;
+        return false;
+    }
+    else
+    {
+        Mat mask1 = prev_frame>0;
+        Mat mask2 = depth_img > 0;
+        Mat mask3;
+        bitwise_and(mask1, mask2, mask3);
+        cv::absdiff(depth_img, prev_frame, diff);
+        mask1 = diff < 5000;
+        bitwise_and(mask1, mask3, mask2);
+        mask3 = diff > 1000;
+        bitwise_and(mask2, mask3, mask1);
+        Mat norm;
+        mask1.convertTo(norm, CV_8U, 255.0);
+        
+        blur(norm, norm, Size(10,10));
+        blur(norm, norm, Size(10,10));
+        cv::Mat new_mask = norm>180;
+        cv::imshow("norm", norm);
+        cv::imshow("mask", new_mask);
+        cv::waitKey(1);
+
+        Moments mu = moments(new_mask, true);
+        Point center;
+        center.x = mu.m10 / mu.m00;
+        center.y = mu.m01 / mu.m00;
+        Mat3b res;
+        cvtColor(new_mask, res, CV_GRAY2BGR);
+        if(center.x > 0 && center.y > 0){
+            circle(res, center, 20, Scalar(0,0,255), 4, 8, 0);
+            return true;
+        }
+        else
+            return false;
+
+        imshow("result", res);
+        cv::waitKey(1);
+        prev_frame = depth_img;
+    }
 }

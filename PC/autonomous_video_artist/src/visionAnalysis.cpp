@@ -30,7 +30,7 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         avg_front_distance = avg_distance(depth_img);
         cv::Mat crop_front = depth_img(cv::Rect_<int>(180,200,280,270));
         cv::Mat mask = crop_front>0;
-        int num = countNonZero(crop_front);
+        int num = countNonZero(mask);
         float percentage = ((double)num)/((double)280*330);
         
         double mmin = 0.0;
