@@ -12,14 +12,17 @@
 
 void my_handler(int sig)
 {
-    shutdown = true;
-    ros::shutdown();
-    cv::destroyAllWindows();
+    printf("my handler\n");
     Json::StyledWriter styledWriter;
     std::ofstream fid;
     fid.open("metadata.json");
+    printf("open json file\n");
     fid << styledWriter.write(jsonarray);
+    printf("write done\n");
+    cv::destroyAllWindows();
+    shutdown = true;
     fid.close();
+    ros::shutdown();
 }
  
 
@@ -49,6 +52,8 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     yaw = 0.0;
     motion = false;
     first_time = true;
+    motion_map = cv::Mat::zeros(640,480, CV_32FC1);
+    battery_value = 164;
 
     node.getParamCached("drive", DRIVE);
     node.getParamCached("drive_linearspeed", linear_speed);
