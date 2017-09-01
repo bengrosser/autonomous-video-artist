@@ -112,5 +112,6 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     v["distance_to_docking"] = distance_to_docking;
     v["avg_brightness"] = brightness;
     v["entropy"] = entropy;
+    v["avg_distance"] = avg_front_distance;
     jsonarray.append(v);
 }
