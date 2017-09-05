@@ -77,6 +77,7 @@ bool AutoNav::bitAnalysis(const cv::Mat rgb_img)
 
 void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 {
+    printf("preAnalysis\n");
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
@@ -86,9 +87,11 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
             cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
         cv::Mat rgb_img = cv_ptr->image;
         cv::imshow("view", rgb_img);
-        bit = bitAnalysis(rgb_img);
-        entropy = image_entropy(rgb_img);
-        brightness = avg_brightness(rgb_img);
+        cv::waitKey(1);
+        //bit = bitAnalysis(rgb_img);
+        //entropy = image_entropy(rgb_img);
+        //brightness = avg_brightness(rgb_img);
+        printf("done\n");
     }
     catch(const cv_bridge::Exception& e)
     {
@@ -107,6 +110,7 @@ double AutoNav::avg_distance(const cv::Mat depth_img)
 
 double AutoNav::image_entropy(const cv::Mat rgb_img)
 {
+    printf("entropy function\n");
     Mat gray_img;
     if(rgb_img.channels() == 3)
         cvtColor(rgb_img, gray_img, CV_BGR2GRAY);
@@ -129,6 +133,7 @@ double AutoNav::image_entropy(const cv::Mat rgb_img)
 
 double AutoNav::avg_brightness(const cv::Mat rgb_img)
 {
+    printf("avg_brightness function\n");
     cv::Mat hsv_img;
     cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
     vector<Mat> channel;

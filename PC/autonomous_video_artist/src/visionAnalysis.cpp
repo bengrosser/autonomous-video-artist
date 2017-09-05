@@ -12,6 +12,7 @@
 
 void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
 {
+    printf("frontEnv\n");
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {

@@ -61,10 +61,16 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     signal(SIGINT, my_handler);
 
-    ros::MultiThreadedSpinner threads(9);
+    ros::MultiThreadedSpinner threads(8);
 
     image_transport::ImageTransport it(node);
     image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
+
+    image_transport::Subscriber preAnalysis=it.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
+
+    /*ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
+
+    ros::Subscriber frontEnv=node.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);*/
     
     ros::Timer pilot=node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
 
@@ -75,8 +81,6 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     ros::Subscriber sysInfo=node.subscribe("/sys/freeRAM", 1, &AutoNav::sysInfo, this);
 
     ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
-
-    ros::Subscriber preAnalysis = node.subscribe("/camera/rgb/image_raw", 1, &AutoNav::preAnalysis, this);
 
     ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
 
