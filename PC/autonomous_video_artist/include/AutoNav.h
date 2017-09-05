@@ -89,17 +89,21 @@ private:
     double entropy;
     double brightness;
     double avg_front_distance;
-    
+    bool motion;
+    bool first_time;
+    Mat prev_frame;
+    Mat motion_map;
     
 
     //Preliminary analysis
+    void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
     vector<double> colorPercent(const cv_bridge::CvImageConstPtr cv_ptr, int group_num);
     unsigned int count_bits(int n);
     bool bitAnalysis(const cv::Mat rgb_img);
-    void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
     double avg_distance(const cv::Mat depth_img);
-    double image_entropy(const cv::Mat image);
-    double avg_brightness(const cv::Mat image);
+    double image_entropy(const cv::Mat rgb_img);
+    double avg_brightness(const cv::Mat rgb_img);
+    bool motion_detection(const cv::Mat depth_img);
     //take videos
     void webcam0(const sensor_msgs::ImageConstPtr& msg);
     void webcam1(const sensor_msgs::ImageConstPtr& msg);

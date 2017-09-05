@@ -36,8 +36,9 @@ void AutoNav::linear_accelerate(const ros::TimerEvent& time, double target_veloc
     decision.linear.x = 0.0;
     decision.angular.z = 0.0;
     ros::Time current_time = ros::Time::now();
-    while(ros::Time::now() - current_time <= ros::Duration(duration) && move_forward)
+    while(ros::Time::now() - current_time <= ros::Duration(duration) && (move_forward||leave_docking_station))
     {
+        //printf("while\n");
         double time_elapsed = (ros::Time::now()-current_time).toSec();
         decision.linear.x = acc_speed(target_velocity, duration, time_elapsed);
         velocity.publish(decision);
@@ -100,11 +101,12 @@ void AutoNav::leave_station_action(const ros::TimerEvent& time)
     node.getParamCached("drive", DRIVE);
     if(DRIVE)
     {
-        linear_accelerate(time, -0.16, 6.0);
+        linear_accelerate(time, -0.16, 10.0);
         geometry_msgs::Twist decision;
         decision.linear.x = -0.16;
         decision.angular.z = 0.0;
         ros::Time start = ros::Time::now();
+        printf("finshed accelerating\n");
         while(ros::Time::now() -  start < ros::Duration(2.0))
         {
             velocity.publish(decision);
@@ -394,10 +396,11 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         acc_or_not = false;
     }*/
 
-    /*if(acc_or_not){
+    if(acc_or_not){
         leave_station_action(time);
+        printf("done\n");
         acc_or_not = false;
-    }*/
+    }
 
 
 
