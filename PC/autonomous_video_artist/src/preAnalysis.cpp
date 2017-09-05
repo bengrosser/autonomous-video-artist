@@ -77,7 +77,6 @@ bool AutoNav::bitAnalysis(const cv::Mat rgb_img)
 
 void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 {
-    printf("preAnalysis\n");
     cv_bridge::CvImageConstPtr cv_ptr;
     try
     {
@@ -89,9 +88,8 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
         cv::imshow("view", rgb_img);
         cv::waitKey(1);
         //bit = bitAnalysis(rgb_img);
-        //entropy = image_entropy(rgb_img);
-        //brightness = avg_brightness(rgb_img);
-        printf("done\n");
+        entropy = image_entropy(rgb_img);
+        brightness = avg_brightness(rgb_img);
     }
     catch(const cv_bridge::Exception& e)
     {
@@ -104,13 +102,11 @@ double AutoNav::avg_distance(const cv::Mat depth_img)
     Mat mask = depth_img > 0;
     int pixel_num = countNonZero(mask);
     cv::Mat depth = depth_img/1000.0;
-    //cv::Scalar avg_pixel = cv::mean(depth_img);
     return (double)sum(depth)[0]/(double)pixel_num;
 }
 
 double AutoNav::image_entropy(const cv::Mat rgb_img)
 {
-    printf("entropy function\n");
     Mat gray_img;
     if(rgb_img.channels() == 3)
         cvtColor(rgb_img, gray_img, CV_BGR2GRAY);
@@ -133,7 +129,6 @@ double AutoNav::image_entropy(const cv::Mat rgb_img)
 
 double AutoNav::avg_brightness(const cv::Mat rgb_img)
 {
-    printf("avg_brightness function\n");
     cv::Mat hsv_img;
     cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
     vector<Mat> channel;
@@ -169,7 +164,7 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         
         blur(norm, norm, Size(10,10));
         blur(norm, norm, Size(10,10));
-        cv::Mat new_mask = norm>180;
+        cv::Mat new_mask = norm>200;
         cv::imshow("norm", norm);
         cv::imshow("mask", new_mask);
         cv::waitKey(1);
@@ -180,6 +175,9 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         center.y = mu.m01 / mu.m00;
         Mat3b res;
         cvtColor(new_mask, res, CV_GRAY2BGR);
+        imshow("result", res);
+        cv::waitKey(1);
+        prev_frame = depth_img;
         if(center.x > 0 && center.y > 0){
             circle(res, center, 20, Scalar(0,0,255), 4, 8, 0);
             return true;
@@ -187,8 +185,6 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         else
             return false;
 
-        imshow("result", res);
-        cv::waitKey(1);
-        prev_frame = depth_img;
+        
     }
 }

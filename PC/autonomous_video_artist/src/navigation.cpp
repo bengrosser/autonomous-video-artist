@@ -31,6 +31,7 @@ float AutoNav::dec_speed(double start_velocity, double duration, double time_ela
 
 void AutoNav::linear_accelerate(const ros::TimerEvent& time, double target_velocity, double duration)
 {
+    printf("linear_accelerate\n");
     geometry_msgs::Twist decision;
     decision.linear.x = 0.0;
     decision.angular.z = 0.0;
@@ -46,6 +47,7 @@ void AutoNav::linear_accelerate(const ros::TimerEvent& time, double target_veloc
 
 void AutoNav::angular_accelerate(const ros::TimerEvent& time, double target_velocity, double duration)
 {
+    printf("angular_accelerate\n");
     geometry_msgs::Twist decision;
     decision.linear.x = 0.0;
     decision.angular.z = 0.0;
@@ -61,6 +63,7 @@ void AutoNav::angular_accelerate(const ros::TimerEvent& time, double target_velo
 
 void AutoNav::linear_decelerate(const ros::TimerEvent& time, double start_velocity, double duration)
 {
+    printf("linear_decelerate\n");
     geometry_msgs::Twist decision;
     decision.linear.x = 0.0;
     decision.angular.z = 0.0;
@@ -76,6 +79,7 @@ void AutoNav::linear_decelerate(const ros::TimerEvent& time, double start_veloci
 
 void AutoNav::angular_decelerate(const ros::TimerEvent& time, double start_velocity, double duration)
 {
+    printf("angular_decelerate\n");
     geometry_msgs::Twist decision;
     decision.linear.x = 0.0;
     decision.angular.z = 0.0;
@@ -91,6 +95,7 @@ void AutoNav::angular_decelerate(const ros::TimerEvent& time, double start_veloc
 
 void AutoNav::leave_station_action(const ros::TimerEvent& time)
 {
+    printf("leave_station_action\n");
     bool DRIVE;
     node.getParamCached("drive", DRIVE);
     if(DRIVE)
@@ -348,7 +353,7 @@ void AutoNav::battery_is_low_action(const ros::TimerEvent& time)
 void AutoNav::pilot(const ros::TimerEvent& time)
 {   
     //test the linear accelerate/decelerate functions
-    if(acc_or_not && DRIVE)
+    /*if(acc_or_not && DRIVE)
     {
         printf("accelerate\n");
         linear_accelerate(time, -0.16, 5.0);
@@ -366,10 +371,10 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         linear_decelerate(time, -0.16, 5.0);
         printf("stop\n");
         acc_or_not = false;
-    }
+    }*/
 
     //test the angular accelerate/decelerate functions
-    if(acc_or_not && DRIVE)
+    /*if(acc_or_not && DRIVE)
     {
         printf("accelerate\n");
         angular_accelerate(time, 0.5, 5.0);
@@ -387,7 +392,12 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         angular_decelerate(time, 0.5, 5.0);
         printf("stop\n");
         acc_or_not = false;
-    }
+    }*/
+
+    /*if(acc_or_not){
+        leave_station_action(time);
+        acc_or_not = false;
+    }*/
 
 
 
