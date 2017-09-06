@@ -82,8 +82,10 @@ private:
     int view_bottom;
 
     bool DRIVE;
-    double linear_speed;
-    double angular_speed;
+    double static_linear_speed;
+    double static_angular_speed;
+    double linear_speed;  //real time speed
+    double angular_speed;  //real time speed
 
     bool bit;
     double entropy;

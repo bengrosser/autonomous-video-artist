@@ -94,6 +94,10 @@ void AutoNav::toEulerianAngle(const float x, const float y, const float z, const
     float t3 = +2.0*(w*z+x*y);
     float t4 = +1.0-2.0*(ysqr+z*z);
     yaw = std::atan2(t3, t4);
+
+    std::cout<<"roll: "<<roll<<std::endl;
+    std::cout<<"pitch: "<<pitch<<std::endl;
+    std::cout<<"yaw: "<<yaw<<std::endl;
 }
 
 void AutoNav::writeJson(const ros::TimerEvent& time)
@@ -102,7 +106,7 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     v["position_x"] = current_x;
     v["position_y"] = current_y;
     v["has_obstacle"] = !move_forward;
-    v["direction"] = roll;
+    v["direction"] = yaw;
     ros::Time current_time = ros::Time::now();
     uint32_t second_value = current_time.toSec();
     uint32_t nsecond_value = current_time.toNSec();

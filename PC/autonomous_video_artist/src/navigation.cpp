@@ -102,16 +102,18 @@ void AutoNav::leave_station_action(const ros::TimerEvent& time)
     if(DRIVE)
     {
         linear_accelerate(time, -0.16, 10.0);
+        printf("finshed accelerating\n");
+        linear_decelerate(time, -0.16, 10.0);
         geometry_msgs::Twist decision;
         decision.linear.x = -0.16;
         decision.angular.z = 0.0;
-        ros::Time start = ros::Time::now();
-        printf("finshed accelerating\n");
-        while(ros::Time::now() -  start < ros::Duration(2.0))
+        ros::Time start = ros::Time::now();        
+        /*while(ros::Time::now() -  start < ros::Duration(2.0))
         {
             velocity.publish(decision);
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
+        }*/
+        angular_accelerate(time, 1.0, 5.0);
         decision.linear.x = 0.0;
         decision.angular.z = 1.0;
         start = ros::Time::now();
@@ -131,7 +133,7 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
     {
         if(DRIVE)
         {
-            linear_accelerate(time, -linear_speed, 5.0);
+            //linear_accelerate(time, -linear_speed, 5.0);
             decision.linear.x = -linear_speed;
             decision.angular.z = 0.0;
             ros::Time start = ros::Time::now();
@@ -172,7 +174,7 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
     {
         if(acc_or_not)
         {
-            linear_accelerate(time, linear_speed, 5.0);
+            //linear_accelerate(time, linear_speed, 5.0);
             acc_or_not = false;
         }
         if(move_forward)
@@ -396,16 +398,16 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         acc_or_not = false;
     }*/
 
-    if(acc_or_not){
+    /*if(acc_or_not){
         leave_station_action(time);
         printf("done\n");
         acc_or_not = false;
-    }
+    }*/
 
 
 
     /*******************Don't delete this code *********************/
-    /*if(leave_docking_station)
+    if(leave_docking_station)
     {
         leave_station_action(time);
     }
@@ -427,7 +429,7 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         //battery is low (navigate to the docking station)
         std::cout<<"move to docking station"<<std::endl;
         ros::Time start = ros::Time::now();
-        while(ros::Time::now()-start < ros::Duration(5.0)){//do nothing, just to waste the time}
+        while(ros::Time::now()-start < ros::Duration(5.0)){}//do nothing, just to waste the time
         battery_is_low_action(time);
-    }*/
+    }
 }

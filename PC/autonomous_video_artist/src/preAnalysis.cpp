@@ -101,6 +101,8 @@ double AutoNav::avg_distance(const cv::Mat depth_img)
 {
     Mat mask = depth_img > 0;
     int pixel_num = countNonZero(mask);
+    if(pixel_num==0)
+        return -1;
     cv::Mat depth = depth_img/1000.0;
     return (double)sum(depth)[0]/(double)pixel_num;
 }
