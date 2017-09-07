@@ -68,6 +68,8 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         }
         else
             move_forward = true;
+
+        //visualize
         double max = 0.0;
         cv::minMaxLoc(crop_front, 0, &max, 0, 0);
         cv::Mat crop_norm;

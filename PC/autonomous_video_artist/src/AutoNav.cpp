@@ -52,7 +52,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     yaw = 0.0;
     motion = false;
     first_time = true;
-    motion_map = cv::Mat::zeros(640,480, CV_32FC1);
+    motion_map = cv::Mat::zeros(480,640, CV_32FC1);
     battery_value = 164;
 
     node.getParamCached("drive", DRIVE);

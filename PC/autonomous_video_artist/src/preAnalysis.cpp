@@ -141,8 +141,8 @@ double AutoNav::avg_brightness(const cv::Mat rgb_img)
 
 bool AutoNav::motion_detection(const cv::Mat depth_img)
 {
-    Mat diff=cv::Mat::zeros(640,480,CV_32FC1);
-    Mat diff_after = cv::Mat::zeros(640,480,CV_32FC1);
+    Mat diff=cv::Mat::zeros(480,640,CV_32FC1);
+    Mat diff_after = cv::Mat::zeros(480,640,CV_32FC1);
     
     if(first_time)
     {
@@ -166,10 +166,24 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         
         blur(norm, norm, Size(10,10));
         blur(norm, norm, Size(10,10));
-        cv::Mat new_mask = norm>200;
-        cv::imshow("norm", norm);
+        cv::Mat new_mask = norm>150;
+        /*cv::imshow("norm", norm);
         cv::imshow("mask", new_mask);
+        cv::waitKey(1);*/
+        
+        Mat new_mask1;
+        new_mask.convertTo(new_mask1, CV_32FC1);
+        
+        motion_map = new_mask1+motion_map;
+        
+        //visualize
+        double motion_max = 0.0;
+        cv::minMaxLoc(motion_map, 0, &motion_max, 0, 0);
+        Mat motion_norm;
+        motion_map.convertTo(motion_norm, CV_32F, 1.0/motion_max, 0);
+        cv::imshow("motion", motion_norm);
         cv::waitKey(1);
+
 
         Moments mu = moments(new_mask, true);
         Point center;
@@ -177,11 +191,11 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         center.y = mu.m01 / mu.m00;
         Mat3b res;
         cvtColor(new_mask, res, CV_GRAY2BGR);
-        imshow("result", res);
-        cv::waitKey(1);
         prev_frame = depth_img;
         if(center.x > 0 && center.y > 0){
             circle(res, center, 20, Scalar(0,0,255), 4, 8, 0);
+            imshow("result", res);
+            cv::waitKey(1);
             return true;
         }
         else

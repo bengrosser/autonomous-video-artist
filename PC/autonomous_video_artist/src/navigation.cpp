@@ -96,7 +96,6 @@ void AutoNav::angular_decelerate(const ros::TimerEvent& time, double start_veloc
 
 void AutoNav::leave_station_action(const ros::TimerEvent& time)
 {
-    printf("leave_station_action\n");
     bool DRIVE;
     node.getParamCached("drive", DRIVE);
     if(DRIVE)
