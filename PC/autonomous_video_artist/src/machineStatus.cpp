@@ -56,8 +56,8 @@ void AutoNav::battery(const kobuki_msgs::SensorState msg)
 
 void AutoNav::sysInfo(const std_msgs::Int32::ConstPtr& msg)
 {
-    int ram = msg->data;
-    ROS_INFO("Free RAM %d", ram);
+    freeRAM = msg->data;
+    //ROS_INFO("Free RAM %d", ram);
 }
 
 void AutoNav::angle(const nav_msgs::Odometry::ConstPtr& msg)
@@ -100,17 +100,28 @@ void AutoNav::toEulerianAngle(const float x, const float y, const float z, const
     std::cout<<"yaw: "<<yaw<<std::endl;
 }
 
+double AutoNav::angle_converter(const double yaw){
+    if(yaw > 0)
+        return yaw/pi*180.0;
+    else
+        return 360.0-abs(yaw)/pi*180.0;
+}
+
 void AutoNav::writeJson(const ros::TimerEvent& time)
 {
     Json::Value v;
     v["position_x"] = current_x;
     v["position_y"] = current_y;
     v["has_obstacle"] = !move_forward;
-    v["direction"] = yaw;
-    ros::Time current_time = ros::Time::now();
+    //v["direction"] = yaw;
+    v["direction"] = angle_converter(yaw);
+    /*ros::Time current_time = ros::Time::now();
     uint32_t second_value = current_time.toSec();
     uint32_t nsecond_value = current_time.toNSec();
-    double timestamp = second_value+(nsecond_value/pow(10,9));
+    double timestamp = second_value+(nsecond_value/pow(10,9));*/
+    time_t t = std::time(0);
+    struct tm * now = localtime(&t);
+    string timestamp = to_string(now->tm_year + 1900)+"-"+to_string(now->tm_mon+1)+"-"+to_string(now->tm_mday)+" "+to_string(now->tm_hour)+":"+to_string(now->tm_min)+":"+to_string(now->tm_sec);
     v["timestamp"] = timestamp;
     v["battery"] = battery_value;
     v["distance_to_docking"] = distance_to_docking;
@@ -118,5 +129,6 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
     v["entropy"] = entropy;
     v["avg_distance"] = avg_front_distance;
     v["motion"] = motion;
+    v["freeRAM"] = freeRAM;
     jsonarray.append(v);
 }

@@ -54,6 +54,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     first_time = true;
     motion_map = cv::Mat::zeros(480,640, CV_32FC1);
     battery_value = 164;
+    freeRAM = -1;
 
     node.getParamCached("drive", DRIVE);
     node.getParamCached("drive_linearspeed", linear_speed);

@@ -36,6 +36,7 @@
 #include <jsoncpp/json/writer.h>
 #include <jsoncpp/json/json.h>
 #include <fstream>
+#include <ctime>
 
 using namespace std;
 using namespace cv;
@@ -80,6 +81,7 @@ private:
     float yaw;
     int view_height;
     int view_bottom;
+    int freeRAM;
 
     bool DRIVE;
     double static_linear_speed;
@@ -129,6 +131,7 @@ private:
     void sysInfo(const std_msgs::Int32::ConstPtr& msg);
     void angle(const nav_msgs::Odometry::ConstPtr& msg);
     void toEulerianAngle(const float x, const float y, const float z, const float w, float& roll, float& pitch, float& yaw);
+    double angle_converter(const double yaw);
     void writeJson(const ros::TimerEvent& time);
     
 
