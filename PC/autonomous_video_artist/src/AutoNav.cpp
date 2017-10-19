@@ -55,6 +55,8 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     motion_map = cv::Mat::zeros(480,640, CV_32FC1);
     battery_value = 164;
     freeRAM = -1;
+	
+	video_clip = 0;
 
     node.getParamCached("drive", DRIVE);
     node.getParamCached("drive_linearspeed", linear_speed);
@@ -62,7 +64,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     signal(SIGINT, my_handler);
 
-    ros::MultiThreadedSpinner threads(8);
+    ros::MultiThreadedSpinner threads(9);
 
     image_transport::ImageTransport it(node);
     image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
@@ -84,6 +86,8 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
 
     ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
+
+	ros::Timer panning = node.createTimer(ros::Duration(0.1), &AutoNav::video_control, this);
 
     threads.spin();
     

@@ -82,6 +82,7 @@ private:
     int view_height;
     int view_bottom;
     int freeRAM;
+	int RAM_in_use;
 
     bool DRIVE;
     double static_linear_speed;
@@ -98,6 +99,7 @@ private:
     Mat prev_frame;
     Mat motion_map;
     
+	int video_clip;
 
     //Preliminary analysis
     void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
@@ -108,11 +110,17 @@ private:
     double image_entropy(const cv::Mat rgb_img);
     double avg_brightness(const cv::Mat rgb_img);
     bool motion_detection(const cv::Mat depth_img);
+
     //take videos
-    void webcam0(const sensor_msgs::ImageConstPtr& msg);
-    void webcam1(const sensor_msgs::ImageConstPtr& msg);
+	void video_control(const ros::TimerEvent& time);
+	void shoot_video(const ros::TimerEvent& time);
+	void panning(const ros::TimerEvent& time, double duration, double velocity);
+	void camera(const ros::TimerEvent& time, string duration, string output_file_name, int camera_idx);
+    void CorrespondingJson(string filename);
+
     //vision analysis
     void frontEnv(const sensor_msgs::ImageConstPtr& msg);
+
     //navigation
     float acc_speed(double target_velocity, double duration, double time_elapsed);
     float dec_speed(double start_velocity, double duration, double time_elapsed);
@@ -125,6 +133,7 @@ private:
     void auto_docking_action(const ros::TimerEvent& time);
     void battery_is_low_action(const ros::TimerEvent& time);
     void pilot(const ros::TimerEvent& time);
+
     //machine status
     void bumperStatus(const kobuki_msgs::BumperEvent msg);
     void battery(const kobuki_msgs::SensorState msg);
