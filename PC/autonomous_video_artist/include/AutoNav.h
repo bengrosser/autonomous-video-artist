@@ -24,6 +24,8 @@
 #include <kobuki_msgs/BumperEvent.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Int64.h>
+#include <std_msgs/UInt64.h>
 #include <kobuki_msgs/SensorState.h>
 #include <sys/sysinfo.h>
 #include <actionlib/server/simple_action_server.h>
@@ -37,10 +39,13 @@
 #include <jsoncpp/json/json.h>
 #include <fstream>
 #include <ctime>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
 
 using namespace std;
 using namespace cv;
 namespace enc = sensor_msgs::image_encodings;
+
 
 extern bool shutdown;
 extern const double pi;
@@ -79,10 +84,14 @@ private:
     float roll;
     float pitch;
     float yaw;
-    int view_height;
-    int view_bottom;
-    int freeRAM;
-	int RAM_in_use;
+
+	//system info parameters
+    unsigned long freeRAM;
+	unsigned long RAM_in_use;
+	unsigned long freeSwap;
+	unsigned long Swap_in_use;
+	long uptime;
+	
 
     bool DRIVE;
     double static_linear_speed;
@@ -98,8 +107,7 @@ private:
     bool first_time;
     Mat prev_frame;
     Mat motion_map;
-    
-	int video_clip;
+
 
     //Preliminary analysis
     void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
@@ -137,7 +145,14 @@ private:
     //machine status
     void bumperStatus(const kobuki_msgs::BumperEvent msg);
     void battery(const kobuki_msgs::SensorState msg);
-    void sysInfo(const std_msgs::Int32::ConstPtr& msg);
+    //void sysInfo(const std_msgs::Int32::ConstPtr& msg);
+	//void sysInfo(const std_msgs::Int64::ConstPtr& msg1, const std_msgs::Int64::ConstPtr& msg2, const std_msgs::Int64::ConstPtr& msg3, const std_msgs::Int64::ConstPtr& msg4, const std_msgs::Int64::ConstPtr& msg5);
+	void sys_freeRAM(const std_msgs::UInt64::ConstPtr& msg);
+	void sys_totalRAM(const std_msgs::UInt64::ConstPtr& msg);
+	void sys_freeSwap(const std_msgs::UInt64::ConstPtr& msg);
+	void sys_totalSwap(const std_msgs::UInt64::ConstPtr& msg);
+	void sys_uptime(const std_msgs::Int64::ConstPtr& msg);
+
     void angle(const nav_msgs::Odometry::ConstPtr& msg);
     void toEulerianAngle(const float x, const float y, const float z, const float w, float& roll, float& pitch, float& yaw);
     double angle_converter(const double yaw);

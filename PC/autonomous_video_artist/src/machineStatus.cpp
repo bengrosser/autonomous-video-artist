@@ -54,10 +54,40 @@ void AutoNav::battery(const kobuki_msgs::SensorState msg)
     }
 }
 
-void AutoNav::sysInfo(const std_msgs::Int32::ConstPtr& msg)
+/*void AutoNav::sysInfo(const std_msgs::Int32::ConstPtr& msg)
 {
     freeRAM = msg->data;
     //ROS_INFO("Free RAM %d", ram);
+}*/
+
+/*void AutoNav::sysInfo(const std_msgs::Int32::ConstPtr& msg1, const std_msgs::Int32::ConstPtr& msg2, const std_msgs::Int32::ConstPtr& msg3, const std_msgs::Int32::ConstPtr& msg4, const std_msgs::Int32::ConstPtr& msg5)
+{
+	
+}*/
+
+void AutoNav::sys_freeRAM(const std_msgs::UInt64::ConstPtr& msg)
+{
+	freeRAM = msg->data;
+}
+
+void AutoNav::sys_totalRAM(const std_msgs::UInt64::ConstPtr& msg)
+{
+	RAM_in_use = msg->data;
+}
+
+void AutoNav::sys_freeSwap(const std_msgs::UInt64::ConstPtr& msg)
+{
+	freeSwap = msg->data;
+}
+
+void AutoNav::sys_totalSwap(const std_msgs::UInt64::ConstPtr& msg)
+{
+	Swap_in_use = msg->data;
+}
+
+void AutoNav::sys_uptime(const std_msgs::Int64::ConstPtr & msg)
+{
+	uptime = msg->data;
 }
 
 void AutoNav::angle(const nav_msgs::Odometry::ConstPtr& msg)
@@ -95,9 +125,9 @@ void AutoNav::toEulerianAngle(const float x, const float y, const float z, const
     float t4 = +1.0-2.0*(ysqr+z*z);
     yaw = std::atan2(t3, t4);
 
-    std::cout<<"roll: "<<roll<<std::endl;
-    std::cout<<"pitch: "<<pitch<<std::endl;
-    std::cout<<"yaw: "<<yaw<<std::endl;
+    //std::cout<<"roll: "<<roll<<std::endl;
+    //std::cout<<"pitch: "<<pitch<<std::endl;
+    //std::cout<<"yaw: "<<yaw<<std::endl;
 }
 
 double AutoNav::angle_converter(const double yaw){
@@ -121,10 +151,10 @@ void AutoNav::writeJson(const ros::TimerEvent& time)
 	subV["direction"] = angle_converter(yaw);
 	subV["battery_level"] = battery_value;
 	subV["distance_to_dock"] = distance_to_docking;
-	subV["RAM_in_use_sys"] = RAM_in_use;
-	//subV["swap_in_use_sys"]   ??
-	subV["RAM_free"] = freeRAM;
-	//subV["swap_free"]  ??
+	//subV["RAM_in_use_sys"] = RAM_in_use;
+	//subV["swap_in_use_sys"] = swap_in_use;
+	//subV["RAM_free"] = freeRAM;
+	//subV["swap_free"] = freeSwap;
 	//subV["loadavg_1"]  ??
 	//subV["process_CPU"] ??
 	//subV["process_RAM"] ??

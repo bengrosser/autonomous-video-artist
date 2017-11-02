@@ -96,8 +96,8 @@ void AutoNav::CorrespondingJson(string filename)
 	current_status["direction"] = angle_converter(yaw);
 	current_status["battery_level"] = battery_value;
 	current_status["distance_to_dock"] = distance_to_docking;
-	current_status["RAM_in_use_sys"] = RAM_in_use;
-	current_status["RAM_free"] = freeRAM;
+	//current_status["RAM_in_use_sys"] = RAM_in_use;
+	//current_status["RAM_free"] = freeRAM;
 	
 	Json::StyledWriter styledWriter;
 	std::ofstream fid;
