@@ -105,3 +105,30 @@ void AutoNav::CorrespondingJson(string filename)
 	fid  << styledWriter.write(current_status);
 	fid.close();
 }
+
+/*void AutoNav::CorrespondingJson(Json::Value& current_status)
+{
+	current_status["avg_brightness"] = brightness;
+	current_status["avg_distance"] = avg_front_distance;
+	current_status["motion_detected"] = motion;
+	current_status["entropy"] = entropy;
+	current_status["has_obstacle"] = !move_forward;
+	current_status["position_X"] = current_x;
+	current_status["position_Y"] = current_y;
+	time_t t = std::time(0);
+    struct tm * now = localtime(&t);
+    string timestamp = to_string(now->tm_year + 1900)+"-"+to_string(now->tm_mon+1)+"-"+to_string(now->tm_mday)+" "+to_string(now->tm_hour)+":"+to_string(now->tm_min)+":"+to_string(now->tm_sec);
+	current_status["timestamp"] = timestamp;
+	current_status["direction"] = angle_converter(yaw);
+	current_status["battery_level"] = battery_value;
+	current_status["distance_to_dock"] = distance_to_docking;
+	//TODO: long to int
+	//current_status["RAM_in_use_sys"] = si.totalram-si.freeram;
+	//current_status["RAM_free"] = si.freeram;
+	//current_status["swap_in_use_sys"] = si.totalswap-si.freeswap;
+	//current_status["swap_free"] = si.freeswap;
+	//current_status["uptime"] = si.uptime;
+	//current_status["capture_pan_type"]
+	//current_status["capture_duration"]
+	//current_status["capture_success"]
+}*/

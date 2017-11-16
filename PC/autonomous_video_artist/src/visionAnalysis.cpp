@@ -27,7 +27,7 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         }        
 
         avg_front_distance = avg_distance(depth_img);
-        motion = motion_detection(depth_img);
+        motion = motion_detection(depth_img);      ////////////////////////////There is a bug
         cv::Mat crop_front = depth_img(cv::Rect_<int>(180,200,280,270));
         cv::Mat mask = crop_front>0;
         int num = countNonZero(mask);

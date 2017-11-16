@@ -136,9 +136,12 @@ double AutoNav::avg_brightness(const cv::Mat rgb_img)
     vector<Mat> channel;
     split(hsv_img, channel);
     Scalar m = mean(channel[2]);
+    //std::cout<<"Avg brightness :"<< m[0]<<std::endl;
     return m[0];
 }
 
+
+///////////There is a bug in this function!!!!!!
 bool AutoNav::motion_detection(const cv::Mat depth_img)
 {
     Mat diff=cv::Mat::zeros(480,640,CV_32FC1);
@@ -167,12 +170,12 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         blur(norm, norm, Size(10,10));
         blur(norm, norm, Size(10,10));
         cv::Mat new_mask = norm>150;
-        /*cv::imshow("norm", norm);
-        cv::imshow("mask", new_mask);
-        cv::waitKey(1);*/
         
-        Mat new_mask1;
+        
+        cv::Mat new_mask1;
         new_mask.convertTo(new_mask1, CV_32FC1);
+        cv::imshow("new_mask1", new_mask1);
+        
         
         motion_map = new_mask1+motion_map;
         
@@ -200,7 +203,6 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         }
         else
             return false;
-
-        
     }
+    return true;
 }
