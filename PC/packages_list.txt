@@ -4,7 +4,9 @@ To run this code, you need to install some packages on your PC.
 
 1. Required ros package. Here is a good reference from turtlebot tutorial: http://wiki.ros.org/turtlebot/Tutorials/indigo/PC%20Installation
 
-2. OpenCV. Here is a tutorial: https://milq.github.io/install-opencv-ubuntu-debian/.
+2. OpenCV. http://www.bogotobogo.com/OpenCV/opencv_3_tutorial_ubuntu14_install_cmake.php
 
-3. (optional. Only needed when you want to try the point-clould version of code) PCL library 1.8. Here is a good reference: https://github.com/hsean/Capstone-44-Object-Segmentation/wiki/PCL-1.8:-Ubuntu-14.04-Installation-Guide
+3. JSONCPP. $ sudo apt-get install libjsoncpp-dev
+
+4. (optional. Only needed when you want to try the point-clould version of code) PCL library 1.8. Here is a good reference: https://github.com/hsean/Capstone-44-Object-Segmentation/wiki/PCL-1.8:-Ubuntu-14.04-Installation-Guide
 

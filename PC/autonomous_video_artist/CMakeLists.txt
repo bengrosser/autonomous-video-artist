@@ -21,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
 )
 
+find_package(OpenCV REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
@@ -130,6 +131,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -162,7 +164,7 @@ add_executable (ava src/main.cpp src/AutoNav.cpp src/navigation.cpp src/preAnaly
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-target_link_libraries(ava ${catkin_LIBRARIES} ${JSONCPP_LIBRARY})
+target_link_libraries(ava ${catkin_LIBRARIES} ${JSONCPP_LIBRARY} ${OpenCV_LIBS})
 
 #############
 ## Install ##
