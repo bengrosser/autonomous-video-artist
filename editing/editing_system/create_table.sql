@@ -1,0 +1,20 @@
+CREATE TABLE Metadata(
+	file_name text PRIMARY KEY,
+	file_path text NOT NULL,
+	avg_brightness real NOT NULL,
+	avg_distance real NOT NULL,
+	motion_detected integer NOT NULL,
+	entropy real NOT NULL,
+	has_obstacle integer NOT NULL,
+	position_x real NOT NULL, 
+	position_y real NOT NULL,
+	timestamp text NOT NULL,
+	direction real NOT NULL,
+	battery_level integer NOT NULL,
+	distance_to_dock real NOT NULL,
+	RAM_in_use_sys integer NOT NULL,
+	capture_pan_type integer NOT NULL, 
+	capture_duration real NOT NULL,
+	metadata_score integer,
+	to_edit text 
+);

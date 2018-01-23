@@ -11,9 +11,7 @@ Code for Initializer module in editing system
 #TODO: Implement Loggin for this
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin 
-import numpy as np
-import time
-import message_publisher 
+import message_publisher
 import sys
 
 
@@ -36,7 +34,8 @@ class Initializer(ConsumerMixin):
         exchange = Exchange('editing_exchange', type='direct')
         routing_key = "data-start-initialize"
         initialize_publisher = message_publisher.Message_publisher(self.connection, exchange, 
-                routing_key) 
+                routing_key)
+        #Initializer will tell filewatcher how many files to watch
         msg = dict(
                 enough_quantity = 5,
                 ) 
