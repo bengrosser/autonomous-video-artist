@@ -88,73 +88,72 @@ def vector_magnitude(pair):
     return math.sqrt(pair[0]**2 + pair[1]**2)
 
 
-def gradient_epf(vid1_edit_frame_dict, vid2_edit_frame_dict):
+def compare_frame_list_gradient(vid1_name, frame_list1, key_1, vid2_name, frame_list2, key_2, ff_memory):
+    lowest_vector = None
+    lowest_magnitude = float('inf')
+    list1_frame_offset = 0
+    list2_frame_offset = 0
+    list1_counter = 0
+    for frame_1 in frame_list1:
+        list2_counter = 0
+        for frame_2 in frame_list2:
+            similarity_vector = compare_gradient(frame_1, frame_2)
+            similarity_vector_magnitude = vector_magnitude(similarity_vector)
+            memory_key = (vid1_name, vid2_name, key_1, key_2, list1_counter, list2_counter)
+            if memory_key in ff_memory:
+                ff_memory[memory_key]['gradient'] = similarity_vector
+            else:
+                ff_memory[memory_key] = {}
+                ff_memory[memory_key]['gradient'] = similarity_vector
+            if similarity_vector_magnitude < lowest_magnitude:
+                list1_frame_offset = list1_counter
+                list2_frame_offset = list2_counter
+                lowest_vector = similarity_vector
+                lowest_magnitude = similarity_vector_magnitude
+            list2_counter += 1
+        list1_counter += 1
+    return lowest_vector, lowest_magnitude, list1_frame_offset, list2_frame_offset, ff_memory
+
+
+# ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results
+def gradient_epf(vid1_name, vid1_edit_frame_dict, vid2_name, vid2_edit_frame_dict, ff_memory):
     vid1_lowest_key = None
     vid2_lowest_key = None
     vid1_frame_offset = 0
     vid2_frame_offset = 0
     lowest_vector = None
     lowest_magnitude = float('inf')
-    vid1_counter = 0
-    for key_1, frame_1 in vid1_edit_frame_dict.iteritems():
-        vid2_counter = 0
-        for key_2, frame_2 in vid2_edit_frame_dict.iteritems():
-            similarity_vector = compare_gradient(frame_1, frame_2)
-            similarity_vector_magnitude = vector_magnitude(similarity_vector)
+    for key_1, frame_1_list in vid1_edit_frame_dict.iteritems():
+        for key_2, frame_2_list in vid2_edit_frame_dict.iteritems():
+            # Compare gradient value in the list
+            lowest_similarity_vector, no_use, frame_1_list_offset, frame_2_list_offset = \
+                compare_frame_list_gradient(vid1_name, frame_1_list, key_1, vid2_name, frame_2_list, key_2, ff_memory)
+            similarity_vector_magnitude = vector_magnitude(lowest_similarity_vector)
             if similarity_vector_magnitude < lowest_magnitude:
                 vid1_lowest_key = key_1
                 vid2_lowest_key = key_2
-                vid1_frame_offset = vid1_counter
-                vid2_frame_offset = vid2_counter
-                lowest_vector = similarity_vector
+                vid1_frame_offset = frame_1_list_offset
+                vid2_frame_offset = frame_2_list_offset
+                lowest_vector = lowest_similarity_vector
                 lowest_magnitude = similarity_vector_magnitude
-            vid2_counter += 1
-        vid1_counter += 1
-    return vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector
+    return vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector, lowest_magnitude
 
 
-def editing_point_finder(vid1, vid2):
-    """
-    :param vid1: name of the video 1
-    :param vid2: name of the video 2
-    :return: the pair of editing points and its corresponding methods
-    """
-    connection = sqlite3.connect('Video_Metadata.db')
-    cursor = connection.cursor()
-    cursor.execute('SELECT to_edit, file_path FROM Metadata WHERE file_name=?', (vid1, ))
-    connection.close()
-    vid1_to_edit, vid1_path = cursor.fetchone()
-    cursor.execute('SELECT to_edit, file_path FROM Metadata WHERE file_name=?', (vid2, ))
-    vid2_to_edit, vid2_path = cursor.fetchone()
-    vid1_edit_frame_dict = build_edit_frame_dict(vid1_path, vid1_to_edit)
-    vid2_edit_frame_dict = build_edit_frame_dict(vid2_path, vid2_to_edit)
-    vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector = gradient_epf(vid1_edit_frame_dict, vid2_edit_frame_dict)
-    print vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector
-
-
-
-
-
-editing_point_finder('2017-10-24_20:1:53.avi', '2017-10-24_20:1:53.avi')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# def editing_point_finder(vid1, vid2):
+#     """
+#     :param vid1: name of the video 1
+#     :param vid2: name of the video 2
+#     :return: the pair of editing points and its corresponding methods
+#     """
+#     connection = sqlite3.connect('Video_Metadata.db')
+#     cursor = connection.cursor()
+#     cursor.execute('SELECT to_edit, file_path FROM Metadata WHERE file_name=?', (vid1, ))
+#     connection.close()
+#     vid1_to_edit, vid1_path = cursor.fetchone()
+#     cursor.execute('SELECT to_edit, file_path FROM Metadata WHERE file_name=?', (vid2, ))
+#     vid2_to_edit, vid2_path = cursor.fetchone()
+#     vid1_edit_frame_dict = build_edit_frame_dict(vid1_path, vid1_to_edit)
+#     vid2_edit_frame_dict = build_edit_frame_dict(vid2_path, vid2_to_edit)
+#     vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector, lowest_magnitude = \
+#         gradient_epf(vid1_edit_frame_dict, vid2_edit_frame_dict)
+#     return vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector, lowest_magnitude

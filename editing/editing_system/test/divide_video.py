@@ -1,8 +1,7 @@
 import cv2
-import numpy as np
-import time
 import random
 import math
+import json
 
 
 def generate_random_starting_points(num_points, total_num_frames, frames_per_sec, vid_length):
@@ -10,7 +9,7 @@ def generate_random_starting_points(num_points, total_num_frames, frames_per_sec
     :param num_points: Number of starting points
     :param total_num_frames: total number of frames in the video
     :param frames_per_sec: FPS
-    :param vid_length: duration of video clips
+    :param vid_length: duration of video clips in seconds
     :return: list of starting points
     """
     duration_in_frames = frames_per_sec * vid_length
@@ -41,9 +40,11 @@ def split_video(vid_numbers, vid_length, video_path):
     frames_per_video = int(frames_per_second*vid_length)
     total_frame_num = int(camera.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
     starting_points = generate_random_starting_points(vid_numbers, total_frame_num, frames_per_second, vid_length)
+    vid_subclip_json = {}
     for starting_point in starting_points:
         camera.set(1, starting_point)
         vid_name = str(starting_point) + ".mp4"
+        vid_subclip_json[vid_name] = (starting_point, starting_point + frames_per_video - 1)
         out = cv2.VideoWriter(vid_name, fourcc, camera.get(cv2.cv.CV_CAP_PROP_FPS), (1920, 800))
         for i in range(frames_per_video):
             grabbed, frame = camera.read()
@@ -53,6 +54,9 @@ def split_video(vid_numbers, vid_length, video_path):
                 print "There is something wrong with the video source"
                 break
         out.release()
+    with open("vid_subclip.json", 'w+') as outfile:
+        json.dump(vid_subclip_json, outfile)
+    outfile.close()
     print "Finished the job"
 
 split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/matrix-woman-red.mp4")
