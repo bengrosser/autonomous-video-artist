@@ -18,16 +18,22 @@ def compare_gradient(img1, img2):
     :param img2: The frame read from second video
     :return: a vector with both magnitude and direction
     """
-    img1 = cv2.cvtColor(img1, cv2.COLOR_BRG2GRAY)
+    print "Start work on gradient"
+    start_time = time.time()
+    img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
     img1_blur = gradient.gaussian_blur(img1)
-    img2 = cv2.cvtColor(img2, cv2.COLOR_BRG2GRAY)
+    img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
     img2_blur = gradient.gaussian_blur(img2)
     img1_sobelx, img1_sobely = gradient.sobel_filter(img1_blur)
     img2_sobelx, img2_sobely = gradient.sobel_filter(img2_blur)
     img1_gradient_intensity, img1_raw_direction_indegree = gradient.get_gradients(img1_sobelx, img1_sobely)
     img2_gradient_intensity, img2_raw_direction_indegree = gradient.get_gradients(img2_sobelx, img2_sobely)
-    return generate_similarity_vector(img1_gradient_intensity, img2_gradient_intensity,
+    print "Spend", time.time()-start_time, "seconds in creating gradient source"
+    start_time = time.time()
+    result =  generate_similarity_vector(img1_gradient_intensity, img2_gradient_intensity,
                                       img1_raw_direction_indegree, img2_raw_direction_indegree)
+    print "Spend", time.time()-start_time, "seconds in comparison"
+    return result
 
 
 # Based on both images' edge vectors' directions and intensity we can have a compatibility vector
@@ -38,11 +44,11 @@ def generate_similarity_vector(intensity_1, intensity_2, direction_1, direction_
                "-45": np.array([negative_45_unit_value, negative_45_unit_value]),
                "45": np.array([positive_45_unit_value, positive_45_unit_value])}
     rows_num, cols_num = intensity_1.shape
-    similarity_vector = np.array([0, 0])
-    for i in rows_num:
-        for j in cols_num:
-            unit_vector_1 = dir_map[str(direction_1[i][j])]
-            unit_vector_2 = dir_map[str(direction_2[i][j])]
+    similarity_vector = np.array([0.0, 0.0])
+    for i in range(rows_num):
+        for j in range(cols_num):
+            unit_vector_1 = dir_map[str(int(direction_1[i][j]))]
+            unit_vector_2 = dir_map[str(int(direction_2[i][j]))]
             vector_1_intensity = intensity_1[i][j]
             vector_2_intensity = intensity_2[i][j]
             vector_1 = unit_vector_1 * vector_1_intensity
@@ -97,7 +103,11 @@ def compare_frame_list_gradient(vid1_name, frame_list1, key_1, vid2_name, frame_
     for frame_1 in frame_list1:
         list2_counter = 0
         for frame_2 in frame_list2:
-            similarity_vector = compare_gradient(frame_1, frame_2)
+            start_time = time.time()
+            down_scale_frame_1 = cv2.resize(frame_1, (200, 400))
+            down_scale_frame_2 = cv2.resize(frame_2, (200, 400))
+            similarity_vector = compare_gradient(down_scale_frame_1, down_scale_frame_2)
+            print "Gradient Compariosn spend", time.time()-start_time, "seconds"
             similarity_vector_magnitude = vector_magnitude(similarity_vector)
             memory_key = (vid1_name, vid2_name, key_1, key_2, list1_counter, list2_counter)
             if memory_key in ff_memory:
@@ -115,8 +125,15 @@ def compare_frame_list_gradient(vid1_name, frame_list1, key_1, vid2_name, frame_
     return lowest_vector, lowest_magnitude, list1_frame_offset, list2_frame_offset, ff_memory
 
 
-# ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results
 def gradient_epf(vid1_name, vid1_edit_frame_dict, vid2_name, vid2_edit_frame_dict, ff_memory):
+    """
+    :param vid1_name: parameter for making ff_memory key
+    :param vid1_edit_frame_dict: will be used for calculations
+    :param vid2_name: parameter for making ff_memory key
+    :param vid2_edit_frame_dict: will be used for calculations
+    :param ff_memory: ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results
+    :return: the lowest vector and its coordinate along with updated ff_memory for gradient
+    """
     vid1_lowest_key = None
     vid2_lowest_key = None
     vid1_frame_offset = 0
@@ -126,7 +143,7 @@ def gradient_epf(vid1_name, vid1_edit_frame_dict, vid2_name, vid2_edit_frame_dic
     for key_1, frame_1_list in vid1_edit_frame_dict.iteritems():
         for key_2, frame_2_list in vid2_edit_frame_dict.iteritems():
             # Compare gradient value in the list
-            lowest_similarity_vector, no_use, frame_1_list_offset, frame_2_list_offset = \
+            lowest_similarity_vector, no_use, frame_1_list_offset, frame_2_list_offset, ff_memory = \
                 compare_frame_list_gradient(vid1_name, frame_1_list, key_1, vid2_name, frame_2_list, key_2, ff_memory)
             similarity_vector_magnitude = vector_magnitude(lowest_similarity_vector)
             if similarity_vector_magnitude < lowest_magnitude:
@@ -136,7 +153,7 @@ def gradient_epf(vid1_name, vid1_edit_frame_dict, vid2_name, vid2_edit_frame_dic
                 vid2_frame_offset = frame_2_list_offset
                 lowest_vector = lowest_similarity_vector
                 lowest_magnitude = similarity_vector_magnitude
-    return vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector, lowest_magnitude
+    return vid1_lowest_key, vid2_lowest_key, vid1_frame_offset, vid2_frame_offset, lowest_vector, lowest_magnitude, ff_memory
 
 
 # def editing_point_finder(vid1, vid2):

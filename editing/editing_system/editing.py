@@ -16,6 +16,8 @@ import math
 import sqlite3
 import time
 import json
+
+
 # TODO: Checkout the generators if the performance really sucks
 # TODO: Implement actual import stage methods
 
@@ -29,7 +31,7 @@ def read_frames_into_list(vid_path):
         if grabbed:
             vid_frames_in_list.append(frame)
         else:
-            print "No Video Feed Available, Finished Import", vid_path
+            print "Finished Import", vid_path
             break
     camera.release()
     return vid_frames_in_list
@@ -45,6 +47,7 @@ def test_import(test_files_root_path):
     imported_video_sources = {}
     vid_subclip_info = json.load(open(json_file_path))
     for vid_name, editing_pair in vid_subclip_info.iteritems():
+        print "Start to work on ", vid_name
         editing_pair = (editing_pair[0], editing_pair[1])
         vid_path = test_files_root_path + "/" + vid_name
         frames_list = read_frames_into_list(vid_path)
@@ -56,48 +59,47 @@ def test_import(test_files_root_path):
 #   Compare all the frames in sub-clips imported find the best editing point
 #   Build Reference Dictionary: this step is done inside editing point finder
 # The reference dictionary should contain three top layers corresponding to DA methods
-def initialize(imported_video_sources):
+def initialize(imported_video_sources, ff_memory_to_update):
+    """
+    :param imported_video_sources: the dictionary with format {vid_name:{editing_pair: corresponding frames}}
+    :param ff_memory_to_update: used to book keeping comparison results
+    :return: lowest vector coordinate, ff_memory
+    """
+    vid_names = imported_video_sources.keys()
+    num_of_videos = len(vid_names)
+    lowest_vector_vid1_key = None
+    lowest_vector_vid2_key = None
+    lowest_vector_vid1_pair_key = None
+    lowest_vector_vid2_pair_key = None
+    lowest_vector_vid1_offset = None
+    lowest_vector_vid2_offset = None
+    lowest_vector = None
+    lowest_magnitude = float('inf')
+    for i in range(num_of_videos):
+        for j in range(i + 1, num_of_videos):
+            print "Start to work on", vid_names[i], vid_names[j]
+            local_lowest_pair_key_1, local_lowest_pair_key_2, local_vid1_offset, local_vid2_offset, \
+            local_lowest_vector, local_lowest_manitude, ff_memory_to_update = \
+                epf.gradient_epf(vid_names[i], imported_video_sources[vid_names[i]], vid_names[j],
+                                 imported_video_sources[vid_names[j]], ff_memory_to_update)
+            if local_lowest_manitude < lowest_magnitude:
+                lowest_vector_vid1_key = vid_names[i]
+                lowest_vector_vid2_key = vid_names[j]
+                lowest_vector_vid1_pair_key = local_lowest_pair_key_1
+                lowest_vector_vid2_pair_key = local_lowest_pair_key_2
+                lowest_vector_vid1_offset = local_vid1_offset
+                lowest_vector_vid2_offset = local_vid2_offset
+                lowest_vector = local_lowest_vector
+                lowest_magnitude = local_lowest_manitude
+    return lowest_vector_vid1_key, lowest_vector_vid2_key, lowest_vector_vid1_pair_key, lowest_vector_vid2_pair_key, \
+           lowest_vector_vid1_offset, lowest_vector_vid2_offset, lowest_vector, ff_memory_to_update
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+start_time = time.time()
+imported_videos_sources = test_import("./test")
+print "Spend", time.time()-start_time, "seconds to import videos"
+ff_memory = {}
+result_vid1_key, result_vid2_key, result_vid1_pair_key, result_vid2_pair_key, result_vid1_offset, result_vid2_offset, \
+    result_vector, ff_memory = initialize(imported_videos_sources, ff_memory)
+print "Spend", time.time()-start_time, "seconds to finish first two stages of editing"
+print ff_memory.keys()
