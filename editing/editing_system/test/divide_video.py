@@ -34,6 +34,11 @@ def generate_random_starting_points(num_points, total_num_frames, frames_per_sec
 
 
 def split_video(vid_numbers, vid_length, video_path):
+    """
+    :param vid_numbers: Number of subclips
+    :param vid_length: Length of the video count in seconds
+    :param video_path: path to the video
+    """
     camera = cv2.VideoCapture(video_path)
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
     frames_per_second = math.ceil(camera.get(cv2.cv.CV_CAP_PROP_FPS))
@@ -43,9 +48,9 @@ def split_video(vid_numbers, vid_length, video_path):
     vid_subclip_json = {}
     for starting_point in starting_points:
         camera.set(1, starting_point)
-        vid_name = str(starting_point) + ".mp4"
+        vid_name = "casey_" + str(starting_point) + ".mp4"
         vid_subclip_json[vid_name] = (starting_point, starting_point + frames_per_video - 1)
-        out = cv2.VideoWriter(vid_name, fourcc, camera.get(cv2.cv.CV_CAP_PROP_FPS), (1920, 800))
+        out = cv2.VideoWriter(vid_name, fourcc, camera.get(cv2.cv.CV_CAP_PROP_FPS), (1280, 720))
         for i in range(frames_per_video):
             grabbed, frame = camera.read()
             if grabbed:
@@ -54,10 +59,11 @@ def split_video(vid_numbers, vid_length, video_path):
                 print "There is something wrong with the video source"
                 break
         out.release()
-    with open("vid_subclip.json", 'w+') as outfile:
+    with open("vid_subclip_casey.json", 'w+') as outfile:
         json.dump(vid_subclip_json, outfile)
     outfile.close()
     print "Finished the job"
 
-split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/matrix-woman-red.mp4")
+# split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/matrix-woman-red.mp4")
+split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/editing/editing_system/test/field_test.mp4")
 

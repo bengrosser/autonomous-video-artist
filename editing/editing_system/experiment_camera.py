@@ -1,7 +1,4 @@
 import cv2
-import time
-import numpy
-from range_finder import calcEntropy
 
 def read_one_frame(camera):
     grabbed, frame = camera.read()
@@ -17,6 +14,6 @@ counter = 0
 while frame is not None:
     frame = read_one_frame(camera)
     if frame is not None:
-        print calcEntropy(frame)
+        print "Got one frame"
     counter += 1
 

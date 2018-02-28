@@ -3,7 +3,8 @@
 # Import stage:
 #   Grab data from database
 #   Or in the test phase, read test videos and json files
-#   Build dictionary based on vid_names and corresponding subclips
+#   Change, -> cluster the frames so that there are fewer things to compare in the build of dictionary
+#   ----------Build dictionary based on vid_names and corresponding subclips<<<--
 # Initialization Stage:
 #   Compare all the frames in sub-clips imported find the best editing point
 #   Build Reference Dictionary
@@ -16,10 +17,11 @@ import math
 import sqlite3
 import time
 import json
+import cPickle
 
 
 # TODO: Checkout the generator if the performance really sucks
-# TODO: Implement actual import stage methods
+# TODO: Implement actual import stage methods ---> gradient epf
 
 
 # Get the frame sequential generator for each of the video source
@@ -104,7 +106,7 @@ def initialize(imported_video_sources, ff_memory_to_update):
         for j in range(i + 1, num_of_videos):
             print "Start to work on", vid_names[i], vid_names[j]
             start_time = time.time()
-            local_lowest_pair_key_1, local_lowest_pair_key_2, local_vid1_offset, local_vid2_offset, \
+            local_lowest_pair_key_1, local_lowest_pair_key_2, local_vid1_cluster_offset, local_vid2_cluster_offset, \
             local_lowest_vector, local_lowest_magnitude, ff_memory_to_update = \
                 epf.gradient_epf(vid_names[i], imported_video_sources[vid_names[i]], vid_names[j],
                                  imported_video_sources[vid_names[j]], ff_memory_to_update)
@@ -114,8 +116,8 @@ def initialize(imported_video_sources, ff_memory_to_update):
                 lowest_vector_vid2_key = vid_names[j]
                 lowest_vector_vid1_pair_key = local_lowest_pair_key_1
                 lowest_vector_vid2_pair_key = local_lowest_pair_key_2
-                lowest_vector_vid1_offset = local_vid1_offset
-                lowest_vector_vid2_offset = local_vid2_offset
+                lowest_vector_vid1_offset = local_vid1_cluster_offset
+                lowest_vector_vid2_offset = local_vid2_cluster_offset
                 lowest_vector = local_lowest_vector
                 lowest_magnitude = local_lowest_magnitude
     return lowest_vector_vid1_key, lowest_vector_vid2_key, lowest_vector_vid1_pair_key, lowest_vector_vid2_pair_key, \
@@ -147,7 +149,7 @@ def generator_initialize(imported_video_sources, ff_memory_to_update):
         for j in range(i + 1, num_of_videos):
             print "Start to work on", vid_names[i], vid_names[j]
             start_time = time.time()
-            local_lowest_pair_key_1, local_lowest_pair_key_2, local_vid1_offset, local_vid2_offset, \
+            local_lowest_pair_key_1, local_lowest_pair_key_2, local_vid1_cluster_offset, local_vid2_cluster_offset, \
             local_lowest_vector, local_lowest_magnitude, ff_memory_to_update = \
                 epf.gradient_epf_with_generators(vid_names[i], imported_video_sources[vid_names[i]], vid_names[j],
                                  imported_video_sources[vid_names[j]], ff_memory_to_update)
@@ -157,8 +159,8 @@ def generator_initialize(imported_video_sources, ff_memory_to_update):
                 lowest_vector_vid2_key = vid_names[j]
                 lowest_vector_vid1_pair_key = local_lowest_pair_key_1
                 lowest_vector_vid2_pair_key = local_lowest_pair_key_2
-                lowest_vector_vid1_offset = local_vid1_offset
-                lowest_vector_vid2_offset = local_vid2_offset
+                lowest_vector_vid1_offset = local_vid1_cluster_offset
+                lowest_vector_vid2_offset = local_vid2_cluster_offset
                 lowest_vector = local_lowest_vector
                 lowest_magnitude = local_lowest_magnitude
     return lowest_vector_vid1_key, lowest_vector_vid2_key, lowest_vector_vid1_pair_key, lowest_vector_vid2_pair_key, \
@@ -173,4 +175,8 @@ ff_memory = {}
 result_vid1_key, result_vid2_key, result_vid1_pair_key, result_vid2_pair_key, result_vid1_offset, result_vid2_offset, \
     result_vector, ff_memory = generator_initialize(imported_videos_sources, ff_memory)
 print "Spend", time.time()-start_time, "seconds to finish first two stages of editing"
-print ff_memory.keys()
+print result_vid1_key, result_vid2_key, result_vid1_pair_key, result_vid2_pair_key, result_vid1_offset, \
+    result_vid2_offset, result_vector
+print "There are", len(ff_memory), "items in ff_memory"
+with open('ff_memory.pickle', 'wb') as descriptor:
+    cPickle.dump(ff_memory, descriptor, protocol=cPickle.HIGHEST_PROTOCOL)

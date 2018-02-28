@@ -3,6 +3,7 @@ import numpy as np
 from random import randint
 from collections import OrderedDict
 
+
 def calcEntropy(img):
     hist = cv2.calcHist([img],[0],None,[256],[0,256])
     hist = hist.ravel()/hist.sum()

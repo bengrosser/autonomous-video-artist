@@ -12,7 +12,6 @@ Ellipse version
 also with the help of the cairo library
 '''
 
-#TODO: check out the performance and determine to use threading or not
 
 import cv2
 import numpy as np
