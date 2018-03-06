@@ -4,7 +4,7 @@ To run this code, you need to install some packages on your PC.
 
 1. Required ros package. Here is a good reference from turtlebot tutorial: http://wiki.ros.org/turtlebot/Tutorials/indigo/PC%20Installation
 
-2. OpenCV. http://www.bogotobogo.com/OpenCV/opencv_3_tutorial_ubuntu14_install_cmake.php
+2. OpenCV. https://milq.github.io/install-opencv-ubuntu-debian/
 
 3. JSONCPP. $ sudo apt-get install libjsoncpp-dev
 
