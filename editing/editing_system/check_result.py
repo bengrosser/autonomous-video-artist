@@ -85,9 +85,9 @@ def generate_video(assemble_blocks, output):
     print "Spend", time.time()-start_time, "to generate video"
 
 
-with open("assembled_video.pickle", 'rb') as input_source:
-    assembled_blocks = pickle.load(input_source)
-    generate_video(assembled_blocks, "her_matrix.mp4")
+# with open("assembled_video.pickle", 'rb') as input_source:
+#     assembled_blocks = pickle.load(input_source)
+#     generate_video(assembled_blocks, "her_matrix.mp4")
     # create_cluster_sound(assembled_blocks)
     # print assembled_blocks.editing_blocks[0].video_name
     # print assembled_blocks.editing_blocks[0].cluster_index

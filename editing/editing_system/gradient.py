@@ -184,8 +184,8 @@ def test_gradientDir():
 
 
 def produce_gradient_video(src, output, framerate, res1, res2):
-    src_path = "./data/video/" + src
-    camera = cv2.VideoCapture(src_path)
+    # src_path = "./data/video/" + src
+    camera = cv2.VideoCapture(src)
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
     frame_rate = float(framerate)
@@ -206,9 +206,8 @@ def produce_gradient_video(src, output, framerate, res1, res2):
             frame_time = float(count/24.0)
             hsv = change_color(result, gradient_intensity)
             final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
-            print final_result.shape
             out.write(final_result)
-            print "finished one frame"
+            print "finished", count, "frames"
             count += 1
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
@@ -220,3 +219,5 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     out.release()
     cv2.destroyAllWindows()
 
+
+produce_gradient_video("./her_matrix.mp4", "her_matrix_gradient.mp4", 23.0, 1920, 800)
