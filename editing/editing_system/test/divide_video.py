@@ -48,9 +48,9 @@ def split_video(vid_numbers, vid_length, video_path):
     vid_subclip_json = {}
     for starting_point in starting_points:
         camera.set(1, starting_point)
-        vid_name = "casey_" + str(starting_point) + ".mp4"
+        vid_name = "her_" + str(starting_point) + ".mp4"
         vid_subclip_json[vid_name] = (starting_point, starting_point + frames_per_video - 1)
-        out = cv2.VideoWriter(vid_name, fourcc, camera.get(cv2.cv.CV_CAP_PROP_FPS), (1280, 720))
+        out = cv2.VideoWriter(vid_name, fourcc, camera.get(cv2.cv.CV_CAP_PROP_FPS), (1920, 800))
         for i in range(frames_per_video):
             grabbed, frame = camera.read()
             if grabbed:
@@ -59,11 +59,22 @@ def split_video(vid_numbers, vid_length, video_path):
                 print "There is something wrong with the video source"
                 break
         out.release()
-    with open("vid_subclip_casey.json", 'w+') as outfile:
+    with open("vid_subclip_her.json", 'w+') as outfile:
         json.dump(vid_subclip_json, outfile)
     outfile.close()
     print "Finished the job"
 
-# split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/matrix-woman-red.mp4")
-split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/editing/editing_system/test/field_test.mp4")
 
+def combine_json(json_1, json_2, out_name):
+    json_1_dict = json.load(open(json_1))
+    json_2_dict = json.load(open(json_2))
+    result_dict = {}
+    result_dict.update(json_1_dict)
+    result_dict.update(json_2_dict)
+    with open(out_name, 'w+') as outfile:
+        json.dump(result_dict, outfile)
+    print "Finished Combining"
+# combine_json('vid_subclip.json', 'vid_subclip_her.json', 'vid_subclip_her_matrix.json')
+# split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/matrix-woman-red.mp4")
+# split_video(10, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/editing/editing_system/test/field_test.mp4")
+# split_video(5, 10, "/Users/frankshammer42/Documents/CS/autonomous-video-artist/visual/src_video/her.mp4")

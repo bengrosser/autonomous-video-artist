@@ -31,6 +31,7 @@ def sample_clustered_frames(frames_clusters):
 
 
 # Computationally more intensive methods to cluster frames
+# TODO: Increase threshold to limit number of clusters generated
 def cluster_video_frames_intense(camera, threshold):
     """
     :param file_path: File path to the video
@@ -105,50 +106,28 @@ def cluster_video_frames_entropy(camera, n):
     return result_frames_clusters
 
 
-# frames_result = cluster_video_frames_intense('./test/2958.mp4', 0.025)
+def get_block_time_range(clusters, cluster_index, fps):
+    """
+    Get the time range of a block from clusters based upon fps
+    :param clusters: clustered video
+    :param cluster_index: which index this block belongs to
+    :param fps: FPS of the video
+    :return: the time range for pydub to use
+    """
+    total_frames_before = 0
+    for i in range(cluster_index):
+        total_frames_before += len(clusters[i])
+    begin_time = (total_frames_before/fps)*1000
+    end_time = ((total_frames_before + len(clusters[cluster_index]))/fps)*1000
+    return begin_time, end_time
+
+
+# camera = cv2.VideoCapture('./test/1137.mp4')
+# frames_result = cluster_video_frames_intense(camera, 0.025)
 # counter = 0
 # for frames_cluster in frames_result:
 #     for frame in frames_cluster:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#         window_name = "Cluster " + str(counter)
+#         cv2.imshow(window_name, frame)
+#         cv2.waitKey(1)
+#     counter += 1
