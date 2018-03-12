@@ -388,7 +388,8 @@ void AutoNav::pilot(const ros::TimerEvent& time)
 
 
     /*******************Don't delete this code *********************/
-    if(leave_docking_station)
+	battery_is_good_action(time);
+    /*if(leave_docking_station)
     {
         leave_station_action(time);
     }
@@ -412,5 +413,5 @@ void AutoNav::pilot(const ros::TimerEvent& time)
         ros::Time start = ros::Time::now();
         while(ros::Time::now()-start < ros::Duration(5.0)){}//do nothing, just to waste the time
         battery_is_low_action(time);
-    }
+    }*/
 }

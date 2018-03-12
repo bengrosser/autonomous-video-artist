@@ -15,6 +15,8 @@ vector<double> AutoNav::colorPercent(const cv_bridge::CvImageConstPtr cv_ptr, in
 {
     vector<double> ret(pow(group_num, 3), 0.0);
     cv::Mat rgb_img = cv_ptr->image;
+	cout<<"row: "<<rgb_img.rows<<endl;
+	cout<<"col: "<<rgb_img.cols<<endl;
     int num_per_group = 255/group_num;
     for(int i = 0; i < img_height; ++i)
     {
@@ -85,11 +87,12 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
         else
             cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
         cv::Mat rgb_img = cv_ptr->image;
-        cv::imshow("view", rgb_img);
-        cv::waitKey(1);
         //bit = bitAnalysis(rgb_img);
         entropy = image_entropy(rgb_img);
         brightness = avg_brightness(rgb_img);
+		lock_guard<mutex> lock(mtx);
+		cv::imshow("color image", rgb_img);
+        cv::waitKey(100);
     }
     catch(const cv_bridge::Exception& e)
     {
@@ -135,15 +138,19 @@ double AutoNav::avg_brightness(const cv::Mat rgb_img)
     cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
     vector<Mat> channel;
     split(hsv_img, channel);
-    Scalar m = mean(channel[2]);
-    //std::cout<<"Avg brightness :"<< m[0]<<std::endl;
-    return m[0];
+    Scalar v = mean(channel[2]);
+    //std::cout<<"Avg brightness :"<< v[0]<<std::endl;
+	//cout<<"size: "<<hsv_img.rows<<", "<<hsv_img.cols<<endl;
+	Scalar s = mean(channel[1]);
+	//cout<<"saturation: "<<s[0]<<endl;
+    return v[0];
 }
 
 
-///////////There is a bug in this function!!!!!!
+
 bool AutoNav::motion_detection(const cv::Mat depth_img)
 {
+	cout<<"Motion detection"<<endl;
     Mat diff=cv::Mat::zeros(480,640,CV_32FC1);
     Mat diff_after = cv::Mat::zeros(480,640,CV_32FC1);
     

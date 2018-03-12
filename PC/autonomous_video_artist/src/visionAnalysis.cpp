@@ -24,10 +24,9 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         }
         else if(enc.compare("32FC1") == 0){
             cv_ptr->image.convertTo(depth_img, CV_16UC1, 1000.0);
-        }        
-
+        }   
         avg_front_distance = avg_distance(depth_img);
-        motion = motion_detection(depth_img);      ////////////////////////////There is a bug
+        //motion = motion_detection(depth_img);  
         cv::Mat crop_front = depth_img(cv::Rect_<int>(180,200,280,270));
         cv::Mat mask = crop_front>0;
         int num = countNonZero(mask);
@@ -36,6 +35,7 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         double mmin = 0.0;
         double mmax = 0.0;
         cv::minMaxLoc(crop_front, &mmin, &mmax, 0, 0, mask);
+		
         if(mmin < 600 || percentage < 0.65)
         {
             cv::Mat crop_left = depth_img(cv::Rect_<int>(0,200,180,270));
@@ -72,10 +72,16 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         //visualize
         double max = 0.0;
         cv::minMaxLoc(crop_front, 0, &max, 0, 0);
-        cv::Mat crop_norm;
-        crop_front.convertTo(crop_norm, CV_32F, 1.0/max, 0);
-        cv::imshow("foo", crop_norm);
-        cv::waitKey(1);
+        /*cv::Mat crop_norm;
+        crop_front.convertTo(crop_norm, CV_32F, 1.0/max, 0);*/
+		
+		cv::Mat depth_norm;
+		depth_img.convertTo(depth_norm, CV_32F, 1.0/max, 0);
+				
+		lock_guard<mutex> lock(mtx);
+        //cv::imshow("depth image", crop_norm);
+		cv::imshow("depth image", depth_norm);
+        cv::waitKey(100);
 
     }
     catch(const cv_bridge::Exception& e)
