@@ -21,8 +21,14 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
 )
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 2 REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(Qt5Core)
+find_package(Qt5Gui)
+find_package(Qt5Widgets)
+find_package(Qt5Test)
+find_package(Qt5Concurrent)
+find_package(Qt5OpenGL)
 pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
 
@@ -116,7 +122,7 @@ link_libraries(${JSONCPP_LIBRARIES})
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
+#  INCLUDE_DIRS include
 #  LIBRARIES autonomous_video_artist
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
