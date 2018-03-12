@@ -172,7 +172,7 @@ def change_color(result, gradient_intensity):
     max_gradient = gradient_intensity.max()
     for i in range(row):
         for j in range(collumn):
-            hsv[i][j][2] = np.rint((gradient_intensity[i][j]/max_gradient)*255)
+            hsv[i][j][2] = gradient_intensity[i][j]
     return hsv
             
 #Testing functions
@@ -198,6 +198,7 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     while True:
         grabbed, frame = camera.read()
         if grabbed:
+            gradient_time = time.time()
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             img_blur = gaussian_blur(img.copy())
             sobelx, sobely = sobel_filter(img_blur)
@@ -207,6 +208,7 @@ def produce_gradient_video(src, output, framerate, res1, res2):
             hsv = change_color(result, gradient_intensity)
             final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
             out.write(final_result)
+            print "Finished this frame spends", time.time()-gradient_time, "seconds"
             print "finished", count, "frames"
             count += 1
             # if cv2.waitKey(1) & 0xFF == ord('q'):
