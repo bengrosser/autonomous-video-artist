@@ -6,6 +6,7 @@ import struct
 import argparse
 import sys
 import time
+from numba import jit
 
 sys.setrecursionlimit(100000)
 dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)} 
@@ -39,14 +40,55 @@ def sobel_filter(img):
     return (sobelx, sobely)
 
 
-def get_gradients(sobelx, sobely): 
-    approx_array = np.array([-90, -45, -1, 1, 45, 90]) 
+@jit(nopython=True)
+def mapping_direction_for_jit(raw_direction_indegree):
+    result = np.zeros(raw_direction_indegree.shape)
+    approx_array = np.array([-90, -45, -1, 1, 45, 90])
+    rows, cols = raw_direction_indegree.shape
+    for row in range(rows):
+        for col in range(cols):
+            element = raw_direction_indegree[row, col]
+            if math.isnan(element):
+                element = 90
+            if element == 0:
+                element = 1
+            tempResult = np.abs(approx_array - element)
+            element = approx_array[np.argmin(tempResult)]
+            result[row, col] = element
+    return result
+
+
+def get_gradients_with_jit(sobelx, sobely):
+    # start_time = time.time()
     gradient_intensity = np.sqrt(sobelx**2 + sobely**2)
+    # print "Get intensity in", time.time()-start_time, "seconds"
+    # start_time = time.time()
     for x in np.nditer(sobelx, op_flags=["readwrite"]):
         if x==0:
             x[...] = 0.01
     raw_direction_inradiant = np.arctan(sobely/sobelx)
     raw_direction_indegree = np.rad2deg(raw_direction_inradiant)
+    # make sure that there is no negatvie zero inside the matrix
+    for x in np.nditer(raw_direction_indegree, op_flags=["readwrite"]):
+        if is_neg_zero(x):
+            x[...] = -1
+    result_direction = mapping_direction_for_jit(raw_direction_indegree)
+    return (gradient_intensity, result_direction)
+
+
+def get_gradients(sobelx, sobely):
+    approx_array = np.array([-90, -45, -1, 1, 45, 90])
+    # start_time = time.time()
+    gradient_intensity = np.sqrt(sobelx**2 + sobely**2)
+    # print "Get intensity in", time.time()-start_time, "seconds"
+
+    # start_time = time.time()
+    for x in np.nditer(sobelx, op_flags=["readwrite"]):
+        if x==0:
+            x[...] = 0.01
+    raw_direction_inradiant = np.arctan(sobely/sobelx)
+    raw_direction_indegree = np.rad2deg(raw_direction_inradiant)
+    # make sure that there is no negatvie zero inside the matrix
     for x in np.nditer(raw_direction_indegree, op_flags=['readwrite']):
         if math.isnan(x):
             x[...] = 90
@@ -130,7 +172,7 @@ def change_color(result, gradient_intensity):
     max_gradient = gradient_intensity.max()
     for i in range(row):
         for j in range(collumn):
-            hsv[i][j][2] = np.rint((gradient_intensity[i][j]/max_gradient)*255)
+            hsv[i][j][2] = gradient_intensity[i][j]
     return hsv
             
 #Testing functions
@@ -142,8 +184,8 @@ def test_gradientDir():
 
 
 def produce_gradient_video(src, output, framerate, res1, res2):
-    src_path = "./videos/" + src
-    camera = cv2.VideoCapture(src_path)
+    # src_path = "./data/video/" + src
+    camera = cv2.VideoCapture(src)
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
     fourcc = cv2.cv.CV_FOURCC(*'XVID')
     frame_rate = float(framerate)
@@ -156,15 +198,18 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     while True:
         grabbed, frame = camera.read()
         if grabbed:
+            gradient_time = time.time()
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             img_blur = gaussian_blur(img.copy())
             sobelx, sobely = sobel_filter(img_blur)
-            gradient_intensity, raw_direction_indegree = get_gradients(sobelx, sobely)
+            gradient_intensity, raw_direction_indegree = get_gradients_with_jit(sobelx, sobely)
             result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map, background_color)
             frame_time = float(count/24.0)
             hsv = change_color(result, gradient_intensity)
             final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
             out.write(final_result)
+            print "Finished this frame spends", time.time()-gradient_time, "seconds"
+            print "finished", count, "frames"
             count += 1
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
@@ -175,3 +220,6 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     camera.release()
     out.release()
     cv2.destroyAllWindows()
+
+
+produce_gradient_video("./her_matrix.mp4", "her_matrix_gradient.mp4", 23.0, 1920, 800)

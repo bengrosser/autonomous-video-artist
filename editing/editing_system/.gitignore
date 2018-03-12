@@ -2,3 +2,8 @@ da_video_result/
 data/
 json/
 videos/
+editing_result/
+.idea/
+*.mp4
+*.avi
+running_result.txt
