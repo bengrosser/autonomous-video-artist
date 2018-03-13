@@ -26,6 +26,53 @@ def generate_frame_gradient(frame):
     return final_result
 
 
+def generate_cut_images(assemble_blocks):
+    """
+    Generate cut images between two editing blocks
+    :param assemble_blocks: abstract data result from editing
+    """
+    start_time = time.time()
+    # visual_bridge_result = cv2.VideoWriter(visual_bridge_name, fourcc, frame_rate, resolution)
+    clustered_videos = {}
+    counter = 0
+    for editing_block in assemble_blocks.editing_blocks:
+        # print editing_block
+        block_vid_name = editing_block.video_name
+        block_cluster_index = editing_block.cluster_index
+        if 'her' in block_vid_name:
+            block_threshold = 0.1
+        else:
+            block_threshold = 0.025
+        begin_image_name = "./cut_images/" + "block_" + str(counter) + "_begin.jpg"
+        end_image_name = "./cut_images/" + "block_" + str(counter) + "_end.jpg"
+        if block_vid_name not in clustered_videos:
+            file_name = "./test/" + block_vid_name
+            camera = cv2.VideoCapture(file_name)
+            # cluster_start_time = time.time()
+            clustered_video = cluster_video_frames_intense(camera, block_threshold)
+            # clustered_video = cluster_video_frames_intense(camera, editing_block.cluster_threshold)
+            # print "Spend", time.time()-cluster_start_time, "to cluster"
+            clustered_videos[block_vid_name] = clustered_video
+            cluster_to_use = clustered_video[block_cluster_index]
+            begin_image = cluster_to_use[0]
+            end_image = cluster_to_use[len(cluster_to_use)-1]
+            begin_image_result = generate_frame_gradient(begin_image)
+            end_image_result = generate_frame_gradient(end_image)
+            cv2.imwrite(begin_image_name, begin_image_result)
+            cv2.imwrite(end_image_name, end_image_result)
+        else:
+            cluster_to_use = clustered_videos[block_vid_name][block_cluster_index]
+            begin_image = cluster_to_use[0]
+            end_image = cluster_to_use[len(cluster_to_use)-1]
+            begin_image_result = generate_frame_gradient(begin_image)
+            end_image_result = generate_frame_gradient(end_image)
+            cv2.imwrite(begin_image_name, begin_image_result)
+            cv2.imwrite(end_image_name, end_image_result)
+        counter += 1
+        print "Finished the block", block_vid_name, block_cluster_index, "remain", 200-counter, "blocks to process"
+    print "Spend", time.time()-start_time, "to generate cut images"
+
+
 # TODO: Later modify it to accommodate editing range
 def generate_video(assemble_blocks, output):
     """
@@ -87,6 +134,7 @@ def generate_video(assemble_blocks, output):
 
 # with open("assembled_video.pickle", 'rb') as input_source:
 #     assembled_blocks = pickle.load(input_source)
+#     generate_cut_images(assembled_blocks)
 #     generate_video(assembled_blocks, "her_matrix.mp4")
     # create_cluster_sound(assembled_blocks)
     # print assembled_blocks.editing_blocks[0].video_name

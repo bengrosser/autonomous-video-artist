@@ -1,8 +1,10 @@
+test/
 da_video_result/
 data/
 json/
 videos/
 editing_result/
+cut_images/
 .idea/
 *.mp4
 *.avi
