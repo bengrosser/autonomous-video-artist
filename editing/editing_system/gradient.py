@@ -197,7 +197,7 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     start_time = time.time()
     while True:
         grabbed, frame = camera.read()
-        if grabbed:
+        if grabbed and count < 2160:
             gradient_time = time.time()
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             img_blur = gaussian_blur(img.copy())
