@@ -1,5 +1,17 @@
 The code in this directory should be on your turtlebot.
 
+You need to make sure that gstreamer is installed on the robot.
+How to install gstreamer:
+	
+	$ sudo add-apt-repository universe
+	$ sudo add-apt-repository multiverse
+	$ sudo apt-get update
+	$ sudo apt-get install gstreamer1.0-tools gstreamer1.0-alsa gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav
+	$ sudo apt-get install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-good1.0-dev libgstreamer-plugins-bad1.0-dev
+	$ sudo apt-get install gstreamer-tools
+
+----------------------------------------------
+
 To run this code, you need to make sure that the network configuration is already set up between your PC and the turtlebot. Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration .
 
 And also, make sure the TIME SYNCHRONIZATION is CORRECT at your robot. If it is wrong, you can manually synchronize the time by:
