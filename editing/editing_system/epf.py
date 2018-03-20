@@ -6,18 +6,49 @@
 import cv2
 import numpy as np
 import gradient
+import ellipse
 import math
 import time
 from numba import jit
 from frame_cluster import cluster_video_frames_intense, sample_clustered_frames
 
 
-# Calculate the image gradient compatibility with jit enabled methods
-def compare_gradient(img1, img2):
+@jit(nopython=True)
+def generate_ellipse_compatibility_score(eigen_value_matrix_1, eigen_value_matrix_2):
     """
+    Generate corner detection compatibility score by calculating and compare
+    ellipse areas for each pixel on both images
+    :param eigen_value_matrix_1: image shape with depth 2 for image 1
+    :param eigen_value_matrix_2: image shape with depth 2 for image 2
+    :return: a float number suggesting ellipse compatibility
+    """
+    pixel_area_img1 = math.pi * eigen_value_matrix_1[:,:,0] * eigen_value_matrix_1[:,:,1]
+    pixel_area_img2 = math.pi * eigen_value_matrix_2[:,:,0] * eigen_value_matrix_2[:,:,1]
+    abs_area_diff = np.abs(pixel_area_img1 - pixel_area_img2)
+    return np.sum(abs_area_diff)
+
+
+def compare_ellipse(img1, img2):
+    """
+    Calculate the image ellipse compatibility by comparing generated ellipse area
     :param img1: The frame read from first video
     :param img2: The frame read from second video
-    :return: a vector with both magnitude and direction
+    :return: a float suggesting the compatibility, smaller the better
+    """
+    img1_gray = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
+    img2_gray = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
+    img1_eigen_values_matrix = ellipse.harris_value(img1_gray)
+    img2_eigen_values_matrix = ellipse.harris_value(img2_gray)
+    compatibility_score = generate_ellipse_compatibility_score(img1_eigen_values_matrix, img2_eigen_values_matrix)
+    return compatibility_score
+
+
+def compare_gradient(img1, img2):
+    """
+    Calculate the image gradient compatibility with jit enabled methods
+    :param img1: The frame read from first video
+    :param img2: The frame read from second video
+    :return: a vector with both magnitude and direction, smaller the better
     """
     # print "Start work on gradient"
     # start_time = time.time()
@@ -31,20 +62,24 @@ def compare_gradient(img1, img2):
     img2_gradient_intensity, img2_raw_direction_indegree = gradient.get_gradients_with_jit(img2_sobelx, img2_sobely)
     # print "Spend", time.time()-start_time, "seconds in creating gradient source"
     # start_time = time.time()
-    result = generate_similarity_vector(img1_gradient_intensity, img2_gradient_intensity,
-                                      img1_raw_direction_indegree, img2_raw_direction_indegree)
+    result = generate_gradient_similarity_vector(img1_gradient_intensity, img2_gradient_intensity,
+                                                 img1_raw_direction_indegree, img2_raw_direction_indegree)
     # print "Spend", time.time()-start_time, "seconds gradient calculation"
     return result
 
 
-# Based on both images' edge vectors' directions and intensity we can have a compatibility vector
 @jit(nopython=True)
-def generate_similarity_vector(intensity_1, intensity_2, direction_1, direction_2):
+def generate_gradient_similarity_vector(intensity_1, intensity_2, direction_1, direction_2):
+    """
+    This function is for Gradient. Based on both images' edge vectors' directions and intensity we can have a compatibility vector
+    :param intensity_1: Gradient Intensity for pic 1
+    :param intensity_2: Gradient Intensity for pic 2
+    :param direction_1: Gradient Direction for pic 1
+    :param direction_2: Gradient Direction for pic 2
+    :return: a similarity vector suggesting compatibility
+    """
     positive_45_unit_value = 1/math.sqrt(2)
     negative_45_unit_value = -1/math.sqrt(2)
-    # dir_map = {"90": np.array([1, 0]), "-90": np.array([-1, 0]), "1": np.array([0, 1]), "-1": np.array([0, -1]),
-    #            "-45": np.array([negative_45_unit_value, negative_45_unit_value]),
-    #            "45": np.array([positive_45_unit_value, positive_45_unit_value])}
     rows_num, cols_num = intensity_1.shape
     similarity_vector = np.array([0.0, 0.0])
     for i in range(rows_num):
@@ -192,10 +227,12 @@ def compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, vid2_gene
             cluster_frame_2 = sampled_frames_cluster2[cluster_2_index]
             down_scale_frame_1 = cv2.resize(cluster_frame_1, (200, 480))
             down_scale_frame_2 = cv2.resize(cluster_frame_2, (200, 480))
-            # start_time = time.time()
-            similarity_vector = compare_gradient(down_scale_frame_1, down_scale_frame_2)
-            # print "Gradient comparison spend", time.time()-start_time, "seconds"
-            similarity_vector_magnitude = vector_magnitude(similarity_vector)
+            start_time = time.time()
+            similarity_vector = compare_ellipse(down_scale_frame_1, down_scale_frame_2)
+            similarity_vector_magnitude = similarity_vector
+            print similarity_vector_magnitude
+            print "Ellipse comparison spend", time.time()-start_time, "seconds"
+            # similarity_vector_magnitude = vector_magnitude(similarity_vector)
             memory_key = (vid1_name, vid2_name, key_1, key_2, cluster_1_index, cluster_2_index, vid1_threshold, vid2_threshold)
             if memory_key in ff_memory:
                 ff_memory[memory_key]['gradient'] = similarity_vector
@@ -326,7 +363,8 @@ def gradient_epf_with_generators(vid1_name, vid1_edit_source, vid2_name, vid2_ed
             vid1_threshold, vid2_threshold, lowest_similarity_vector, no_use, frame_1_list_offset, frame_2_list_offset, ff_memory = \
                 compare_frame_cluster(vid1_name, vid1_generator, vid1_editing_pair, vid2_name, vid2_generator,
                                       vid2_editing_pair, ff_memory)
-            similarity_vector_magnitude = vector_magnitude(lowest_similarity_vector)
+            # similarity_vector_magnitude = vector_magnitude(lowest_similarity_vector)
+            similarity_vector_magnitude = lowest_similarity_vector
             if similarity_vector_magnitude < lowest_magnitude:
                 vid1_lowest_key = vid1_editing_pair
                 vid2_lowest_key = vid2_editing_pair

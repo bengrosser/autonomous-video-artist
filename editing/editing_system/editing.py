@@ -35,7 +35,7 @@ def test_import_generator(test_files_root_path):
     :param test_files_root_path: root path for all test files
     :return: the dictionary with format {vid_name: [[editing_pairs], generator]}
     """
-    json_file_path = test_files_root_path + "/vid_subclip_her_matrix.json"
+    json_file_path = test_files_root_path + "/vid_subclip.json"
     imported_video_sources = {}
     vid_subclip_info = json.load(open(json_file_path))
     for vid_name, editing_pair in vid_subclip_info.iteritems():

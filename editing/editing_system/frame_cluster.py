@@ -122,12 +122,12 @@ def get_block_time_range(clusters, cluster_index, fps):
     return begin_time, end_time
 
 
-camera = cv2.VideoCapture('./test/field_test/fuck.m4v')
-frames_result = cluster_video_frames_intense(camera, 0.025)
-counter = 0
-for frames_cluster in frames_result:
-    for frame in frames_cluster:
-        window_name = "Cluster " + str(counter)
-        cv2.imshow(window_name, frame)
-        cv2.waitKey(1)
-    counter += 1
+# camera = cv2.VideoCapture('./test/field_test/fuck.m4v')
+# frames_result = cluster_video_frames_intense(camera, 0.025)
+# counter = 0
+# for frames_cluster in frames_result:
+#     for frame in frames_cluster:
+#         window_name = "Cluster " + str(counter)
+#         cv2.imshow(window_name, frame)
+#         cv2.waitKey(1)
+#     counter += 1

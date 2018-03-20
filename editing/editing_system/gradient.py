@@ -220,6 +220,3 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     camera.release()
     out.release()
     cv2.destroyAllWindows()
-
-
-produce_gradient_video("./her_matrix.mp4", "her_matrix_gradient.mp4", 23.0, 1920, 800)
