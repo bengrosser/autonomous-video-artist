@@ -93,7 +93,7 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 		if(ros::Time::now()-prev_shoot_timestamp > ros::Duration(60)){
 			brightness = avg_brightness(rgb_img);
 			cout<<"Brightness percentage: "<<brightness<<endl;
-			if(brightness > 0.3 && brightness < 0.6)
+			if(brightness > 0.3 && brightness < 0.8)
 				panning_motion = true;
 		}
 		lock_guard<mutex> lock(mtx);
@@ -119,7 +119,7 @@ double AutoNav::avg_brightness(const cv::Mat rgb_img)
 	//cout<<"saturation: "<<s[0]<<endl;
     return v[0];*/
 	Mat vChannel = channel[2];
-	Mat mask = vChannel > 180;
+	Mat mask = vChannel > 200;
 	lock_guard<mutex> lock(mtx);
 	cv::imshow("v channel mask", mask);
 	cv::waitKey(1);
