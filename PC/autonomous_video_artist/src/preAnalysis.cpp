@@ -88,8 +88,14 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
             cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
         cv::Mat rgb_img = cv_ptr->image;
         //bit = bitAnalysis(rgb_img);
-        entropy = image_entropy(rgb_img);
-        brightness = avg_brightness(rgb_img);
+        //entropy = image_entropy(rgb_img);
+		//cout<<entropy<<endl;
+		if(ros::Time::now()-prev_shoot_timestamp > ros::Duration(60)){
+			brightness = avg_brightness(rgb_img);
+			cout<<"Brightness percentage: "<<brightness<<endl;
+			if(brightness > 0.3 && brightness < 0.6)
+				panning_motion = true;
+		}
 		lock_guard<mutex> lock(mtx);
 		cv::imshow("color image", rgb_img);
         cv::waitKey(100);
@@ -98,6 +104,26 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
     {
         ROS_ERROR("cv_bridge exception: %s", e.what());
     }
+}
+
+double AutoNav::avg_brightness(const cv::Mat rgb_img)
+{
+    cv::Mat hsv_img;
+    cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
+    vector<Mat> channel;
+    split(hsv_img, channel);
+    /*Scalar v = mean(channel[2]);
+    //std::cout<<"Avg brightness :"<< v[0]<<std::endl;
+	//cout<<"size: "<<hsv_img.rows<<", "<<hsv_img.cols<<endl;
+	Scalar s = mean(channel[1]);
+	//cout<<"saturation: "<<s[0]<<endl;
+    return v[0];*/
+	Mat vChannel = channel[2];
+	Mat mask = vChannel > 180;
+	lock_guard<mutex> lock(mtx);
+	cv::imshow("v channel mask", mask);
+	cv::waitKey(1);
+	return (double)countNonZero(mask)/(double)(mask.cols * mask.rows);
 }
 
 double AutoNav::avg_distance(const cv::Mat depth_img)
@@ -132,19 +158,7 @@ double AutoNav::image_entropy(const cv::Mat rgb_img)
     return entropy;
 }
 
-double AutoNav::avg_brightness(const cv::Mat rgb_img)
-{
-    cv::Mat hsv_img;
-    cvtColor(rgb_img, hsv_img, CV_BGR2HSV);
-    vector<Mat> channel;
-    split(hsv_img, channel);
-    Scalar v = mean(channel[2]);
-    //std::cout<<"Avg brightness :"<< v[0]<<std::endl;
-	//cout<<"size: "<<hsv_img.rows<<", "<<hsv_img.cols<<endl;
-	Scalar s = mean(channel[1]);
-	//cout<<"saturation: "<<s[0]<<endl;
-    return v[0];
-}
+
 
 
 

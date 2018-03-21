@@ -10,6 +10,7 @@
 #define AUTONAV_H_
 
 #include <iostream>
+#include <stdlib.h>
 #include <vector>
 #include <cmath>
 #include <ros/ros.h>
@@ -111,6 +112,16 @@ private:
 
 	mutex mtx;
 
+	//parameters for shooting videos
+	bool shoot;
+	int camera_idx;
+	int clip_idx;    //initialize to zero
+	int panning_idx;
+	bool shoot_safe;
+	bool panning_motion;
+	ros::Time prev_shoot_timestamp;
+	
+
 
     //Preliminary analysis
     void preAnalysis(const sensor_msgs::ImageConstPtr& msg);
@@ -136,7 +147,6 @@ private:
     //take videos
 	void video_control(const ros::TimerEvent& time);
 	void shoot_video(const ros::TimerEvent& time);
-	void panning(const ros::TimerEvent& time, double duration, double velocity);
 	void camera(const ros::TimerEvent& time, string duration, string output_file_name, int camera_idx);
     void CorrespondingJson(string filename);
 
@@ -144,6 +154,11 @@ private:
     void frontEnv(const sensor_msgs::ImageConstPtr& msg);
 
     //navigation
+	void panning1(const ros::TimerEvent& time, double duration);
+	void prePanning2(const ros::TimerEvent& time, double duration);
+	void panning2(const ros::TimerEvent& time, double duration);
+	void prePanning3(const ros::TimerEvent& time, double duration);
+	void panning3(const ros::TimerEvent& time, double duration);
     float acc_speed(double target_velocity, double duration, double time_elapsed);
     float dec_speed(double start_velocity, double duration, double time_elapsed);
     void linear_accelerate(const ros::TimerEvent& time, double target_velocity, double duration);

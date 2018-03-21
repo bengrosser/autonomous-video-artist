@@ -16,7 +16,7 @@ int main(int argc, char** argv)
     ros::init(argc, argv, "navigation");
     ros::NodeHandle node("autoNav");
     
-    node.setParam("drive", true);
+    node.setParam("drive", false);
     node.setParam("drive_linearspeed", 0.16);
     node.setParam("drive_angularspeed", 0.18);
 	

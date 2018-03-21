@@ -44,6 +44,15 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     avoid_from_right = false;    
     acc_or_not = true;
 
+	//initialize video parameter
+	shoot = false;
+	clip_idx = 0;
+	shoot_safe = false;
+	panning_motion = false;
+	prev_shoot_timestamp = ros::Time::now();
+	panning_idx = 0;
+	
+
 
     near_docking_station_x = -0.8;
     near_docking_station_y = 0.0;
@@ -77,7 +86,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     signal(SIGINT, my_handler);
 
-    ros::MultiThreadedSpinner threads(13);
+    ros::MultiThreadedSpinner threads(6);
 
     image_transport::ImageTransport it(node);
     image_transport::Subscriber frontEnv=it.subscribe("/camera/depth/image", 1, &AutoNav::frontEnv, this);
@@ -94,18 +103,18 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 
     ros::Subscriber bumperCommand=node.subscribe("/mobile_base/events/bumper",10, &AutoNav::bumperStatus, this);
 
-    ros::Subscriber sys_freeRAM=node.subscribe("/sys/freeRAM", 1, &AutoNav::sys_freeRAM, this);
+    /*ros::Subscriber sys_freeRAM=node.subscribe("/sys/freeRAM", 1, &AutoNav::sys_freeRAM, this);
 	ros::Subscriber sys_totalRAM=node.subscribe("/sys/totalRAM", 1, &AutoNav::sys_totalRAM, this);
 	ros::Subscriber sys_freeSwap=node.subscribe("/sys/freeSwap", 1, &AutoNav::sys_freeSwap, this);
 	ros::Subscriber sys_totalSwap=node.subscribe("/sys/totalSwap", 1, &AutoNav::sys_totalSwap, this);
-	ros::Subscriber sys_uptime=node.subscribe("/sys/uptime", 1, &AutoNav::sys_uptime, this);
+	ros::Subscriber sys_uptime=node.subscribe("/sys/uptime", 1, &AutoNav::sys_uptime, this);*/
 	
 
-    ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
+    //ros::Subscriber autoCharging=node.subscribe("/odom", 10, &AutoNav::angle, this);
 
-    ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
+    //ros::Timer writeJson=node.createTimer(ros::Duration(1.0), &AutoNav::writeJson, this);
 
-	ros::Timer panning = node.createTimer(ros::Duration(0.1), &AutoNav::video_control, this);
+	ros::Timer shoot_video = node.createTimer(ros::Duration(0.1), &AutoNav::shoot_video, this);
 
 	//NO HEADER, DOESN't WORK!
 	/*message_filters::Subscriber<Int32> sys_sub1(node, "sys/freeRAM", 1);

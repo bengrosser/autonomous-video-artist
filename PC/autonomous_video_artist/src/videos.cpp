@@ -27,7 +27,7 @@ void AutoNav::video_control(const ros::TimerEvent& time)
 
 void AutoNav::shoot_video(const ros::TimerEvent& time)
 {
-	int hour = 0;
+	/*int hour = 0;
 	int minute = 0;
 	int second = 20;
 	double speed = 1.0;
@@ -55,19 +55,14 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 
 	//Write a json file at the end of video shooting
 	json_filename = timestamp+"_end.json";
-	CorrespondingJson(json_filename);
-}
-
-void AutoNav::panning(const ros::TimerEvent& time, double duration, double speed)
-{
-	geometry_msgs::Twist decision;
-	decision.linear.x = speed;
-	decision.angular.z = 0.0;
-	ros::Time current_time = ros::Time::now();
-	while(ros::Time::now()- current_time <= ros::Duration(duration))
+	CorrespondingJson(json_filename);*/
+	if(shoot)
 	{
-		velocity.publish(decision);
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		string command = "ssh ubuntu@192.168.1.140 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=clip"+to_string(clip_idx)+".mp4'";
+		system(command.c_str());
+		++clip_idx;
+		shoot = false;
+		prev_shoot_timestamp = ros::Time::now();
 	}
 }
 

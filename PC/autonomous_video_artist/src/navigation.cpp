@@ -16,6 +16,113 @@
 
 const double pi = 4*atan(1);
 
+void AutoNav::panning1(const ros::TimerEvent& time, double duration){
+	camera_idx = 0;
+	shoot = true;
+	//waiting for camera start
+	ros::Time current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(9.0)){};
+	geometry_msgs::Twist decision;
+    decision.linear.x = 0.1;
+    decision.angular.z = 0.0;
+    current_time = ros::Time::now();
+    while(ros::Time::now() - current_time <= ros::Duration(duration))
+    {
+        velocity.publish(decision);
+        std::this_thread::sleep_for (std::chrono::milliseconds(10));
+    }
+	decision.linear.x = -0.1;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration))
+	{
+		velocity.publish(decision);
+		std::this_thread::sleep_for (std::chrono::milliseconds(10));
+	}
+	panning_motion =false;
+}
+
+void AutoNav::prePanning2(const ros::TimerEvent& time, double duration){
+	geometry_msgs::Twist decision;
+	decision.linear.x = 0.0;
+	decision.angular.z = 1.0;
+	ros::Time current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(2.8))
+	{
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	decision.linear.x = -0.1;
+	decision.angular.z = 0.0;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration))
+	{
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
+
+void AutoNav::panning2(const ros::TimerEvent& time, double duration){
+	prePanning2(time, duration/2.0);
+	camera_idx = 0;
+	shoot = true;
+	//wait for camera start
+	ros::Time current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(9.0)){};
+	geometry_msgs::Twist decision;
+	decision.linear.x = 0.1;
+	decision.angular.z = 0.0;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration)){
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	decision.linear.x = -0.1;
+	decision.angular.z = 0.0;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration)){
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	panning_motion = false;
+}
+
+void AutoNav::prePanning3(const ros::TimerEvent& time, double duration){
+	geometry_msgs::Twist decision;
+	decision.linear.x = 0.0;
+	decision.angular.z = 0.17;
+	ros::Time current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration))
+	{
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+}
+
+void AutoNav::panning3(const ros::TimerEvent& time, double duration){
+	prePanning3(time, duration/2.0);
+	camera_idx = 0;
+	shoot = true;
+	//wait for camera start
+	ros::Time current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(9.0)){};
+	geometry_msgs::Twist decision;
+	decision.linear.x = 0.0;
+	decision.angular.z = -0.17;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration)){
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	decision.linear.x = -0.1;
+	decision.angular.z = 0.17;
+	current_time = ros::Time::now();
+	while(ros::Time::now()-current_time <= ros::Duration(duration)){
+		velocity.publish(decision);
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+	}
+	panning_motion = false;
+}
+
 /*Function to calculate the speed during accelerating*/
 float AutoNav::acc_speed(double target_velocity, double duration, double time_elapsed)
 {
@@ -114,40 +221,52 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
     {
         if(DRIVE)
         {
-            //linear_accelerate(time, -linear_speed, 5.0);
-            decision.linear.x = -linear_speed;
-            decision.angular.z = 0.0;
-            ros::Time start = ros::Time::now();
-            while(ros::Time::now() - start < ros::Duration(2.0))
-            {
-                velocity.publish(decision);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
-            int direction = 1;
-            if(which_bumper == 1)
-            {
-                int tmp = rand()%2;
-                if(tmp == 0)
-                    direction = 1;
-                else
-                    direction = -1;
-            }
-            else if(which_bumper == 0)
-            {
-                direction = -1;
-            }
-            else
-            {
-                direction = 1;
-            }
-            decision.angular.z = direction*angular_speed;
-            decision.linear.x = 0.0;
-            start = ros::Time::now();
-            while(ros::Time::now() - start < ros::Duration(3.0))
-            {
-                velocity.publish(decision);
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
+			if(panning_motion && shoot_safe){
+				cout<<"SHOOT VIDEO!"<<endl;
+				if(panning_idx == 0)
+					panning1(time, 10.0);
+				else if(panning_idx == 1)
+					panning2(time, 10.0);
+				else
+					panning3(time, 10.0);
+				panning_idx = (panning_idx+1)%3;
+			}
+			else{
+            	//linear_accelerate(time, -linear_speed, 5.0);
+            	decision.linear.x = -linear_speed;
+            	decision.angular.z = 0.0;
+            	ros::Time start = ros::Time::now();
+            	while(ros::Time::now() - start < ros::Duration(2.0))
+            	{
+                	velocity.publish(decision);
+                	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            	}
+            	int direction = 1;
+            	if(which_bumper == 1)
+            	{
+                	int tmp = rand()%2;
+                	if(tmp == 0)
+                    	direction = 1;
+                	else
+                    	direction = -1;
+            	}
+            	else if(which_bumper == 0)
+            	{
+                	direction = -1;
+            	}
+            	else
+            	{
+                	direction = 1;
+            	}
+            	decision.angular.z = direction*angular_speed;
+            	decision.linear.x = 0.0;
+            	start = ros::Time::now();
+            	while(ros::Time::now() - start < ros::Duration(3.0))
+            	{
+                	velocity.publish(decision);
+                	std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            	}
+			}
         }
         bump = false;
     }
@@ -389,6 +508,7 @@ void AutoNav::pilot(const ros::TimerEvent& time)
 
     /*******************Don't delete this code *********************/
 	battery_is_good_action(time);
+	
     /*if(leave_docking_station)
     {
         leave_station_action(time);

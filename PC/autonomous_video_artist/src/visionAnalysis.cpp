@@ -36,6 +36,12 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         double mmax = 0.0;
         cv::minMaxLoc(crop_front, &mmin, &mmax, 0, 0, mask);
 		
+		cout<<"min distance:"<<mmin<<endl;
+		if(mmin < 1000 || percentage < 0.6)
+			shoot_safe = false;
+		else
+			shoot_safe = true;
+
         if(mmin < 600 || percentage < 0.65)
         {
             cv::Mat crop_left = depth_img(cv::Rect_<int>(0,200,180,270));
