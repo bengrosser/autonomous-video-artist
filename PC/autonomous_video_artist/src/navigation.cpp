@@ -63,7 +63,7 @@ void AutoNav::prePanning2(const ros::TimerEvent& time, double duration){
 
 void AutoNav::panning2(const ros::TimerEvent& time, double duration){
 	prePanning2(time, duration/2.0);
-	camera_idx = 0;
+	camera_idx = 1;
 	shoot = true;
 	//wait for camera start
 	ros::Time current_time = ros::Time::now();
