@@ -221,88 +221,87 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
     {
         if(DRIVE)
         {
-			if(panning_motion && shoot_safe){
-				cout<<"SHOOT VIDEO!"<<endl;
-				if(panning_idx == 0)
-					panning1(time, 10.0);
-				else if(panning_idx == 1)
-					panning2(time, 10.0);
-				else
-					panning3(time, 10.0);
-				panning_idx = (panning_idx+1)%3;
-			}
-			else{
-            	//linear_accelerate(time, -linear_speed, 5.0);
-            	decision.linear.x = -linear_speed;
-            	decision.angular.z = 0.0;
-            	ros::Time start = ros::Time::now();
-            	while(ros::Time::now() - start < ros::Duration(2.0))
-            	{
-                	velocity.publish(decision);
-                	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            	}
-            	int direction = 1;
-            	if(which_bumper == 1)
-            	{
-                	int tmp = rand()%2;
-                	if(tmp == 0)
-                    	direction = 1;
-                	else
-                    	direction = -1;
-            	}
-            	else if(which_bumper == 0)
-            	{
-                	direction = -1;
-            	}
-            	else
-            	{
-                	direction = 1;
-            	}
-            	decision.angular.z = direction*angular_speed;
-            	decision.linear.x = 0.0;
-            	start = ros::Time::now();
-            	while(ros::Time::now() - start < ros::Duration(3.0))
-            	{
-                	velocity.publish(decision);
-                	std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            	}
-			}
-        }
-        bump = false;
-    }
-    else
-    {
-        if(acc_or_not)
-        {
-            //linear_accelerate(time, linear_speed, 5.0);
-            acc_or_not = false;
-        }
-        if(move_forward)
-        {
-            decision.linear.x = linear_speed;
+            //linear_accelerate(time, -linear_speed, 5.0);
+            decision.linear.x = -linear_speed;
             decision.angular.z = 0.0;
-            if(DRIVE)
+            ros::Time start = ros::Time::now();
+            while(ros::Time::now() - start < ros::Duration(2.0))
+            {
+                velocity.publish(decision);
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+            int direction = 1;
+            if(which_bumper == 1)
+            {
+                int tmp = rand()%2;
+                if(tmp == 0)
+                    direction = 1;
+                else
+                    direction = -1;
+            }
+            else if(which_bumper == 0)
+            {
+                direction = -1;
+            }
+            else
+            {
+                direction = 1;
+            }
+            decision.angular.z = direction*angular_speed;
+            decision.linear.x = 0.0;
+            start = ros::Time::now();
+            while(ros::Time::now() - start < ros::Duration(3.0))
             {
                 velocity.publish(decision);
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }
         }
-        else
-        {
-            if(go_right)
-                decision.angular.z = angular_speed;
+        bump = false;
+    }
+    else
+    {
+        if(panning_motion && shoot_safe){
+            cout<<"SHOOT VIDEO!"<<endl;
+            if(panning_idx == 0)
+                panning1(time, 10.0);
+            else if(panning_idx == 1)
+                panning2(time, 10.0);
             else
-                decision.angular.z = -angular_speed;
-
-            if(DRIVE)
+                panning3(time, 10.0);
+            panning_idx = (panning_idx+1)%3;
+        }else{
+            if(acc_or_not)
             {
-                while(!move_forward)
+                //linear_accelerate(time, linear_speed, 5.0);
+                acc_or_not = false;
+            }
+            if(move_forward)
+            {
+                decision.linear.x = linear_speed;
+                decision.angular.z = 0.0;
+                if(DRIVE)
                 {
                     velocity.publish(decision);
                     std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
             }
-            acc_or_not = true;
+            else
+            {
+                if(go_right)
+                    decision.angular.z = angular_speed;
+                else
+                    decision.angular.z = -angular_speed;
+                
+                if(DRIVE)
+                {
+                    while(!move_forward)
+                    {
+                        velocity.publish(decision);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    }
+                }
+                acc_or_not = true;
+            }
         }
     }
 }
