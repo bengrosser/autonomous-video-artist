@@ -10,20 +10,6 @@
 
 #include "AutoNav.h"
 
-/*void AutoNav::webcam0(const sensor_msgs::ImageConstPtr& msg)
-{
-
-}
-
-void AutoNav::webcam1(const sensor_msgs::ImageConstPtr& msg)
-{
-
-}*/
-void AutoNav::video_control(const ros::TimerEvent& time)
-{
-	//if(rule) -> shoot video
-		//shoot_video(time)
-}
 
 void AutoNav::shoot_video(const ros::TimerEvent& time)
 {
@@ -32,9 +18,6 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 	int second = 20;
 	double speed = 1.0;
 	int camera_idx = 0;
-	//there should be a rule to define these parameters
-	//TODO
-
 	time_t t = std::time(0);
     struct tm * now = localtime(&t);
     string timestamp = to_string(now->tm_year + 1900)+"-"+to_string(now->tm_mon+1)+"-"+to_string(now->tm_mday)+"_"+to_string(now->tm_hour)+":"+to_string(now->tm_min)+":"+to_string(now->tm_sec);
@@ -56,6 +39,9 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 	//Write a json file at the end of video shooting
 	json_filename = timestamp+"_end.json";
 	CorrespondingJson(json_filename);*/
+
+
+    //TODO write a json file before record the video
 	if(shoot)
 	{
 		string command = "ssh ubuntu@192.168.1.140 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=clip"+to_string(clip_idx)+".mp4'";
@@ -64,15 +50,9 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 		shoot = false;
 		prev_shoot_timestamp = ros::Time::now();
 	}
+	//TODO write a json file after recording the video
 }
 
-void AutoNav::camera(const ros::TimerEvent& time, string duration, string output_file_name, int camera_idx)
-{
-	string command = "ffmpeg -f v4l2 -framerate 40 -video_size 640*480 -i /dev/video0 -t "+ duration + " " + output_file_name;
-	const char* com = command.c_str(); 
-	system(com);
-	
-}
 
 void AutoNav::CorrespondingJson(string filename)
 {
