@@ -78,14 +78,12 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         //visualize
         double max = 0.0;
         cv::minMaxLoc(crop_front, 0, &max, 0, 0);
-        /*cv::Mat crop_norm;
-        crop_front.convertTo(crop_norm, CV_32F, 1.0/max, 0);*/
+        
 		
 		cv::Mat depth_norm;
 		depth_img.convertTo(depth_norm, CV_32F, 1.0/max, 0);
 				
 		lock_guard<mutex> lock(mtx);
-        //cv::imshow("depth image", crop_norm);
 		cv::imshow("depth image", depth_norm);
         cv::waitKey(100);
 

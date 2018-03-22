@@ -145,9 +145,7 @@ private:
 
 
     //take videos
-	void video_control(const ros::TimerEvent& time);
 	void shoot_video(const ros::TimerEvent& time);
-	void camera(const ros::TimerEvent& time, string duration, string output_file_name, int camera_idx);
     void CorrespondingJson(string filename);
 
     //vision analysis
