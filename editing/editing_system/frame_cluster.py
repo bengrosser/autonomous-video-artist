@@ -30,9 +30,43 @@ def sample_clustered_frames(frames_clusters):
     return sample_result
 
 
+
+def cluster_with_threshold(camera, threshold):
+    result_frames_clusters = []
+    cluster_frames = []
+    prev_frame = None
+    while True:
+        grabbed, frame = camera.read()
+        if grabbed:
+            # If we only have no frame to compare, we pass it into cluster frames
+            if len(cluster_frames) == 0:
+                cluster_frames.append(frame)
+                prev_frame = frame
+                continue
+            else:
+                image_diff = get_image_difference(frame, prev_frame)
+                # print image_diff
+                # Cluster breaks occurred
+                if image_diff > threshold:
+                    # print len(cluster_frames)
+                    result_frames_clusters.append(cluster_frames)
+                    cluster_frames = []
+                    prev_frame = frame
+                    cluster_frames.append(frame)
+                else:
+                    cluster_frames.append(frame)
+                    prev_frame = frame
+        else:
+            if len(cluster_frames) > 0:
+                result_frames_clusters.append(cluster_frames)
+            break
+
+    camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    return result_frames_clusters
+
+
 # Computationally more intensive methods to cluster frames
-# TODO: Increase threshold to limit number of clusters generated
-def cluster_video_frames_intense(camera, threshold):
+def adaptive_cluster(camera, threshold):
     """
     :param file_path: File path to the video
     :param threshold: The threshold we are going to use to see if two images are similiar
@@ -150,7 +184,7 @@ def get_block_time_range(clusters, cluster_index, fps):
 
 
 # camera = cv2.VideoCapture("./test/field_test/demo_test/lobby1/clip6.avi")
-# clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
+# clustered_result, threshold = adaptive_cluster(camera, 0.04)
 # while True:
 #     grabbed, frame = camera.read()
 #     if grabbed:
@@ -170,7 +204,7 @@ def get_block_time_range(clusters, cluster_index, fps):
 #         break
 
 # camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip2.avi")
-# clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
+# clustered_result, threshold = adaptive_cluster(camera, 0.04)
 # counter = 0
 # print len(clustered_result)
 # for result in clustered_result:

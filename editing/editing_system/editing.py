@@ -365,8 +365,8 @@ def test_1():
     vid2_generator = imported_videos_sources[video_2k][1]
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
     vid2_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    clustered_vid1 = frame_cluster.cluster_video_frames_intense(vid1_generator, 0.25)
-    clustered_vid2 = frame_cluster.cluster_video_frames_intense(vid2_generator, 0.25)
+    clustered_vid1 = frame_cluster.adaptive_cluster(vid1_generator, 0.25)
+    clustered_vid2 = frame_cluster.adaptive_cluster(vid2_generator, 0.25)
     sampled_frames_cluster1 = frame_cluster.sample_clustered_frames(clustered_vid1)
     sampled_frames_cluster2 = frame_cluster.sample_clustered_frames(clustered_vid2)
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)

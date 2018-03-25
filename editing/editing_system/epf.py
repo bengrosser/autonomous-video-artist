@@ -12,7 +12,7 @@ import math
 import time
 # from editing import test_import_generator
 from numba import jit
-from frame_cluster import cluster_video_frames_intense, sample_clustered_frames
+from frame_cluster import adaptive_cluster, sample_clustered_frames
 
 
 @jit(nopython=True)
@@ -245,8 +245,8 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     #     return ff_memory
     # else:
     #     print "Both shouldn't be none"
-    clustered_vid1, vid1_threshold = cluster_video_frames_intense(vid1_generator, vid1_threshold)
-    clustered_vid2, vid2_threshold = cluster_video_frames_intense(vid2_generator, vid2_threshold)
+    clustered_vid1, vid1_threshold = adaptive_cluster(vid1_generator, vid1_threshold)
+    clustered_vid2, vid2_threshold = adaptive_cluster(vid2_generator, vid2_threshold)
     sampled_frames_cluster1 = sample_clustered_frames(clustered_vid1)
     sampled_frames_cluster2 = sample_clustered_frames(clustered_vid2)
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -307,8 +307,8 @@ def compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, vid2_gene
         vid2_threshold = 0.025
     vid1_generator.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)
     vid2_generator.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)
-    clustered_vid1 = cluster_video_frames_intense(vid1_generator, vid1_threshold)
-    clustered_vid2 = cluster_video_frames_intense(vid2_generator, vid2_threshold)
+    clustered_vid1 = adaptive_cluster(vid1_generator, vid1_threshold)
+    clustered_vid2 = adaptive_cluster(vid2_generator, vid2_threshold)
     sampled_frames_cluster1 = sample_clustered_frames(clustered_vid1)
     sampled_frames_cluster2 = sample_clustered_frames(clustered_vid2)
     vid1_generator.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, 0)

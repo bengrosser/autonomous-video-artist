@@ -4,7 +4,7 @@ import cv2
 import gradient
 import numpy as np
 from editing_structures import EditingBlock, AssembledBlocks
-from frame_cluster import cluster_video_frames_intense
+from frame_cluster import cluster_with_threshold
 from audio_helper import create_cluster_sound
 
 
@@ -49,8 +49,8 @@ def generate_cut_images(assemble_blocks):
             file_name = "./test/" + block_vid_name
             camera = cv2.VideoCapture(file_name)
             # cluster_start_time = time.time()
-            clustered_video = cluster_video_frames_intense(camera, block_threshold)
-            # clustered_video = cluster_video_frames_intense(camera, editing_block.cluster_threshold)
+            clustered_video = cluster_with_threshold(camera, block_threshold)
+            # clustered_video = adaptive_cluster(camera, editing_block.cluster_threshold)
             # print "Spend", time.time()-cluster_start_time, "to cluster"
             clustered_videos[block_vid_name] = clustered_video
             cluster_to_use = clustered_video[block_cluster_index]
@@ -98,8 +98,8 @@ def generate_video(assemble_blocks, output):
             file_name = "./test/field_test/demo_test/sub_set_1/" + block_vid_name
             camera = cv2.VideoCapture(file_name)
             cluster_start_time = time.time()
-            clustered_video = cluster_video_frames_intense(camera, block_threshold)
-            # clustered_video = cluster_video_frames_intense(camera, editing_block.cluster_threshold)
+            clustered_video = cluster_with_threshold(camera, block_threshold)
+            # clustered_video = adaptive_cluster(camera, editing_block.cluster_threshold)
             print "Spend", time.time()-cluster_start_time, "to cluster with threshold", block_threshold
             clustered_videos[block_vid_name] = clustered_video
             cluster_to_use = clustered_video[block_cluster_index]

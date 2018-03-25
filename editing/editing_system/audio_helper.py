@@ -2,7 +2,7 @@ import cv2
 import time
 import json
 from pydub import AudioSegment
-from frame_cluster import cluster_video_frames_intense, get_block_time_range
+from frame_cluster import adaptive_cluster, get_block_time_range
 
 
 # Test Method, may not be used in the real production
@@ -62,7 +62,7 @@ def create_cluster_sound(assembled_blocks):
                 fps = camera.get(cv2.CAP_PROP_FPS)
                 # print "Frames per second using video.get(cv2.CAP_PROP_FPS) : {0}".format(fps)
             cluster_start_time = time.time()
-            clustered_video = cluster_video_frames_intense(camera, editing_block.cluster_threshold)
+            clustered_video = adaptive_cluster(camera, editing_block.cluster_threshold)
             print "Spend", time.time()-cluster_start_time, "to cluster"
             clustered_videos[block_vid_name] = clustered_video
             audio_segmentation = AudioSegment.from_file(audio_path, "mp3")
