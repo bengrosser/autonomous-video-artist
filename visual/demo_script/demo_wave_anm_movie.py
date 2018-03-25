@@ -29,8 +29,7 @@ from scikits.audiolab import wavread
 
 
 def create_grid_flip(img):
-    row_size, col_size = img.shape
-    grid = np.zeros((2*row_size, 2*col_size))
+    row_size, col_size = img.shape grid = np.zeros((2*row_size, 2*col_size))
     grid[0:row_size, 0:col_size] = img
     img_hori = cv2.flip(grid, 0)
     img_left = cv2.bitwise_or(img_hori, grid)

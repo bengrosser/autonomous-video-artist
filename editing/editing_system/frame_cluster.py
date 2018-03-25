@@ -9,7 +9,7 @@ from range_finder import calcEntropy
 def get_image_difference(image_1, image_2):
     first_image_hist = cv2.calcHist([image_1], [0], None, [256], [0, 256])
     second_image_hist = cv2.calcHist([image_2], [0], None, [256], [0, 256])
-    img_hist_diff = cv2.compareHist(first_image_hist, second_image_hist, cv2.cv.CV_COMP_BHATTACHARYYA)
+    img_hist_diff = cv2.compareHist(first_image_hist, second_image_hist, cv2.HISTCMP_BHATTACHARYYA)
     img_template_probability_match = cv2.matchTemplate(first_image_hist, second_image_hist, cv2.TM_CCOEFF_NORMED)[0][0]
     img_template_diff = 1 - img_template_probability_match
     # taking only 10% of histogram diff, since it's less accurate than template method
@@ -42,31 +42,60 @@ def cluster_video_frames_intense(camera, threshold):
     result_frames_clusters = []
     cluster_frames = []
     prev_frame = None
+    if camera is None:
+        print "It can't be none here"
     while True:
-        grabbed, frame = camera.read()
-        if grabbed:
-            # If we only have no frame to compare, we pass it into cluster frames
-            if len(cluster_frames) == 0:
-                cluster_frames.append(frame)
-                prev_frame = frame
-                continue
-            else:
-                image_diff = get_image_difference(frame, prev_frame)
-                # print image_diff
-                # Cluster breaks occurred
-                if image_diff > threshold:
-                    # print len(cluster_frames)
-                    result_frames_clusters.append(cluster_frames)
-                    cluster_frames = []
-                    prev_frame = frame
+        while True:
+            grabbed, frame = camera.read()
+            if grabbed:
+                # If we only have no frame to compare, we pass it into cluster frames
+                if len(cluster_frames) == 0:
                     cluster_frames.append(frame)
+                    prev_frame = frame
+                    continue
                 else:
-                    cluster_frames.append(frame)
-                    prev_frame = frame
+                    image_diff = get_image_difference(frame, prev_frame)
+                    # print image_diff
+                    # Cluster breaks occurred
+                    if image_diff > threshold:
+                        # print len(cluster_frames)
+                        result_frames_clusters.append(cluster_frames)
+                        cluster_frames = []
+                        prev_frame = frame
+                        cluster_frames.append(frame)
+                    else:
+                        cluster_frames.append(frame)
+                        prev_frame = frame
+            else:
+                print "Nothing here to grab with length of result", len(result_frames_clusters)
+                if len(cluster_frames) > 0:
+                    result_frames_clusters.append(cluster_frames)
+                break
+        camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        result_len = len(result_frames_clusters)
+        if result_len > 6:
+            print "Add threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            threshold += 0.05
+            result_frames_clusters = []
+            cluster_frames = []
+        elif result_len < 4:
+            if result_len == 0:
+                print "fuck ing why?"
+                camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            print "Reduce threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            if threshold > 0.03:
+                threshold -= 0.01
+            else:
+                threshold -= 0.001
+
+            result_frames_clusters = []
+            cluster_frames = []
         else:
-            result_frames_clusters.append(cluster_frames)
-            break
-    return result_frames_clusters
+            print "use threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            return result_frames_clusters, threshold
 
 
 def cluster_video_frames_entropy(camera, n):
@@ -122,12 +151,16 @@ def get_block_time_range(clusters, cluster_index, fps):
     return begin_time, end_time
 
 
-# camera = cv2.VideoCapture('./test/field_test/fuck.m4v')
-# frames_result = cluster_video_frames_intense(camera, 0.025)
+camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip2.avi")
+clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
+# camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip2.avi")
+# clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
 # counter = 0
-# for frames_cluster in frames_result:
-#     for frame in frames_cluster:
+# print len(clustered_result)
+# for result in clustered_result:
+#     for frame in result:
 #         window_name = "Cluster " + str(counter)
 #         cv2.imshow(window_name, frame)
 #         cv2.waitKey(1)
 #     counter += 1
+# cv2.destroyAllWindows()

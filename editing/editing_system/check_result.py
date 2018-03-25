@@ -81,9 +81,9 @@ def generate_video(assemble_blocks, output):
     :param output: output name for the video
     """
     start_time = time.time()
-    fourcc = cv2.cv.CV_FOURCC(*'XVID')
-    frame_rate = float(23)
-    resolution = (int(1920), int(800))
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    frame_rate = float(30)
+    resolution = (int(640), int(480))
     visual_bridge_name = "visual_bridge_" + output
     edited_result = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
     # visual_bridge_result = cv2.VideoWriter(visual_bridge_name, fourcc, frame_rate, resolution)
