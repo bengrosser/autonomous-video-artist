@@ -67,22 +67,19 @@ def cluster_video_frames_intense(camera, threshold):
                         cluster_frames.append(frame)
                         prev_frame = frame
             else:
-                print "Nothing here to grab with length of result", len(result_frames_clusters)
                 if len(cluster_frames) > 0:
                     result_frames_clusters.append(cluster_frames)
                 break
+
         camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
         result_len = len(result_frames_clusters)
-        if result_len > 6:
+        if result_len > 12:
             print "Add threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"
             threshold += 0.05
             result_frames_clusters = []
             cluster_frames = []
-        elif result_len < 4:
-            if result_len == 0:
-                print "fuck ing why?"
-                camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        elif result_len < 6:
             print "Reduce threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"
             if threshold > 0.03:
@@ -151,8 +148,27 @@ def get_block_time_range(clusters, cluster_index, fps):
     return begin_time, end_time
 
 
-camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip2.avi")
-clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
+
+# camera = cv2.VideoCapture("./test/field_test/demo_test/lobby1/clip6.avi")
+# clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
+# while True:
+#     grabbed, frame = camera.read()
+#     if grabbed:
+#         print "Got a frame"
+#     else:
+#         print "No frame for old man"
+#         break
+#
+# camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+# print "Now second time"
+# while True:
+#     grabbed, frame = camera.read()
+#     if grabbed:
+#         print "Got a frame second"
+#     else:
+#         print "No frame for super old man"
+#         break
+
 # camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip2.avi")
 # clustered_result, threshold = cluster_video_frames_intense(camera, 0.04)
 # counter = 0

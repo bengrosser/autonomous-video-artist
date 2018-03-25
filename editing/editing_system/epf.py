@@ -236,16 +236,15 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     vid1_threshold = 0.05
     vid2_threshold = 0.05
 
-
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
     vid2_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    if vid1_generator is None or vid2_generator is None:
-        print vid1_name
-        print vid2_name
-        print "Need to reimport"
-        return ff_memory
-    else:
-        print "Both shouldn't be none"
+    # if vid1_generator is None or vid2_generator is None:
+    #     print vid1_name
+    #     print vid2_name
+    #     print "Need to reimport"
+    #     return ff_memory
+    # else:
+    #     print "Both shouldn't be none"
     clustered_vid1, vid1_threshold = cluster_video_frames_intense(vid1_generator, vid1_threshold)
     clustered_vid2, vid2_threshold = cluster_video_frames_intense(vid2_generator, vid2_threshold)
     sampled_frames_cluster1 = sample_clustered_frames(clustered_vid1)

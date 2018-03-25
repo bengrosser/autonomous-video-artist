@@ -188,6 +188,8 @@ def find_best_editing_pair(ff_memory):
     min_ellipse_value = min_ellipse_value['ellipse']
     min_wave_value = min_wave_value['wave']
 
+
+
     num_items = len(ff_memory.keys())
     total_gradient_sum = 0
     total_ellipse_sum = 0
@@ -205,6 +207,10 @@ def find_best_editing_pair(ff_memory):
     gradient_score = min_gradient_value / gradient_average
     ellipse_score = min_ellipse_value / ellipse_average
     wave_score = min_wave_value / wave_average
+
+    print gradient_score
+    print ellipse_score
+    print wave_score
 
     if gradient_score < ellipse_score and gradient_score < wave_score:
         return gradient_key, "gradient"
@@ -231,9 +237,9 @@ def editing_generator_initialize(imported_video_sources, ff_memory_to_update):
             print "Start to work on", vid_names[i], vid_names[j]
             start_time = time.time()
             print "Spend", time.time() - process_start_time, "seconds on the process------"
-            if imported_video_sources[vid_names[i]][1] is None or imported_video_sources[vid_names[j]][1] is None:
-                imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_1")
-                print "Re import!!!!!!!!!!!!!!!!!!!!"
+            # if imported_video_sources[vid_names[i]][1] is None or imported_video_sources[vid_names[j]][1] is None:
+            #     imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_1")
+            #     print "Re import!!!!!!!!!!!!!!!!!!!!"
             ff_memory_to_update = epf.epf_with_generators(vid_names[i], imported_video_sources[vid_names[i]], vid_names[j],
                                                  imported_video_sources[vid_names[j]], ff_memory_to_update)
             print "Spend", time.time() - start_time, "seconds on pair", vid_names[i], vid_names[j]
@@ -245,9 +251,6 @@ def editing_generator_initialize(imported_video_sources, ff_memory_to_update):
             print "-------------------------------------------------"
             print "-------------------------------------------------"
             counter += 1
-
-
-
 
     print "Finished Producing ff_memory"
     with open("ff_memory_sub_set_1.pickle", 'wb') as descriptor:
@@ -263,6 +266,15 @@ def edit_videos():
     imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_1")
     # imported_videos_sources = test_import("./test")
     print "Spend", time.time() - start_time, "seconds to import videos"
+    print "Start videos quality check"
+    check_start_time = time.time()
+    success, which_key = video_quality_check(imported_videos_sources)
+    if not success:
+        print which_key, "can't be read multiple times, choose another one"
+        return
+    else:
+        print "All Videos are good to go"
+    print "Spend", time.time() - check_start_time, "seconds to test videos"
     ff_memory = {}
     used_keys = []
     # Previous method
@@ -281,10 +293,68 @@ def edit_videos():
     block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])
     used_keys.append(first_key)
     assembled_blocks = AssembledBlocks(block_1, block_2, ff_memory, used_keys)
-    assembled_blocks.assemble_blocks(75)
+    assembled_blocks.assemble_blocks(100)
     print "Spend", time.time() - start_time, "seconds to to finish editing"
     with open("assembled_video_sub_set_1.pickle", 'wb') as descriptor:
         pickle.dump(assembled_blocks, descriptor, pickle.HIGHEST_PROTOCOL)
+
+
+# ---------------------TEST CODES-----------------------
+def test_assemble():
+    print "I am her"
+    imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_1")
+    used_keys = []
+    with open("ff_memory_sub_set_1.pickle", 'rb') as input:
+        ff_memory = pickle.load(input)
+    # first_key, method, ff_memory = editing_generator_initialize(imported_videos_sources, ff_memory)
+    first_key, method = find_best_editing_pair(ff_memory)
+    block_1 = EditingBlock(first_key[0], first_key[2], method, first_key[4], first_key[6])
+    block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])
+    used_keys.append(first_key)
+    assembled_blocks = AssembledBlocks(block_1, block_2, ff_memory, used_keys)
+    assembled_blocks.assemble_blocks(100)
+    with open("assembled_video_sub_set_1.pickle", 'wb') as descriptor:
+        pickle.dump(assembled_blocks, descriptor, pickle.HIGHEST_PROTOCOL)
+
+
+def video_read_through(video_generator):
+    """
+    Read through the video and reset the generator
+    :param video_generator: the generator to read from
+    :return: success read through?  and frames length to compare multiple times
+    """
+    total_frames = 0
+    while True:
+        grabbed, frame = video_generator.read()
+        if grabbed:
+            total_frames += 1
+        else:
+            print "Read Through in progress"
+            break
+    video_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    if total_frames > 0:
+        return True, total_frames
+    else:
+        return False, total_frames
+
+
+def video_quality_check(imported_videos_sources):
+    """
+    Check and make sure the quality of the video is the same through multiple read
+    :param imported_video_sources: the dictionary with format {vid_name: [[editing pairs], video generator]]}
+    :return: whether all videos have good qualities to be read multiple times, if not which one is fucked up
+    """
+    vid_keys = imported_videos_sources.keys()
+    for key in vid_keys:
+        generator = imported_videos_sources[key][1]
+        success_through, frames_num = video_read_through(generator)
+        if success_through:
+            for i in range(3):
+                success_again, next_frames_num = video_read_through(generator)
+                if not success_again or next_frames_num != frames_num:
+                    print key, "can't be read multiple times"
+                    return False, key
+    return True, None
 
 
 def test_1():
@@ -318,14 +388,25 @@ def test_2():
 
 
 
+# edit_videos()
+test_assemble()
+
+# imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_2")
+# success, which_key = video_quality_check(imported_videos_sources)
+# if success:
+#     print "All Videos are good to go"
+# else:
+#     print which_key, "has issues"
 
 
-edit_videos()
-# with open("test_ff_memory.pickle", "rb") as input_source:
+# with open("ff_memory_sub_set_1.pickle", "rb") as input_source:
 #     test_ff_memory = pickle.load(input_source)
-#     key, method = find_best_editing_pair(test_ff_memory)
-#     print key
-#     print method
+#     keys = test_ff_memory.keys()
+#     for key in keys:
+#         print test_ff_memory[key]['wave']
+
+
+
 
 # test_import_generator("./test/field_test/demo_test/sub_set_1")
 

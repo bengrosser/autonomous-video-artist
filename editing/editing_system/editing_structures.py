@@ -50,6 +50,26 @@ class EditingBlock:
         :return: the block info of the key in the ff_memory that has is most compatible with the block, the magnitude should
             be compared to average, the method that creates this value
         """
+        # Normalize the data
+
+        gradient_key, min_gradient_value = min(ff_memory.items(), key=lambda k: vector_magnitude(k[1]['gradient']))
+        ellipse_key, min_ellipse_value = min(ff_memory.items(), key=lambda k: k[1]['ellipse'])
+        wave_key, min_wave_value = min(ff_memory.items(), key=lambda k: k[1]['wave'])
+
+        min_gradient_value = vector_magnitude(min_gradient_value['gradient'])
+        min_ellipse_value = min_ellipse_value['ellipse']
+        min_wave_value = min_wave_value['wave']
+
+
+        gradient_key, max_gradient_value = max(ff_memory.items(), key=lambda k: vector_magnitude(k[1]['gradient']))
+        ellipse_key, max_ellipse_value = max(ff_memory.items(), key=lambda k: k[1]['ellipse'])
+        wave_key, max_wave_value = max(ff_memory.items(), key=lambda k: k[1]['wave'])
+        max_gradient_value = vector_magnitude(max_gradient_value['gradient'])
+        max_ellipse_value = max_ellipse_value['ellipse']
+        max_wave_value = max_wave_value['wave']
+
+
+
         block_id = {self.video_name, self.clip_range, self.cluster_index, self.cluster_threshold}
         # lowest_vector = None
         gradient_lowest_vector_magnitude = float('Inf')
@@ -87,9 +107,15 @@ class EditingBlock:
                     wave_lowest_key = self.get_block_info_from_key(key)
                     wave_memory_key = key
 
-        ellipse_score = ellipse_lowest_magnitude / ellipse_avg
-        gradient_score = gradient_lowest_vector_magnitude / gradient_avg
-        wave_score = wave_lowest_magnitude / wave_avg
+        # ellipse_score = ellipse_lowest_magnitude / ellipse_avg
+        # gradient_score = gradient_lowest_vector_magnitude / gradient_avg
+        # wave_score = wave_lowest_magnitude / wave_avg
+
+        ellipse_score = (ellipse_lowest_magnitude - min_ellipse_value) / (max_ellipse_value - min_ellipse_value)
+        gradient_score = (gradient_lowest_vector_magnitude - min_gradient_value)/ (max_gradient_value - min_gradient_value)
+        wave_score = (wave_lowest_magnitude - min_wave_value) / (max_wave_value - min_wave_value)
+
+        # print ellipse_score, gradient_score, wave_score
 
         if ellipse_score < gradient_score and ellipse_score < wave_score:
             # print "Scaled value is", ellipse_lowest_magnitude / ellipse_avg
