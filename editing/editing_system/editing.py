@@ -301,12 +301,10 @@ def edit_videos():
 
 # ---------------------TEST CODES-----------------------
 def test_assemble():
-    print "I am her"
     imported_videos_sources = test_import_generator("./test/field_test/demo_test/sub_set_1")
     used_keys = []
     with open("ff_memory_sub_set_1.pickle", 'rb') as input:
         ff_memory = pickle.load(input)
-    # first_key, method, ff_memory = editing_generator_initialize(imported_videos_sources, ff_memory)
     first_key, method = find_best_editing_pair(ff_memory)
     block_1 = EditingBlock(first_key[0], first_key[2], method, first_key[4], first_key[6])
     block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])

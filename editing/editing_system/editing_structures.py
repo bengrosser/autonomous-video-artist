@@ -35,9 +35,9 @@ class EditingBlock:
         :return: a tuple with another block's info
         """
         if key[0] == self.video_name:
-            return (key[1], key[3], key[5], key[6])
+            return (key[1], key[3], key[5], key[7])
         else:
-            return (key[0], key[2], key[4], key[7])
+            return (key[0], key[2], key[4], key[6])
 
     # Find next lowest score / best compatible block
     def find_best_compatible_block(self, ff_memory, used_keys, gradient_avg, ellipse_avg, wave_avg):

@@ -5,7 +5,6 @@ import gradient
 import numpy as np
 from editing_structures import EditingBlock, AssembledBlocks
 from frame_cluster import cluster_with_threshold
-from audio_helper import create_cluster_sound
 
 
 def generate_frame_gradient(frame):
