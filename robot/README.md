@@ -22,21 +22,25 @@ And also, make sure the TIME SYNCHRONIZATION is CORRECT at your robot. If it is 
 
 -----------------------------------------------
 
-If you are using astra camera, make sure that you have installed the driver for astra camera, check these two links.
-
-wiki.ros.org/astra_camera  and  https://github.com/tfoote/ros_astra_camera.
+If you are using astra camera, make sure that you have installed the driver for astra camera, check this link: https://github.com/tfoote/ros_astra_camera.
 
 -----------------------------------------------
 
 HOW TO BRINGUP YOUR TURTLEBOT:
 
-Open two terminal tabs on your turtlebot, and run:
+Open two terminal windows,
+
+on the first window, run
 
     $ roslaunch turtlebot_bringup minimal.launch --screen
 
-    $ roslaunch turtlebot_bringup 3dsensor.launch
+on the second window, if you are using Asus Xtion Pro sensor, run
 
-in each of the tab.
+    $ roslaunch turtlebot_bringup 3dsensor.launch
+    
+if you are using astra sensor, run
+
+    $ roslaunch astra_launch astra.launch
 
 Please check usb_cam directory to setup multiple usb cams on your turtlebot.
 
