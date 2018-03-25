@@ -93,17 +93,14 @@ def generate_video(assemble_blocks, output):
         print editing_block
         block_vid_name = editing_block.video_name
         block_cluster_index = editing_block.cluster_index
-        if 'her' in block_vid_name:
-            block_threshold = 0.1
-        else:
-            block_threshold = 0.025
+        block_threshold = editing_block.cluster_threshold
         if block_vid_name not in clustered_videos:
-            file_name = "./test/" + block_vid_name
+            file_name = "./test/field_test/demo_test/sub_set_1/" + block_vid_name
             camera = cv2.VideoCapture(file_name)
             cluster_start_time = time.time()
             clustered_video = cluster_video_frames_intense(camera, block_threshold)
             # clustered_video = cluster_video_frames_intense(camera, editing_block.cluster_threshold)
-            print "Spend", time.time()-cluster_start_time, "to cluster"
+            print "Spend", time.time()-cluster_start_time, "to cluster with threshold", block_threshold
             clustered_videos[block_vid_name] = clustered_video
             cluster_to_use = clustered_video[block_cluster_index]
             num_frames = len(cluster_to_use)
@@ -132,10 +129,10 @@ def generate_video(assemble_blocks, output):
     print "Spend", time.time()-start_time, "to generate video"
 
 
-# with open("assembled_video.pickle", 'rb') as input_source:
-#     assembled_blocks = pickle.load(input_source)
-#     generate_cut_images(assembled_blocks)
-#     generate_video(assembled_blocks, "her_matrix.mp4")
+with open("assembled_video_sub_set_1.pickle", 'rb') as input_source:
+    assembled_blocks = pickle.load(input_source)
+    # generate_cut_images(assembled_blocks)
+    generate_video(assembled_blocks, "subset_1_field.mp4")
     # create_cluster_sound(assembled_blocks)
     # print assembled_blocks.editing_blocks[0].video_name
     # print assembled_blocks.editing_blocks[0].cluster_index
