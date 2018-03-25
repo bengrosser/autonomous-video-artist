@@ -22,6 +22,12 @@ And also, make sure the TIME SYNCHRONIZATION is CORRECT at your robot. If it is 
 
 -----------------------------------------------
 
+If you are using astra camera, make sure that you have installed the driver for astra camera, check these two links.
+
+wiki.ros.org/astra_camera  and  https://github.com/tfoote/ros_astra_camera.
+
+-----------------------------------------------
+
 HOW TO BRINGUP YOUR TURTLEBOT:
 
 Open two terminal tabs on your turtlebot, and run:
