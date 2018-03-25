@@ -14,7 +14,7 @@ How to install gstreamer:
 
 To run this code, you need to make sure that the network configuration is already set up between your PC and the turtlebot. Here is a good reference about how to get this thing done: http://wiki.ros.org/turtlebot/Tutorials/indigo/Network%20Configuration .
 
-And also, make sure the TIME SYNCHRONIZATION is CORRECT at your robot. If it is wrong, you can manually synchronize the time by:
+And also, make sure the **TIME SYNCHRONIZATION** is **CORRECT** at your robot. If it is wrong, you can manually synchronize the time by:
 	
 	$ sudo apt-get install chrony
 	
@@ -34,11 +34,11 @@ on the first window, run
 
     $ roslaunch turtlebot_bringup minimal.launch --screen
 
-on the second window, if you are using Asus Xtion Pro sensor, run
+on the second window, if you are using **Asus Xtion Pro** sensor, run
 
     $ roslaunch turtlebot_bringup 3dsensor.launch
     
-if you are using astra sensor, run
+if you are using **astra** sensor, run
 
     $ roslaunch astra_launch astra.launch
 
