@@ -123,6 +123,7 @@ def write_frames_with_visual(result, assemble_blocks, cluster, current_progress)
     :param assemble_blocks: the abstract data result from editing
     :param current_progress: index of the current block
     """
+    black_middle = np.zeros((480,640,3), np.uint8) #Frame to be inserted in the middle
     front_method = None # The DA method for the front part, its block method
     end_method = None # The DA method for the end, its next block method
     if current_progress == 0:
@@ -166,7 +167,7 @@ def write_frames_with_visual(result, assemble_blocks, cluster, current_progress)
             else:
                 result.write(source_image)
         elif i in middle_range:
-            result.write(source_image)
+            result.write(black_middle)
         else:
             if end_method is not None:
                 print "Use end method", end_method
@@ -178,6 +179,7 @@ def write_frames_with_visual(result, assemble_blocks, cluster, current_progress)
     print "Finished writing"
 
 
+# Now all the middle frames are black
 def generate_video_with_visuals(assemble_blocks, output):
     """
     Generate result videos with visual bridges
@@ -268,6 +270,7 @@ def generate_video(assemble_blocks, output):
         print "Finished the block"
     print "Spend", time.time()-start_time, "to generate video"
 
+
 #------------------Test code-------------------
 def test_da_methods_with_image():
     src_img = cv2.imread("./exp.jpg")
@@ -280,12 +283,20 @@ def test_da_methods_with_image():
     print "Finished writing test images"
 
 
+def test_with_black():
+    black_middle = np.zeros((480,640,3), np.uint8) #Frame to be inserted in the middle
+    cv2.imshow("black", black_middle)
+    cv2.waitKey(0)
+
+
 # test_da_methods_with_image()
+# test_with_black()
 
 
 with open("assembled_video_sub_set_1.pickle", 'rb') as input_source:
     assembled_blocks = pickle.load(input_source)
-    generate_video_with_visuals(assembled_blocks, "subset_1_visual.mp4")
+    generate_video_with_visuals(assembled_blocks, "subset_1_visual_with_black.mp4")
+
     # generate_cut_images(assembled_blocks)
     # generate_video(assembled_blocks, "subset_1_field.mp4")
     # create_cluster_sound(assembled_blocks)
