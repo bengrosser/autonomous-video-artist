@@ -60,15 +60,13 @@ class EditingBlock:
         min_ellipse_value = min_ellipse_value['ellipse']
         min_wave_value = min_wave_value['wave']
 
-
         gradient_key, max_gradient_value = max(ff_memory.items(), key=lambda k: vector_magnitude(k[1]['gradient']))
         ellipse_key, max_ellipse_value = max(ff_memory.items(), key=lambda k: k[1]['ellipse'])
         wave_key, max_wave_value = max(ff_memory.items(), key=lambda k: k[1]['wave'])
+
         max_gradient_value = vector_magnitude(max_gradient_value['gradient'])
         max_ellipse_value = max_ellipse_value['ellipse']
         max_wave_value = max_wave_value['wave']
-
-
 
         block_id = {self.video_name, self.clip_range, self.cluster_index, self.cluster_threshold}
         # lowest_vector = None

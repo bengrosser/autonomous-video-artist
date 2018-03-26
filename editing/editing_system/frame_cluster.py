@@ -30,7 +30,6 @@ def sample_clustered_frames(frames_clusters):
     return sample_result
 
 
-
 def cluster_with_threshold(camera, threshold):
     result_frames_clusters = []
     cluster_frames = []
@@ -203,8 +202,8 @@ def get_block_time_range(clusters, cluster_index, fps):
 #         print "No frame for super old man"
 #         break
 
-# camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_1/clip3.mp4")
-# result, threshold  = adaptive_cluster(camera, 0.05)
+# camera = cv2.VideoCapture("./test/field_test/demo_test/sub_set_2/clip6.avi")
+# clustered_result, threshold  = adaptive_cluster(camera, 0.05)
 # print threshold
 # print len(result)
 # counter = 0
