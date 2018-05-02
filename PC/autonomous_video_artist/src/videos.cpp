@@ -40,17 +40,30 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 	json_filename = timestamp+"_end.json";
 	CorrespondingJson(json_filename);*/
 
+	time_t t = std::time(0);
+	struct tm * now = localtime(&t);
+	string timestamp = to_string(now->tm_year + 1900)+"-"+to_string(now->tm_mon+1)+"-"+to_string(now->tm_mday)+"_"+to_string(now->tm_hour)+":"+to_string(now->tm_min)+":"+to_string(now->tm_sec);
+
 
     //TODO write a json file before record the video
+	string json_filename = timestamp+"_start.json";
+	CorrespondingJson(json_filename);
+
+
 	if(shoot)
 	{
-		string command = "ssh ubuntu@192.168.1.140 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=clip"+to_string(clip_idx)+".mp4'";
+		//string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/clip"+to_string(clip_idx)+".mp4'";
+		string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/"+timestamp+".mp4'";
 		system(command.c_str());
 		++clip_idx;
 		shoot = false;
 		prev_shoot_timestamp = ros::Time::now();
 	}
+
 	//TODO write a json file after recording the video
+	json_filename = timestamp+"_end.json";
+	CorrespondingJson(json_filename);
+	
 }
 
 

@@ -132,16 +132,6 @@ private:
     double image_entropy(const cv::Mat rgb_img);
     double avg_brightness(const cv::Mat rgb_img);
     bool motion_detection(const cv::Mat depth_img);
-	vector<double> subview; 
-	/*notes for subview
-		Length is 9.
-		0 | 1 | 2
-	   -----------
-        3 | 4 | 5
-       -----------
-        6 | 7 | 8
-
-	*/
 
 
     //take videos

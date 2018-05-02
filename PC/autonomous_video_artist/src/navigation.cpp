@@ -251,7 +251,7 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
             decision.linear.x = 0.0;
             start = ros::Time::now();
             while(ros::Time::now() - start < ros::Duration(3.0))
-            {
+            {	
                 velocity.publish(decision);
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
             }

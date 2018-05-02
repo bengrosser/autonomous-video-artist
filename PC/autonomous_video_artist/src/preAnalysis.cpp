@@ -93,7 +93,7 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
 		if(ros::Time::now()-prev_shoot_timestamp > ros::Duration(60)){
 			brightness = avg_brightness(rgb_img);
 			cout<<"Brightness percentage: "<<brightness<<endl;
-			if(brightness > 0.3 && brightness < 0.8)
+			if(brightness > 0.003 && brightness < 0.8)
 				panning_motion = true;
 		}
 		lock_guard<mutex> lock(mtx);
