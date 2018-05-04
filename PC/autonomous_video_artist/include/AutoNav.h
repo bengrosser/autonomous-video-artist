@@ -120,7 +120,7 @@ private:
 	bool shoot_safe;
 	bool panning_motion;
 	ros::Time prev_shoot_timestamp;
-	
+	int capture_duration;
 
 
     //Preliminary analysis
@@ -136,7 +136,7 @@ private:
 
     //take videos
 	void shoot_video(const ros::TimerEvent& time);
-    void CorrespondingJson(string filename);
+    void CorrespondingJson(string timestamp, string option);
 
     //vision analysis
     void frontEnv(const sensor_msgs::ImageConstPtr& msg);

@@ -88,7 +88,7 @@ void AutoNav::preAnalysis(const sensor_msgs::ImageConstPtr& msg)
             cv_ptr = cv_bridge::toCvShare(msg, enc::MONO8);
         cv::Mat rgb_img = cv_ptr->image;
         //bit = bitAnalysis(rgb_img);
-        //entropy = image_entropy(rgb_img);
+        entropy = image_entropy(rgb_img);
 		//cout<<entropy<<endl;
 		if(ros::Time::now()-prev_shoot_timestamp > ros::Duration(60)){
 			brightness = avg_brightness(rgb_img);
@@ -154,8 +154,8 @@ double AutoNav::image_entropy(const cv::Mat rgb_img)
     cv::Mat logP;
     cv::log(hist, logP);
     
-    double entropy = -1*sum(hist.mul(logP)).val[0];
-    return entropy;
+    double ret = -1*sum(hist.mul(logP)).val[0];
+    return ret;
 }
 
 

@@ -71,6 +71,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
 	Swap_in_use = 0;
 	uptime = 0;
 
+
 	
 	bit = true;
 	entropy = 0.0;
@@ -83,6 +84,7 @@ AutoNav::AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<
     node.getParamCached("drive", DRIVE);
     node.getParamCached("drive_linearspeed", linear_speed);
     node.getParamCached("drive_angularspeed", angular_speed);
+	node.getParamCached("capture_duration", capture_duration);
 
     signal(SIGINT, my_handler);
 

@@ -19,6 +19,7 @@ int main(int argc, char** argv)
     node.setParam("drive", true);
     node.setParam("drive_linearspeed", 0.16);
     node.setParam("drive_angularspeed", 0.5);
+	node.setParam("capture_duration", 20);
 	
 
     AutoNav turtlebot(node);
@@ -27,6 +28,7 @@ int main(int argc, char** argv)
     node.deleteParam("drive");
     node.deleteParam("drive_linearspeed");
     node.deleteParam("drive_angularspeed");
+	node.deleteParam("capture_duration");
 	cout<<"where is the problem"<<endl;
 
     return 0;
