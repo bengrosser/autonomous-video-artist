@@ -156,7 +156,7 @@ private:
     void leave_station_action(const ros::TimerEvent& time);
     void battery_is_good_action(const ros::TimerEvent& time);
     void auto_docking_action(const ros::TimerEvent& time);
-    void battery_is_low_action(const ros::TimerEvent& time);
+	void battery_is_low_action(const ros::TimerEvent& time);
     void pilot(const ros::TimerEvent& time);
 
     //machine status
@@ -173,7 +173,7 @@ private:
     void angle(const nav_msgs::Odometry::ConstPtr& msg);
     void toEulerianAngle(const float x, const float y, const float z, const float w, float& roll, float& pitch, float& yaw);
     double angle_converter(const double yaw);
-    void writeJson(const ros::TimerEvent& time);
+
     
 
 public:
