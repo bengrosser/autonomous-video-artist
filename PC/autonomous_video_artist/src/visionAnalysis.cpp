@@ -36,7 +36,7 @@ void AutoNav::frontEnv(const sensor_msgs::ImageConstPtr& msg)
         double mmax = 0.0;
         cv::minMaxLoc(crop_front, &mmin, &mmax, 0, 0, mask);
 		
-		cout<<"min distance:"<<mmin<<endl;
+		//cout<<"min distance:"<<mmin<<endl;
 		if(mmin < 1000 || percentage < 0.6)
 			shoot_safe = false;
 		else

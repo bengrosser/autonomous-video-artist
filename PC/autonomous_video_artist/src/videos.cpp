@@ -15,17 +15,17 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 {
 	time_t t = std::time(0);
 	struct tm * now = localtime(&t);
-	string timestamp = to_string(now->tm_year + 1900)+"-"+to_string(now->tm_mon+1)+"-"+to_string(now->tm_mday)+"_"+to_string(now->tm_hour)+":"+to_string(now->tm_min)+":"+to_string(now->tm_sec);
-
+	string timestamp = to_string(now->tm_year + 1900)+"_"+to_string(now->tm_mon+1)+"_"+to_string(now->tm_mday)+"_"+to_string(now->tm_hour)+"-"+to_string(now->tm_min)+"-"+to_string(now->tm_sec);
 
 	if(shoot)
 	{
 		//string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/clip"+to_string(clip_idx)+".mp4'";
-		
+
 		//write a json file before recording the video
 		CorrespondingJson(timestamp, "start");
 
-		string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers="+to_string(30*capture_duration)+"device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/clips"+timestamp+".mp4'";
+		string command = "ssh ubuntu@192.168.1.109 'gst-launch --eos-on-shutdown v4l2src num-buffers="+to_string(30*capture_duration)+" device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6432-3634/clips/"+timestamp+".mp4'";
+		cout<<"Command: "<<command<<endl;
 		system(command.c_str());
 		++clip_idx;
 		shoot = false;
@@ -64,7 +64,7 @@ void AutoNav::CorrespondingJson(string timestamp, string option)
 	current_status["uptime"] = to_string(si.uptime); //string type
 	
 
-	string filename = "jsons"+timestamp+"-"+option;
+	string filename = "/home/ubuntu/jsons/"+timestamp+"_"+option;
 	
 	Json::StyledWriter styledWriter;
 	std::ofstream fid;
