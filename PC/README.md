@@ -12,6 +12,13 @@ in your terminal. "image_transport/compressedDepth" should show up in your termi
 
 After these, your should bringup your turtlebot at first. Please check the robot directory https://github.com/bengrosser/autonomous-video-artist/tree/master/robot.
 
+
+-------------------------------------
+
+Make sure that you can ssh to the turtlebot without password at first.
+
+Change the IP address in autonomous_video_artist/src/videos.cpp to the IP address of the turtlebot.
+
 -------------------------------------
 
 HOW TO RUN THIS CODE:
