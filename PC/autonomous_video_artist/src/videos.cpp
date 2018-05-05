@@ -64,7 +64,7 @@ void AutoNav::CorrespondingJson(string timestamp, string option)
 	current_status["uptime"] = to_string(si.uptime); //string type
 	
 
-	string filename = "/media/ubuntu/6438-3534/jsons"+timestamp+"-"+option;
+	string filename = "jsons"+timestamp+"-"+option;
 	
 	Json::StyledWriter styledWriter;
 	std::ofstream fid;
