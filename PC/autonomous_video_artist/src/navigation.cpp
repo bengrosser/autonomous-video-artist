@@ -16,6 +16,7 @@
 
 const double pi = 4*atan(1);
 
+//duration is half of the total duration
 void AutoNav::panning1(const ros::TimerEvent& time, double duration){
 	camera_idx = 0;
 	shoot = true;
@@ -263,11 +264,11 @@ void AutoNav::battery_is_good_action(const ros::TimerEvent& time)
         if(panning_motion && shoot_safe){
             cout<<"SHOOT VIDEO!"<<endl;
             if(panning_idx == 0)
-                panning1(time, 10.0);
+                panning1(time, capture_duration/2);
             else if(panning_idx == 1)
-                panning2(time, 10.0);
+                panning2(time, capture_duration/2);
             else
-                panning3(time, 10.0);
+                panning3(time, capture_duration/2);
             panning_idx = (panning_idx+1)%3;
         }else{
             if(acc_or_not)

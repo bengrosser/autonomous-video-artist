@@ -25,7 +25,7 @@ void AutoNav::shoot_video(const ros::TimerEvent& time)
 		//write a json file before recording the video
 		CorrespondingJson(timestamp, "start");
 
-		string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers=600 device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/clips"+timestamp+".mp4'";
+		string command = "ssh ubuntu@192.168.1.105 'gst-launch --eos-on-shutdown v4l2src num-buffers="+to_string(30*capture_duration)+"device=\"/dev/video"+to_string(camera_idx)+"\" ! video/x-raw-yuv, width=640, height=480, framerate=30/1 ! ffmpegcolorspace ! jpegenc ! avimux ! filesink location=/media/ubuntu/6438-3534/clips"+timestamp+".mp4'";
 		system(command.c_str());
 		++clip_idx;
 		shoot = false;
