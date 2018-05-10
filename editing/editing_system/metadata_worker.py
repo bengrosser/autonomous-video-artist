@@ -21,7 +21,7 @@ class MetadataWorker(ConsumerMixin):
 
     @staticmethod
     def _update_metadata_score(vids_names):
-        connection = sqlite3.connect('Video_Metadata.db')
+        connection = sqlite3.connect('Editing.db')
         cursor = connection.cursor()
         for vid_name in vids_names:
             cursor.execute('SELECT avg_brightness, avg_distance, motion_detected, has_obstacle, battery_level, '
@@ -72,7 +72,7 @@ class MetadataWorker(ConsumerMixin):
 
     @staticmethod
     def _update_editing_range(vids_names):
-        connection = sqlite3.connect('Video_Metadata.db')
+        connection = sqlite3.connect('Editing.db')
         cursor = connection.cursor()
         for vid_name in vids_names:
             cursor.execute('SELECT file_path, battery_level FROM Metadata WHERE file_name=?', (vid_name,))

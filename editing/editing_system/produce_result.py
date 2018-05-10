@@ -7,6 +7,7 @@ import ellipse
 import numpy as np
 from editing_structures import EditingBlock, AssembledBlocks
 from frame_cluster import cluster_with_threshold
+# Code for generating video editing result from the generated editing structures
 
 
 def generate_frame_gradient(frame):
@@ -215,7 +216,6 @@ def generate_video_with_visuals(assemble_blocks, output):
     print "Spend", time.time()-start_time, "to generate video"
 
 
-# TODO: Later modify it to accommodate editing range
 def generate_video(assemble_blocks, output):
     """
     Generate result video and progress video from assemble_blocks class
@@ -226,11 +226,9 @@ def generate_video(assemble_blocks, output):
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     frame_rate = float(30)
     resolution = (int(640), int(480))
-    visual_bridge_name = "visual_bridge_" + output
     edited_result = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
     # visual_bridge_result = cv2.VideoWriter(visual_bridge_name, fourcc, frame_rate, resolution)
     clustered_videos = {}
-    counter = 0
     for editing_block in assemble_blocks.editing_blocks:
         print editing_block
         block_vid_name = editing_block.video_name
@@ -293,9 +291,9 @@ def test_with_black():
 # test_with_black()
 
 
-with open("assembled_video_sub_set_1.pickle", 'rb') as input_source:
-    assembled_blocks = pickle.load(input_source)
-    generate_video_with_visuals(assembled_blocks, "subset_1_visual_with_black.mp4")
+# with open("assembled_video_sub_set_1.pickle", 'rb') as input_source:
+#     assembled_blocks = pickle.load(input_source)
+#     generate_video_with_visuals(assembled_blocks, "subset_1_visual_with_black.mp4")
 
     # generate_cut_images(assembled_blocks)
     # generate_video(assembled_blocks, "subset_1_field.mp4")

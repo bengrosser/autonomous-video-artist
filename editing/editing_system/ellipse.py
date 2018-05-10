@@ -17,8 +17,8 @@ def sobel_filter(img):
 
 
 def get_direction(vector_1, vector_2):
-    #The rotation in the drawing function is anti-clockwise
-    #So we do 360-the actual result
+    # The rotation in the drawing function is anti-clockwise
+    # So we do 360-the actual result
     def unit_vector(vector):
         return vector / np.linalg.norm(vector)
 

@@ -57,7 +57,7 @@ def range_finder(video_name, battery_level, percent_to_use):
     :param video_name: the metadata worker will find range and editing point for this video
     :param battery_level: the battery level metadata associated with the video
     :param percent_to_use: the total percent of frames we are gonna grab from this clip
-    :return: A bunch of ranges that is gonna be used for video editor
+    :return: A bunch of ranges that will be used for video editor
     The editing point is determined by the frame's entropy value
     """
     video_entropy_dict = get_entropy_list(video_name)
@@ -103,7 +103,7 @@ def range_finder(video_name, battery_level, percent_to_use):
 
 
 
-# connection = sqlite3.connect('Video_Metadata.db')
+# connection = sqlite3.connect('Editing.db')
 # cursor = connection.cursor()
 # vid_name = "2017-10-24_20:2:3.avi"
 # cursor.execute('SELECT avg_brightness, avg_distance, motion_detected, has_obstacle, battery_level, '

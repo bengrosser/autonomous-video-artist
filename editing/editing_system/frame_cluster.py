@@ -3,7 +3,6 @@ import numpy as np
 import random
 from range_finder import calcEntropy
 
-# TODO: Change the threshold along the way if there are too much segments
 # TODO: Cluster video frames should take editing pair as an argument to cluster that range
 # Methods from StackOverflow
 def get_image_difference(image_1, image_2):
@@ -72,13 +71,54 @@ def adaptive_cluster(camera, threshold):
     :return: clustered frames
     """
     # camera = cv2.VideoCapture(file_path)
+    # result_frames_clusters = []
+    # cluster_frames = []
+    # prev_frame = None
+    if camera is None:
+        print "It can't be none here"
+        return
+
+    while True:
+        result_frames_clusters = cluster_with_threshold(camera, threshold)
+        camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+        result_len = len(result_frames_clusters)
+        # The current threshold is between 6 to 12
+        if result_len > 12:
+            print "Add threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            threshold += 0.05
+            # result_frames_clusters = []
+            # cluster_frames = []
+        elif result_len < 6:
+            print "Reduce threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            if threshold > 0.03:
+                threshold -= 0.01
+            else:
+                threshold -= 0.001
+            # result_frames_clusters = []
+            # cluster_frames = []
+        else:
+            print "use threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            return result_frames_clusters, threshold
+
+
+def cluster_with_threshold_range(camera, threshold, editing_pair):
+    """
+    Cluster the video clips specified in editing pair with threshold
+    :param editing_pair: editing pair passed in from databse
+    :return: clustered frames
+    """
     result_frames_clusters = []
     cluster_frames = []
     prev_frame = None
-    if camera is None:
-        print "It can't be none here"
+    start_frame_num, end_frame_num = editing_pair
+    num_frames_needed = end_frame_num - start_frame_num + 1
+    camera.set(cv2.CAP_PROP_POS_FRAMES, start_frame_num) # Set the camera to the beginning frame
+    frames_read = 0
     while True:
-        while True:
+        if frames_read < num_frames_needed:
             grabbed, frame = camera.read()
             if grabbed:
                 # If we only have no frame to compare, we pass it into cluster frames
@@ -99,19 +139,44 @@ def adaptive_cluster(camera, threshold):
                     else:
                         cluster_frames.append(frame)
                         prev_frame = frame
+                frames_read += 1
             else:
                 if len(cluster_frames) > 0:
                     result_frames_clusters.append(cluster_frames)
                 break
+        else:
+            if len(cluster_frames) > 0:
+                result_frames_clusters.append(cluster_frames)
+            break
+    camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    return result_frames_clusters
 
+
+def adaptive_cluster_with_range(camera, threshold, editing_pair):
+    """
+    :param file_path: File path to the video
+    :param threshold: The threshold we are going to use to see if two images are similiar
+    :return: clustered frames
+    """
+    # camera = cv2.VideoCapture(file_path)
+    # result_frames_clusters = []
+    # cluster_frames = []
+    # prev_frame = None
+    if camera is None:
+        print "It can't be none here"
+        return
+
+    while True:
+        result_frames_clusters = cluster_with_threshold(camera, threshold)
         camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
         result_len = len(result_frames_clusters)
+        # The current threshold is between 6 to 12
         if result_len > 12:
             print "Add threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"
             threshold += 0.05
-            result_frames_clusters = []
-            cluster_frames = []
+            # result_frames_clusters = []
+            # cluster_frames = []
         elif result_len < 6:
             print "Reduce threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"
@@ -119,9 +184,8 @@ def adaptive_cluster(camera, threshold):
                 threshold -= 0.01
             else:
                 threshold -= 0.001
-
-            result_frames_clusters = []
-            cluster_frames = []
+            # result_frames_clusters = []
+            # cluster_frames = []
         else:
             print "use threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"

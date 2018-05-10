@@ -42,7 +42,7 @@ class File_Wathcher(ConsumerMixin):
         file_ready_publisher.publishMessage(message)
 
     def upload_metadata(self, metadatas):
-        connection = sqlite3.connect('Video_Metadata.db')
+        connection = sqlite3.connect('Editing.db')
         cursor = connection.cursor()
         cursor.executemany('INSERT INTO Metadata VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', metadatas)
         connection.commit()
@@ -64,6 +64,7 @@ class File_Wathcher(ConsumerMixin):
             print json_file_path
             with open(json_file_path, 'r') as file:
                 vid_metadata_dict = json.load(file)
+                # Now we are only using the end part
                 vid_metadata_dict = vid_metadata_dict['end']
                 to_edit = None
                 metadata_score = 0

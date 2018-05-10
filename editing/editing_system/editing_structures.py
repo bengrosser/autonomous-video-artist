@@ -1,10 +1,12 @@
 from epf import vector_magnitude
 
+
 class EditingBlock:
     """
     A Block that stores all the necessary information for
     reconstructing video
     """
+
     def __init__(self, video_name, editing_key, which_method, cluster_index, threshold):
         """
         :param video_name: which video this block comes from
@@ -28,6 +30,7 @@ class EditingBlock:
         threshold_repr = "Clustered by Threshold of " + str(self.cluster_threshold)
         result = border + name_repr + range_repr + method_repr + cluster_repr + threshold_repr
         return result
+
     # Based on self's info, extract another block's information from the key
     def get_block_info_from_key(self, key):
         """
@@ -35,9 +38,9 @@ class EditingBlock:
         :return: a tuple with another block's info
         """
         if key[0] == self.video_name:
-            return (key[1], key[3], key[5], key[7])
+            return key[1], key[3], key[5], key[7]
         else:
-            return (key[0], key[2], key[4], key[6])
+            return key[0], key[2], key[4], key[6]
 
     # Find next lowest score / best compatible block
     def find_best_compatible_block(self, ff_memory, used_keys, gradient_avg, ellipse_avg, wave_avg):
@@ -50,8 +53,8 @@ class EditingBlock:
         :return: the block info of the key in the ff_memory that has is most compatible with the block, the magnitude should
             be compared to average, the method that creates this value
         """
-        # Normalize the data
 
+        # For Normalizing the data
         gradient_key, min_gradient_value = min(ff_memory.items(), key=lambda k: vector_magnitude(k[1]['gradient']))
         ellipse_key, min_ellipse_value = min(ff_memory.items(), key=lambda k: k[1]['ellipse'])
         wave_key, min_wave_value = min(ff_memory.items(), key=lambda k: k[1]['wave'])
@@ -110,7 +113,8 @@ class EditingBlock:
         # wave_score = wave_lowest_magnitude / wave_avg
 
         ellipse_score = (ellipse_lowest_magnitude - min_ellipse_value) / (max_ellipse_value - min_ellipse_value)
-        gradient_score = (gradient_lowest_vector_magnitude - min_gradient_value)/ (max_gradient_value - min_gradient_value)
+        gradient_score = (gradient_lowest_vector_magnitude - min_gradient_value) / (
+                    max_gradient_value - min_gradient_value)
         wave_score = (wave_lowest_magnitude - min_wave_value) / (max_wave_value - min_wave_value)
 
         # print ellipse_score, gradient_score, wave_score
@@ -133,6 +137,7 @@ class AssembledBlocks:
     Data structure that holds the assembled blocks that
     are going to generate the final video
     """
+
     def __init__(self, block_1, block_2, ff_memory, used_keys):
         """
         Uses the best pair generated from initialization phase to initialize the class
@@ -185,7 +190,8 @@ class AssembledBlocks:
             lowest_methods = []
             for block in self.editing_blocks:
                 block_lowest_key, block_lowest_magnitude, block_memory_key, block_method = \
-                    block.find_best_compatible_block(self.source_memory, self.used_keys, self.avg_gradient, self.avg_ellipse, self.avg_wave)
+                    block.find_best_compatible_block(self.source_memory, self.used_keys, self.avg_gradient,
+                                                     self.avg_ellipse, self.avg_wave)
                 lowest_keys.append(block_lowest_key)
                 lowest_magnitude.append(block_lowest_magnitude)
                 lowest_memory_keys.append(block_memory_key)
@@ -199,6 +205,6 @@ class AssembledBlocks:
             print new_block
             print "Will be inserted at", lowest_index
             print "\n"
-            self.editing_blocks.insert(lowest_index+1, new_block)
+            self.editing_blocks.insert(lowest_index + 1, new_block)
             self.used_keys.append(lowest_memory_key)
         print "Assembling Finished"

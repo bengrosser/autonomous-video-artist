@@ -66,8 +66,8 @@ class DAvideoWorker(ConsumerMixin):
         print "Got the message. Start to produce DA videos"
         print "Start producing ellipse videos"
         self.generate_ellipse_videos(new_added_vids_name)
-        finished_ellipse_message = dict(finished_ellipse_files=new_added_vids_name)
-        self.publish_message("data-corner-ready", finished_ellipse_message)
+        # finished_ellipse_message = dict(finished_ellipse_files=new_added_vids_name)
+        # self.publish_message("data-corner-ready", finished_ellipse_message)
         print "Start producing gradient videos"
         self.generate_gradient_videos(new_added_vids_name)
 
