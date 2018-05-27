@@ -45,6 +45,7 @@ def generate_frame_ellipse(frame):
 
 
 # TODO: Do viewing and screen transformation to produce 3D partitcle graph
+# TODO: Generate the video results based upon the editing range
 def generate_frame_wave(frame):
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     f = np.fft.fft2(img)

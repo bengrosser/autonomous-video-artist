@@ -62,7 +62,6 @@ def cluster_with_threshold(camera, threshold):
     camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
     return result_frames_clusters
 
-
 # Computationally more intensive methods to cluster frames
 def adaptive_cluster(camera, threshold):
     """
@@ -162,12 +161,12 @@ def adaptive_cluster_with_range(camera, threshold, editing_pair):
     # result_frames_clusters = []
     # cluster_frames = []
     # prev_frame = None
+    print "Clustering with range", editing_pair
     if camera is None:
         print "It can't be none here"
         return
-
     while True:
-        result_frames_clusters = cluster_with_threshold(camera, threshold)
+        result_frames_clusters = cluster_with_threshold_range(camera, threshold, editing_pair)
         camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
         result_len = len(result_frames_clusters)
         # The current threshold is between 6 to 12

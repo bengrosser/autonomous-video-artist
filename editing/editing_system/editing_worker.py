@@ -5,7 +5,7 @@ Code for Editing worker in the editing system
 import editing
 import sqlite3
 import sys
-import sets
+from editing_structures import EditingBlock, AssembledBlocks
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
 import message_publisher
@@ -95,38 +95,44 @@ class EditingWorker(ConsumerMixin):
         connection.commit()
         connection.close()
 
+    def edit_videos(self):
+        """
+        Edit videos when there is metascore update in the database
+        """
+        new_memory = {}
+        if self.top_non_zero(self.num_videos_to_use):
+            self.top_meta_file_names = self.get_top_names(self.num_videos_to_use)
+            self.enough_data = True
+            print "------------------- start editing videos ------------------"
+            new_memory, vid_name, first_key, method = editing.edit_videos(self.num_videos_to_use, new_memory,
+                                                                          self.num_blocks, self.ff_memory)
+            self.upload_memory(new_memory, vid_name)
+            print "--------------Finished Upload Memory to Database Related To", vid_name, "------------------"
+            self.merge_memory(new_memory)
+            print "--------------Finished Merging Memory--------------"
+            used_keys = []
+            block_1 = EditingBlock(first_key[0], first_key[2], method, first_key[4], first_key[6])
+            block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])
+            used_keys.append(first_key)
+            assembled_blocks = AssembledBlocks(block_1, block_2, new_memory, used_keys)
+            assembled_blocks.assemble_blocks(self.num_blocks)
+            print "--------------Finished Producing Video With Name", vid_name, "------------"
+        else:
+            print "There are still zero values in the database"
+
     # TODO: Check and make sure that new_memory is not changed after merge
     def process_message(self, body, message):
         print "------------------ start editing process ------------------"
         # Going into the loop, every time there is Metascore update, start to produce video
         while True:
-            new_memory = {}
             if not self.enough_data:
                 # if data is not initialized this is the first time using it
                 # self.ff_memory is the accumulated memory
-                if self.top_non_zero(self.num_videos_to_use):
-                    self.top_meta_file_names = self.get_top_names(self.num_videos_to_use)
-                    self.enough_data = True
-                    print "------------------- start editing videos ------------------"
-                    new_memory, vid_name = editing.edit_videos(self.num_videos_to_use, new_memory,
-                                                                   self.num_blocks, self.ff_memory)
-                    self.merge_memory(new_memory)
-                    self.upload_memory(new_memory, vid_name)
-                    print "--------------Finished Upload Memory to Database Related To", vid_name, "------------------"
-                    print "--------------Finished Producing Video With Name", vid_name, "------------"
+                self.edit_videos()
             else:
                 if self.top_updated(self.num_videos_to_use):
-                    if self.top_non_zero(self.num_videos_to_use):
-                        self.top_meta_file_names = self.get_top_names(self.num_videos_to_use)
-                        # Now we have an update of the metadata files
-                        # Since now the self.ff_memory has more than just updated memories, but also before
-                        print "------------------- start editing videos ------------------"
-                        new_memory, vid_name = editing.edit_videos(self.num_videos_to_use, new_memory,
-                                                                       self.num_blocks, self.ff_memory)
-                        self.merge_memory(new_memory)
-                        self.upload_memory(new_memory, vid_name)
-                        print "--------------Finished Upload Memory to Database Related To", vid_name, "-------------"
-                        print "--------------Finished Producing Video With Name", vid_name, "------------"
+                    self.edit_videos()
+
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=self.queues, callbacks=self.callbacks)]

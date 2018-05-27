@@ -12,7 +12,7 @@ import math
 import time
 import copy
 from numba import jit
-from frame_cluster import adaptive_cluster, sample_clustered_frames
+from frame_cluster import adaptive_cluster, sample_clustered_frames, adaptive_cluster_with_range
 
 
 @jit(nopython=True)
@@ -229,8 +229,8 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     # Preemptive, reset both of the generator
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
     vid2_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    clustered_vid1, vid1_threshold = adaptive_cluster(vid1_generator, vid1_threshold)
-    clustered_vid2, vid2_threshold = adaptive_cluster(vid2_generator, vid2_threshold)
+    clustered_vid1, vid1_threshold = adaptive_cluster_with_range(vid1_generator, vid1_threshold, key_1)
+    clustered_vid2, vid2_threshold = adaptive_cluster_with_range(vid2_generator, vid2_threshold, key_2)
     sampled_frames_cluster1 = sample_clustered_frames(clustered_vid1)
     sampled_frames_cluster2 = sample_clustered_frames(clustered_vid2)
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -247,7 +247,7 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
             memory_key = (vid1_name, vid2_name, key_1, key_2, cluster_1_index, cluster_2_index, vid1_threshold, vid2_threshold)
             # If we processed this key before, don't run it
             if memory_key in total_memory:
-                print "Encountered this key before"
+                print "Encountered the key", total_memory, "before"
                 ff_memory[memory_key] = copy.deepcopy(total_memory[memory_key])
             else:
                 cluster_frame_2 = sampled_frames_cluster2[cluster_2_index]
@@ -260,6 +260,7 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
                 wave_score = compare_wave(da_argument)
                 print "Spent ", time.time() - da_start_time, "seconds to finish three Deep Analysis methods"
                 if memory_key in ff_memory:
+                    # Update the score
                     ff_memory[memory_key]['gradient'] = similarity_vector
                     ff_memory[memory_key]['ellipse'] = corner_score
                     ff_memory[memory_key]['wave'] = wave_score

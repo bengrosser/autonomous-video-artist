@@ -314,7 +314,6 @@ def generate_vid_name():
 
 # Method used by EditingWorker
 # TODO: Also Need to produce actual video results in this method
-# TODO: The video filename should be just timestamp and put its corresponding filenames in database
 def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     """
     Editing videos based upon the Metadata score from the database
@@ -322,7 +321,7 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     :param new_memory: Totally empty memory, to make sure that the materials are from updated videos
     :param num_blocks: Number of blocks to be included in the result video
     :param accumulated_memory: The total memory of the machine, so that we don't run into repetitive computations
-    :return: updated ff_memory
+    :return: updated ff_memory, video_name, first_key, method
     """
     vid_name = generate_vid_name()
     start_time = time.time()
@@ -341,19 +340,13 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     used_keys = []
     initialization_start_time = time.time()
     first_key, method, ff_memory = update_ff_memory(imported_videos_sources, new_memory, accumulated_memory)
-    # To avoid that, video generation may crash the program, it is a good idea to store it before generating video
-    # but this will result in a brief time of inconsistency in the database
-
-
-
-
-
     print "Spend", time.time() - initialization_start_time, "seconds to update ff_memory"
-    block_1 = EditingBlock(first_key[0], first_key[2], method, first_key[4], first_key[6])
-    block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])
-    used_keys.append(first_key)
-    assembled_blocks = AssembledBlocks(block_1, block_2, ff_memory, used_keys)
-    assembled_blocks.assemble_blocks(num_blocks)
+    return ff_memory, vid_name, first_key, method
+    # block_1 = EditingBlock(first_key[0], first_key[2], method, first_key[4], first_key[6])
+    # block_2 = EditingBlock(first_key[1], first_key[3], method, first_key[5], first_key[7])
+    # used_keys.append(first_key)
+    # assembled_blocks = AssembledBlocks(block_1, block_2, ff_memory, used_keys)
+    # assembled_blocks.assemble_blocks(num_blocks)
 
 
 
@@ -433,4 +426,4 @@ def test_2():
 
 
 # edit_videos_manual_test()
-print generate_vid_name()
+# print generate_vid_name()
