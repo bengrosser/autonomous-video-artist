@@ -5,10 +5,11 @@ Code for Editing worker in the editing system
 import editing
 import sqlite3
 import sys
+import message_publisher
 from editing_structures import EditingBlock, AssembledBlocks
+from produce_result import generate_video_with_range, generate_video_with_visuals_with_range
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
-import message_publisher
 
 
 # TODO: May Need to convert the format so that all of them is list
@@ -22,6 +23,7 @@ class EditingWorker(ConsumerMixin):
         self.enough_data = False  # Used for initialization
         self.ff_memory = {}  # EditingWorker will keep track of the editing progress by saving ff_memory
         self.num_blocks = 100  # Used for the editing blocks to assemble blocks together
+        self.storage_path = "./editing_result/" # Used to store the editing result
         if not callbacks:
             self.callbacks = [self.process_message, ]
 
@@ -106,6 +108,7 @@ class EditingWorker(ConsumerMixin):
             print "------------------- start editing videos ------------------"
             new_memory, vid_name, first_key, method = editing.edit_videos(self.num_videos_to_use, new_memory,
                                                                           self.num_blocks, self.ff_memory)
+            output_path = self.storage_path + vid_name
             self.upload_memory(new_memory, vid_name)
             print "--------------Finished Upload Memory to Database Related To", vid_name, "------------------"
             self.merge_memory(new_memory)
@@ -116,7 +119,8 @@ class EditingWorker(ConsumerMixin):
             used_keys.append(first_key)
             assembled_blocks = AssembledBlocks(block_1, block_2, new_memory, used_keys)
             assembled_blocks.assemble_blocks(self.num_blocks)
-            print "--------------Finished Producing Video With Name", vid_name, "------------"
+            generate_video_with_range(assembled_blocks, output_path)
+            print "--------------Finished Producing Video To Path", output_path, "------------"
         else:
             print "There are still zero values in the database"
 
@@ -150,3 +154,7 @@ def main():
             file_watcher.run()
         except KeyboardInterrupt:
             sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

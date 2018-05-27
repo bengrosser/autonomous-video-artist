@@ -313,7 +313,6 @@ def generate_vid_name():
 
 
 # Method used by EditingWorker
-# TODO: Also Need to produce actual video results in this method
 def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     """
     Editing videos based upon the Metadata score from the database
@@ -323,7 +322,7 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     :param accumulated_memory: The total memory of the machine, so that we don't run into repetitive computations
     :return: updated ff_memory, video_name, first_key, method
     """
-    vid_name = generate_vid_name()
+    vid_name = generate_vid_name() # With time stamp and geo locatoin
     start_time = time.time()
     imported_videos_sources = editing_import(num_videos)
     # imported_videos_sources = test_import("./test")
@@ -347,7 +346,6 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     # used_keys.append(first_key)
     # assembled_blocks = AssembledBlocks(block_1, block_2, ff_memory, used_keys)
     # assembled_blocks.assemble_blocks(num_blocks)
-
 
 
 # ---------------------TEST CODES-----------------------

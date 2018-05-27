@@ -91,3 +91,37 @@ def generate_wave(img, limit_number):
     Z_row, Z_col = Z_value.shape
     result = Z_value[0:(Z_row / 2), 0:(Z_col / 2)]
     return result
+
+
+def easy_visualize(frame):
+    img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    f = np.fft.fft2(img)
+    fshift = np.fft.fftshift(f)
+    magnitude_spectrum = 20 * np.log(np.abs(fshift))
+    magnitude_spectrum = np.rint(magnitude_spectrum)
+    result = np.uint8(magnitude_spectrum)
+    result = cv2.cvtColor(result, cv2.COLOR_GRAY2RGB)
+    return result
+
+
+def produce_wave_video(src, output, frame_rate, res1, res2):
+    src_path = "./videos/" + src
+    camera = cv2.VideoCapture(src_path)
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    fourcc = cv2.cv.CV_FOURCC(*'XVID')
+    resolution = (int(res1), int(res2))
+    out = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
+    start_time = time.time()
+    while True:
+        grabbed, frame = camera.read()
+        if grabbed:
+            visualized_result = easy_visualize(frame)
+            out.write(visualized_result)
+        else:
+            print("No video feed available")
+            break
+    print "Production Finished"
+    end_time = time.time()
+    camera.release()
+    out.release()
+    cv2.destroyAllWindows()

@@ -7,6 +7,7 @@ from kombu.mixins import ConsumerMixin
 import os
 import gradient
 import ellipse
+import wave
 import sys
 import message_publisher
 
@@ -21,10 +22,10 @@ class DAvideoWorker(ConsumerMixin):
 
     @staticmethod
     def generate_gradient_videos(vids_names):
-        '''
+        """
         Produce gradient analysis videos for newly added vids_names
-        The framerate and resolution 1 and 2 are hardcoded for now
-        '''
+        The frame rate and resolution 1 and 2 are hardcoded for now
+        """
         res1 = 640
         res2 = 480
         framerate = 30
@@ -39,10 +40,10 @@ class DAvideoWorker(ConsumerMixin):
 
     @staticmethod
     def generate_ellipse_videos(vids_names):
-        '''
+        """
         Produce feature analysis videos for newly added vids_names
-        The framerate and resolution 1 and 2 are hardcoded for now
-        '''
+        The frame rate and resolution 1 and 2 are hardcoded for now
+        """
         res1 = 640
         res2 = 480
         framerate = 30
@@ -54,6 +55,24 @@ class DAvideoWorker(ConsumerMixin):
             output_path = src_root_dir_path + "/ellipse_video.mp4"
             ellipse.produce_ellipse_video(src_name, output_path, framerate, res1, res2)
         print "Finished producing ellipse videos"
+
+    @staticmethod
+    def generate_wave_videos(vids_names):
+        """
+        Produce fourier analysis videos for newly added vids_names
+        The frame rate and resolution 1 and 2 are hardcoded for now
+        """
+        res1 = 640
+        res2 = 480
+        framerate = 30
+        for src_name in vids_names:
+            src_root_dir_name = src_name[:-4]
+            src_root_dir_path = "./da_video_result/" + src_root_dir_name
+            if not os.path.exists(src_root_dir_path):
+                os.makedirs(src_root_dir_path)
+            output_path = src_root_dir_path + "/wave_video.mp4"
+            wave.produce_wave_video(src_name, output_path, framerate, res1, res2)
+        print "Finished producing wave videos"
 
     def publish_message(self, routing_key, message):
         exchange = Exchange('editing_exchange', type='direct')
@@ -90,4 +109,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
