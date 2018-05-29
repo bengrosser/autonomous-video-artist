@@ -17,7 +17,9 @@ After these, your should bringup your turtlebot at first. Please check the robot
 
 Make sure that you can ssh to the turtlebot without password at first.
 
-Change the IP address in autonomous_video_artist/src/videos.cpp to the IP address of the turtlebot.
+-------------------------------------
+
+You need to check some parameters in the code before running it: in autonomous_video_artist/src/videos.cpp, check wether the ip address and filesink location is correct in string command variable.
 
 -------------------------------------
 
