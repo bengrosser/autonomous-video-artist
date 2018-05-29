@@ -29,7 +29,6 @@ int main(int argc, char** argv)
     node.deleteParam("drive_linearspeed");
     node.deleteParam("drive_angularspeed");
 	node.deleteParam("capture_duration");
-	cout<<"where is the problem"<<endl;
 
     return 0;
 }

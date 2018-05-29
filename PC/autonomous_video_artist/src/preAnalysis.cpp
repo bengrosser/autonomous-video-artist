@@ -205,8 +205,10 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         cv::minMaxLoc(motion_map, 0, &motion_max, 0, 0);
         Mat motion_norm;
         motion_map.convertTo(motion_norm, CV_32F, 1.0/motion_max, 0);
+		mtx.lock();
         cv::imshow("motion", motion_norm);
         cv::waitKey(1);
+		mtx.unlock();
 
 
         Moments mu = moments(new_mask, true);
@@ -218,8 +220,10 @@ bool AutoNav::motion_detection(const cv::Mat depth_img)
         prev_frame = depth_img;
         if(center.x > 0 && center.y > 0){
             circle(res, center, 20, Scalar(0,0,255), 4, 8, 0);
+			mtx.lock();
             imshow("result", res);
             cv::waitKey(1);
+			mtx.unlock();
             return true;
         }
         else
