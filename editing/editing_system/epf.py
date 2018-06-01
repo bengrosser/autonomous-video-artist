@@ -237,8 +237,8 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     vid2_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
     print "Spent", time.time() - clustering_start_time, "seconds to cluster"
     # Start processing the frames
-    print vid1_name, "has threshold", vid1_threshold
-    print vid2_name, "has threshold", vid2_threshold
+    print vid1_name, "with range", key_1, "has threshold", vid1_threshold
+    print vid2_name, "with range", key_2, "has threshold", vid2_threshold
     print "Length of the sampled frames are", len(sampled_frames_cluster1), len(sampled_frames_cluster2)
     # print "Need to evaluate", len(sampled_frames_cluster1)*len(sampled_frames_cluster2), "pairs"
     for cluster_1_index in range(len(sampled_frames_cluster1)):

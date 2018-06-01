@@ -1,7 +1,23 @@
+Urgent:
+    The update method also need to make sure the editing range is not None ----> DONE
+
 Test Track:
-1: DA worker
-2: Enough Video
-3: Initialized Editing
-4: Update Editing
-5: FF_memory database
-6: Metadata database
+    File Watcher    ---------> DONE
+    Metadata Worker ------------> DONE
+    DA worker -------------> DONE
+    Enough Video -------------> DONE
+    Initialized Editing -----------> DONE
+    Update Editing
+    FF_memory database -----------> DONE
+    Metadata database ------------> DONE
+
+Notice:
+    Need to make sure that the initializer's enough quantity is the same with the editing worker's num_video field
+    Need to change the size of the range in range finder so the video results are not fragmented
+    When passing the data to the editing server, always pass the JSON file first
+    Currently only the end json file is used
+    Need to know the RAM of the Robot before hand to normalize the data
+
+Change:
+    Added the filter functions in the range_finder.py, so that there is no fragmented one frame length ranges
+

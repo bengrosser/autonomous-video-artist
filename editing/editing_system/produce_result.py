@@ -298,7 +298,7 @@ def generate_video_with_range(assemble_blocks, output):
         block_range = editing_block.clip_range
         clip_key = generate_clip_cluster_key(block_vid_name, block_range)
         if clip_key not in clustered_clips:
-            file_name = "./test/field_test/demo_test/sub_set_1/" + block_vid_name
+            file_name = "./videos/" + block_vid_name
             camera = cv2.VideoCapture(file_name)
             cluster_start_time = time.time()
             clustered_video = cluster_with_threshold_range(camera, block_threshold, block_range)

@@ -185,7 +185,7 @@ def produce_ellipse_video(src, output, frame_rate, res1, res2):
     src_path = "./videos/" + src
     camera = cv2.VideoCapture(src_path)
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    fourcc = cv2.cv.CV_FOURCC(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     resolution = (int(res1), int(res2))
     out = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
     start_time = time.time()

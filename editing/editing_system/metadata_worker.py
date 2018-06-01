@@ -7,7 +7,7 @@ from kombu.mixins import ConsumerMixin
 import message_publisher
 import sys
 import sqlite3
-from range_finder import range_finder
+from range_finder import range_finder, range_filter
 
 
 #TODO: pulish the message to the exchange
@@ -52,7 +52,7 @@ class MetadataWorker(ConsumerMixin):
                 else:
                     normalized_distance_to_dock = float(5 - distance_to_dock) / 5
 
-                storage_converter_unit = 1024*1024*1024
+                storage_converter_unit = 2*1024*1024*1024
                 RAM_in_gb = RAM_in_use_sys / float(storage_converter_unit)
                 RAM_distance_from_1 = abs(RAM_in_gb-1)
                 normalized_RAM_in_use_sys = (1 - RAM_distance_from_1) / 1
@@ -77,8 +77,10 @@ class MetadataWorker(ConsumerMixin):
         for vid_name in vids_names:
             cursor.execute('SELECT file_path, battery_level FROM Metadata WHERE file_name=?', (vid_name,))
             file_path, battery_level = cursor.fetchall()[0]
-            editing_range = range_finder(file_path, battery_level, 0.5)
+            editing_range = range_finder(file_path, battery_level, 0.7)
+            editing_range = range_filter(editing_range)
             editing_range_string = str(editing_range)
+            print "Editing Range is", editing_range_string
             cursor.execute('UPDATE Metadata SET to_edit=? WHERE file_name=?', (editing_range_string, vid_name))
             connection.commit()
         connection.close()
@@ -89,7 +91,12 @@ class MetadataWorker(ConsumerMixin):
         self._update_metadata_score(new_added_vids_name)
         print "Finish score update"
         self._update_editing_range(new_added_vids_name)
-        print "Finish range update"
+
+    def publish_message(self, routing_key, message):
+        exchange = Exchange('editing_exchange', type='direct')
+        file_ready_publisher = message_publisher.Message_publisher(self.connection, exchange,
+                                                                   routing_key)
+        file_ready_publisher.publishMessage(message)
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=self.queues, callbacks=self.callbacks)]

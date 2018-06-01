@@ -6,6 +6,8 @@ import editing
 import sqlite3
 import sys
 import message_publisher
+import time
+import cPickle
 from editing_structures import EditingBlock, AssembledBlocks
 from produce_result import generate_video_with_range, generate_video_with_visuals_with_range
 from kombu import Connection, Exchange, Queue
@@ -19,7 +21,7 @@ class EditingWorker(ConsumerMixin):
         self.connection = connection
         self.queues = queues
         self.top_meta_file_names = []  # Used to keep track of changes in Metadata score, a list of file names, default length 10
-        self.num_videos_to_use = 5  # Use this number of videos to pass into the editing function
+        self.num_videos_to_use = 2 # Use this number of videos to pass into the editing function
         self.enough_data = False  # Used for initialization
         self.ff_memory = {}  # EditingWorker will keep track of the editing progress by saving ff_memory
         self.num_blocks = 100  # Used for the editing blocks to assemble blocks together
@@ -90,17 +92,35 @@ class EditingWorker(ConsumerMixin):
         :param vid_name: unique vid_name of time stamp plus longitude and latitude
         """
         memory_stamp = vid_name[:-4]
-        memory_record = [memory_stamp, vid_name, new_memory]
+        memory_blob = cPickle.dumps(new_memory, cPickle.HIGHEST_PROTOCOL)
+        memory_record = [[memory_stamp, vid_name, sqlite3.Binary(memory_blob)]]
         connection = sqlite3.connect('Editing.db')
         cursor = connection.cursor()
         cursor.executemany('INSERT INTO FF_Memory VALUES (?,?,?)', memory_record)
         connection.commit()
         connection.close()
 
+    def database_check(self):
+        """
+        Check whether there are none values in the top meta scores in the database
+        :return: True indicating editing can go on False other wise
+        """
+        imported_videos_sources = editing.editing_import(self.num_videos_to_use)
+        if editing.no_none_in_editing_range(imported_videos_sources):
+            return True
+        else:
+            return False
+
     def edit_videos(self):
         """
-        Edit videos when there is metascore update in the database
+        Edit videos when there is metascore and there is no none in the editing range update in the database
         """
+        editing_data_good_to_go = self.database_check()
+        while not editing_data_good_to_go:
+            print "Wait for Metadata worker to finish the range generation"
+            time.sleep(30)
+            editing_data_good_to_go = self.database_check()
+        print "-----------------data are good to go for the editing-----------"
         new_memory = {}
         if self.top_non_zero(self.num_videos_to_use):
             self.top_meta_file_names = self.get_top_names(self.num_videos_to_use)

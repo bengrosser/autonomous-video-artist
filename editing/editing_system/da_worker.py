@@ -83,12 +83,12 @@ class DAvideoWorker(ConsumerMixin):
     def process_message(self, body, message):
         new_added_vids_name = body["ready_files"]
         print "Got the message. Start to produce DA videos"
-        print "Start producing ellipse videos"
         self.generate_ellipse_videos(new_added_vids_name)
-        # finished_ellipse_message = dict(finished_ellipse_files=new_added_vids_name)
-        # self.publish_message("data-corner-ready", finished_ellipse_message)
-        print "Start producing gradient videos"
+        print "Finished Producing Ellipse Video"
         self.generate_gradient_videos(new_added_vids_name)
+        print "Finished Producing Gradient Video"
+        self.generate_wave_videos(new_added_vids_name)
+        print "Finished Producing Wave Video"
 
     def get_consumers(self, Consumer, channel):
         return [Consumer(queues=self.queues, callbacks=self.callbacks)]

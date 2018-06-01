@@ -187,7 +187,7 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     # src_path = "./data/video/" + src
     camera = cv2.VideoCapture(src)
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    fourcc = cv2.cv.CV_FOURCC(*'XVID')
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     frame_rate = float(framerate)
     resolution = (int(res1), int(res2))
     out = cv2.VideoWriter(output, fourcc, frame_rate, resolution)

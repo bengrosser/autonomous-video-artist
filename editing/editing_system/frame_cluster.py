@@ -151,6 +151,7 @@ def cluster_with_threshold_range(camera, threshold, editing_pair):
     return result_frames_clusters
 
 
+# Current threshold range is (3, 8)
 def adaptive_cluster_with_range(camera, threshold, editing_pair):
     """
     :param file_path: File path to the video
@@ -165,30 +166,43 @@ def adaptive_cluster_with_range(camera, threshold, editing_pair):
     if camera is None:
         print "It can't be none here"
         return
+    loop_security_valve = 50 # Make sure the clustering algorithm doesn't stuck in the infinite loop
+    loop_count = 0
     while True:
         result_frames_clusters = cluster_with_threshold_range(camera, threshold, editing_pair)
         camera.set(cv2.CAP_PROP_POS_FRAMES, 0)
         result_len = len(result_frames_clusters)
-        # The current threshold is between 6 to 12
-        if result_len > 12:
-            print "Add threshold value", threshold
-            print "Have", len(result_frames_clusters), "clusters"
-            threshold += 0.05
-            # result_frames_clusters = []
-            # cluster_frames = []
-        elif result_len < 6:
-            print "Reduce threshold value", threshold
-            print "Have", len(result_frames_clusters), "clusters"
-            if threshold > 0.03:
-                threshold -= 0.01
-            else:
-                threshold -= 0.001
-            # result_frames_clusters = []
-            # cluster_frames = []
-        else:
+        if loop_count == loop_security_valve:
             print "use threshold value", threshold
             print "Have", len(result_frames_clusters), "clusters"
             return result_frames_clusters, threshold
+        # The current threshold is between 3 to 8
+        # For some of the single frame block, cluster numbers will not change at all
+        if threshold <= 0:
+            print "use threshold value", threshold
+            print "Have", len(result_frames_clusters), "clusters"
+            return result_frames_clusters, threshold
+        else:
+            if result_len > 8:
+                print "Add threshold value", threshold
+                print "Have", len(result_frames_clusters), "clusters"
+                threshold += 0.05
+                # result_frames_clusters = []
+                # cluster_frames = []
+            elif result_len < 3:
+                print "Reduce threshold value", threshold
+                print "Have", len(result_frames_clusters), "clusters"
+                if threshold > 0.03:
+                    threshold -= 0.01
+                else:
+                    threshold -= 0.001
+                # result_frames_clusters = []
+                # cluster_frames = []
+            else:
+                print "use threshold value", threshold
+                print "Have", len(result_frames_clusters), "clusters"
+                return result_frames_clusters, threshold
+        loop_count += 1
 
 
 def cluster_video_frames_entropy(camera, n):

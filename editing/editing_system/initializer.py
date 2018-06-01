@@ -37,7 +37,7 @@ class Initializer(ConsumerMixin):
                 routing_key)
         #Initializer will tell filewatcher how many files to watch
         msg = dict(
-                enough_quantity = 3,
+                enough_quantity = 2,
                 ) 
         initialize_publisher.publishMessage(msg)
 

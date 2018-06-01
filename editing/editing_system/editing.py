@@ -14,12 +14,12 @@
 import cv2
 import epf
 import time
-import json
 import pickle
 import frame_cluster
 import sqlite3
 import requests
 import json
+import ast
 import datetime
 from editing_structures import EditingBlock, AssembledBlocks
 from epf import vector_magnitude
@@ -312,6 +312,20 @@ def generate_vid_name():
     return vid_name
 
 
+def no_none_in_editing_range(imported_videos_sources):
+    """
+    This method checks whether there is none values in the editing range from the data base
+    :param imported_videos_sources: Newly imported data
+    :return: Boolean values indicating whether there is still none in the editing range
+    """
+    vid_names = imported_videos_sources.keys()
+    for vid_name in vid_names:
+        editing_pairs = imported_videos_sources[vid_name][0]
+        if editing_pairs is None:
+            return False
+    return True
+
+
 # Method used by EditingWorker
 def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     """
@@ -325,6 +339,10 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     vid_name = generate_vid_name() # With time stamp and geo locatoin
     start_time = time.time()
     imported_videos_sources = editing_import(num_videos)
+    for vid_name, edit_info in imported_videos_sources.iteritems():
+        editing_pairs = edit_info[0]
+        editing_pairs = ast.literal_eval(editing_pairs)
+        imported_videos_sources[vid_name][0] = editing_pairs
     # imported_videos_sources = test_import("./test")
     print "Spend", time.time() - start_time, "seconds to import videos"
     print "Start videos quality check"
