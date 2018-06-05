@@ -40,7 +40,7 @@ class EditingWorker(ConsumerMixin):
 
     def top_updated(self, top_num):
         """
-        This function will check whether the top ten Metascore has changed or not
+        This function will check whether the top Metascore has changed or not
         :param top_num: how many numbers of video metadata to check
         :return: whether metadata is updated
         """

@@ -179,8 +179,7 @@ class AssembledBlocks:
 
     def assemble_blocks(self, num_blocks):
         """
-        Assemble blocks based on the initial blocks and ff_memory, the assemble should go behind, different with
-            insertion
+        Assemble blocks based on the initial blocks and ff_memory, the assemble should go behind, different with insertion
         :param num_blocks: number of blocks needs to be assembled
         """
         while len(self.editing_blocks) != num_blocks:

@@ -1,0 +1,1243 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>editing_system package &#8212; Editing System 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="editing-system-package">
+<h1>editing_system package<a class="headerlink" href="#editing-system-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-editing_system.audio_helper">
+<span id="editing-system-audio-helper-module"></span><h2>editing_system.audio_helper module<a class="headerlink" href="#module-editing_system.audio_helper" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.audio_helper.create_cluster_sound">
+<code class="descclassname">editing_system.audio_helper.</code><code class="descname">create_cluster_sound</code><span class="sig-paren">(</span><em>assembled_blocks</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.audio_helper.create_cluster_sound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create sounds based on the AssembledBlocks passed in
+:param: assembled blocks</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.audio_helper.get_sound_segment">
+<code class="descclassname">editing_system.audio_helper.</code><code class="descname">get_sound_segment</code><span class="sig-paren">(</span><em>json_path</em>, <em>original_file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.audio_helper.get_sound_segment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Using the stored clip information form original video in json to get the sound
+:param json_path: JSON file path
+:param original_file_path: the file path to the video where all test videos divided from</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.da_worker">
+<span id="editing-system-da-worker-module"></span><h2>editing_system.da_worker module<a class="headerlink" href="#module-editing_system.da_worker" title="Permalink to this headline">¶</a></h2>
+<p>Code for deep analysis video worker in the editing system</p>
+<dl class="class">
+<dt id="editing_system.da_worker.DAvideoWorker">
+<em class="property">class </em><code class="descclassname">editing_system.da_worker.</code><code class="descname">DAvideoWorker</code><span class="sig-paren">(</span><em>connection</em>, <em>queues</em>, <em>callbacks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="staticmethod">
+<dt id="editing_system.da_worker.DAvideoWorker.generate_ellipse_videos">
+<em class="property">static </em><code class="descname">generate_ellipse_videos</code><span class="sig-paren">(</span><em>vids_names</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.generate_ellipse_videos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce feature analysis videos for newly added vids_names
+The frame rate and resolution 1 and 2 are hardcoded for now</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="editing_system.da_worker.DAvideoWorker.generate_gradient_videos">
+<em class="property">static </em><code class="descname">generate_gradient_videos</code><span class="sig-paren">(</span><em>vids_names</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.generate_gradient_videos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce gradient analysis videos for newly added vids_names
+The frame rate and resolution 1 and 2 are hardcoded for now</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="editing_system.da_worker.DAvideoWorker.generate_wave_videos">
+<em class="property">static </em><code class="descname">generate_wave_videos</code><span class="sig-paren">(</span><em>vids_names</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.generate_wave_videos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce fourier analysis videos for newly added vids_names
+The frame rate and resolution 1 and 2 are hardcoded for now</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.da_worker.DAvideoWorker.get_consumers">
+<code class="descname">get_consumers</code><span class="sig-paren">(</span><em>Consumer</em>, <em>channel</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.get_consumers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.da_worker.DAvideoWorker.process_message">
+<code class="descname">process_message</code><span class="sig-paren">(</span><em>body</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.da_worker.DAvideoWorker.publish_message">
+<code class="descname">publish_message</code><span class="sig-paren">(</span><em>routing_key</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.DAvideoWorker.publish_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.da_worker.main">
+<code class="descclassname">editing_system.da_worker.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.da_worker.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.editing">
+<span id="editing-system-editing-module"></span><h2>editing_system.editing module<a class="headerlink" href="#module-editing_system.editing" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.editing.edit_videos">
+<code class="descclassname">editing_system.editing.</code><code class="descname">edit_videos</code><span class="sig-paren">(</span><em>num_videos</em>, <em>new_memory</em>, <em>num_blocks</em>, <em>accumulated_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.edit_videos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Editing videos based upon the Metadata score from the database
+:param num_videos: Number of videos we want to import to the editor
+:param new_memory: Totally empty memory, to make sure that the materials are from updated videos
+:param num_blocks: Number of blocks to be included in the result video
+:param accumulated_memory: The total memory of the machine, so that we don’t run into repetitive computations
+:return: updated ff_memory, video_name, first_key, method</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.edit_videos_manual_test">
+<code class="descclassname">editing_system.editing.</code><code class="descname">edit_videos_manual_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.edit_videos_manual_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.editing_import">
+<code class="descclassname">editing_system.editing.</code><code class="descname">editing_import</code><span class="sig-paren">(</span><em>num_videos</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.editing_import" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load generators for the top num_videos metadata scores video clips
+:param num_videos: number of videos to import to the editing worker
+:return: the dictionary with format {vid_name: [[editing_pairs], generator]}</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.find_best_editing_pair">
+<code class="descclassname">editing_system.editing.</code><code class="descname">find_best_editing_pair</code><span class="sig-paren">(</span><em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.find_best_editing_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Go through three categories of ff_memory data and find the best data by comparing
+smallest / average  score
+:param ff_memory: the ff_memory generated by epf with generators
+:return: the key and the category of the methods</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.generate_vid_name">
+<code class="descclassname">editing_system.editing.</code><code class="descname">generate_vid_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.generate_vid_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.generator_initialize">
+<code class="descclassname">editing_system.editing.</code><code class="descname">generator_initialize</code><span class="sig-paren">(</span><em>imported_video_sources</em>, <em>ff_memory_to_update</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.generator_initialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>imported_video_sources</strong> – the dictionary with format {vid_name: [[editing pairs], video generator]]}</li>
+<li><strong>ff_memory_to_update</strong> – used to book keeping comparison results</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">lowest vector coordinate, ff_memory</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.initialize">
+<code class="descclassname">editing_system.editing.</code><code class="descname">initialize</code><span class="sig-paren">(</span><em>imported_video_sources</em>, <em>ff_memory_to_update</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>imported_video_sources</strong> – the dictionary with format {vid_name:{editing_pair: corresponding frames}}</li>
+<li><strong>ff_memory_to_update</strong> – used to book keeping comparison results</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">lowest vector coordinate, ff_memory</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.load_generator">
+<code class="descclassname">editing_system.editing.</code><code class="descname">load_generator</code><span class="sig-paren">(</span><em>vid_path</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.load_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.no_none_in_editing_range">
+<code class="descclassname">editing_system.editing.</code><code class="descname">no_none_in_editing_range</code><span class="sig-paren">(</span><em>imported_videos_sources</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.no_none_in_editing_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method checks whether there is none values in the editing range from the data base
+:param imported_videos_sources: Newly imported data
+:return: Boolean values indicating whether there is still none in the editing range</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.read_frames_into_list">
+<code class="descclassname">editing_system.editing.</code><code class="descname">read_frames_into_list</code><span class="sig-paren">(</span><em>vid_path</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.read_frames_into_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.test_1">
+<code class="descclassname">editing_system.editing.</code><code class="descname">test_1</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.test_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.test_2">
+<code class="descclassname">editing_system.editing.</code><code class="descname">test_2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.test_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.test_assemble">
+<code class="descclassname">editing_system.editing.</code><code class="descname">test_assemble</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.test_assemble" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.test_import">
+<code class="descclassname">editing_system.editing.</code><code class="descname">test_import</code><span class="sig-paren">(</span><em>test_files_root_path</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.test_import" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>test_files_root_path</strong> – root path for all test files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the dictionary with format {vid_name:{editing_pair: corresponding frames}}</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.test_import_generator">
+<code class="descclassname">editing_system.editing.</code><code class="descname">test_import_generator</code><span class="sig-paren">(</span><em>test_files_root_path</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.test_import_generator" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>test_files_root_path</strong> – root path for all test files</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the dictionary with format {vid_name: [[editing_pairs], generator]}</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.update_ff_memory">
+<code class="descclassname">editing_system.editing.</code><code class="descname">update_ff_memory</code><span class="sig-paren">(</span><em>imported_video_sources</em>, <em>ff_memory_to_update</em>, <em>total_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.update_ff_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based on the newly imported video sources, update the frame to frame memory
+:param imported_video_sources: the dictionary with format {vid_name: [[editing pairs], video generator]]}
+:param ff_memory_to_update: used to book keeping comparison results
+:param total_memory: the total machine memory to avoid repetitive computations
+:return: coordinates for the most compatible keys, ff_memory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.video_quality_check">
+<code class="descclassname">editing_system.editing.</code><code class="descname">video_quality_check</code><span class="sig-paren">(</span><em>imported_videos_sources</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.video_quality_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check and make sure the quality of the video is the same through multiple read
+:param imported_video_sources: the dictionary with format {vid_name: [[editing pairs], video generator]]}
+:return: whether all videos have good qualities to be read multiple times, if not which one is fucked up</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing.video_read_through">
+<code class="descclassname">editing_system.editing.</code><code class="descname">video_read_through</code><span class="sig-paren">(</span><em>video_generator</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing.video_read_through" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read through the video and reset the generator
+:param video_generator: the generator to read from
+:return: success read through?  and frames length to compare multiple times</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.editing_structures">
+<span id="editing-system-editing-structures-module"></span><h2>editing_system.editing_structures module<a class="headerlink" href="#module-editing_system.editing_structures" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="editing_system.editing_structures.AssembledBlocks">
+<em class="property">class </em><code class="descclassname">editing_system.editing_structures.</code><code class="descname">AssembledBlocks</code><span class="sig-paren">(</span><em>block_1</em>, <em>block_2</em>, <em>ff_memory</em>, <em>used_keys</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.AssembledBlocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data structure that holds the assembled blocks that
+are going to generate the final video</p>
+<dl class="method">
+<dt id="editing_system.editing_structures.AssembledBlocks.assemble_blocks">
+<code class="descname">assemble_blocks</code><span class="sig-paren">(</span><em>num_blocks</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.AssembledBlocks.assemble_blocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assemble blocks based on the initial blocks and ff_memory, the assemble should go behind, different with insertion
+:param num_blocks: number of blocks needs to be assembled</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_structures.AssembledBlocks.get_average">
+<code class="descname">get_average</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.AssembledBlocks.get_average" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="editing_system.editing_structures.EditingBlock">
+<em class="property">class </em><code class="descclassname">editing_system.editing_structures.</code><code class="descname">EditingBlock</code><span class="sig-paren">(</span><em>video_name</em>, <em>editing_key</em>, <em>which_method</em>, <em>cluster_index</em>, <em>threshold</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.EditingBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Block that stores all the necessary information for
+reconstructing video</p>
+<dl class="method">
+<dt id="editing_system.editing_structures.EditingBlock.find_best_compatible_block">
+<code class="descname">find_best_compatible_block</code><span class="sig-paren">(</span><em>ff_memory</em>, <em>used_keys</em>, <em>gradient_avg</em>, <em>ellipse_avg</em>, <em>wave_avg</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.EditingBlock.find_best_compatible_block" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>ff_memory</strong> – frame(cluster) comparison results from the initialization stage</li>
+<li><strong>used_keys</strong> – representation of the blocks that have already been used in assembled blocks</li>
+<li><strong>gradient_avg</strong> – average value from ff_memory of gradient score</li>
+<li><strong>ellipse_avg</strong> – average value from ff_memory of ellipse score</li>
+<li><strong>wave_avg</strong> – average value from ff_memory of wave score</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the block info of the key in the ff_memory that has is most compatible with the block, the magnitude should
+be compared to average, the method that creates this value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_structures.EditingBlock.get_block_info_from_key">
+<code class="descname">get_block_info_from_key</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_structures.EditingBlock.get_block_info_from_key" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> – A key from ff_memory that contains self’s info</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a tuple with another block’s info</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.editing_worker">
+<span id="editing-system-editing-worker-module"></span><h2>editing_system.editing_worker module<a class="headerlink" href="#module-editing_system.editing_worker" title="Permalink to this headline">¶</a></h2>
+<p>Code for Editing worker in the editing system</p>
+<dl class="class">
+<dt id="editing_system.editing_worker.EditingWorker">
+<em class="property">class </em><code class="descclassname">editing_system.editing_worker.</code><code class="descname">EditingWorker</code><span class="sig-paren">(</span><em>connection</em>, <em>queues</em>, <em>callbacks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.database_check">
+<code class="descname">database_check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.database_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether there are none values in the top meta scores in the database
+:return: True indicating editing can go on False other wise</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.edit_videos">
+<code class="descname">edit_videos</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.edit_videos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Edit videos when there is metascore and there is no none in the editing range update in the database</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.get_consumers">
+<code class="descname">get_consumers</code><span class="sig-paren">(</span><em>Consumer</em>, <em>channel</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.get_consumers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="editing_system.editing_worker.EditingWorker.get_top_names">
+<em class="property">static </em><code class="descname">get_top_names</code><span class="sig-paren">(</span><em>top_num</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.get_top_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.merge_memory">
+<code class="descname">merge_memory</code><span class="sig-paren">(</span><em>new_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.merge_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine the self.ff_memory with the new_memory
+:param new_memory: The new memory generated from edit videos</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.process_message">
+<code class="descname">process_message</code><span class="sig-paren">(</span><em>body</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.public_message">
+<code class="descname">public_message</code><span class="sig-paren">(</span><em>routing_key</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.public_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="editing_system.editing_worker.EditingWorker.top_non_zero">
+<em class="property">static </em><code class="descname">top_non_zero</code><span class="sig-paren">(</span><em>top_num</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.top_non_zero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check and make sure that all the top ten scores are non-zero
+:param top_num: how many numbers of video metadata to check
+:return: whether there is zero in top ten Metascore</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.editing_worker.EditingWorker.top_updated">
+<code class="descname">top_updated</code><span class="sig-paren">(</span><em>top_num</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.top_updated" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will check whether the top Metascore has changed or not
+:param top_num: how many numbers of video metadata to check
+:return: whether metadata is updated</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="editing_system.editing_worker.EditingWorker.upload_memory">
+<em class="property">static </em><code class="descname">upload_memory</code><span class="sig-paren">(</span><em>new_memory</em>, <em>vid_name</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.EditingWorker.upload_memory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload the memory to database
+:param new_memory: Newly generated memory
+:param vid_name: unique vid_name of time stamp plus longitude and latitude</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.editing_worker.main">
+<code class="descclassname">editing_system.editing_worker.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.editing_worker.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.ellipse">
+<span id="editing-system-ellipse-module"></span><h2>editing_system.ellipse module<a class="headerlink" href="#module-editing_system.ellipse" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.ellipse.alpha_blending">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">alpha_blending</code><span class="sig-paren">(</span><em>fore_ground</em>, <em>back_ground</em>, <em>alpha</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.alpha_blending" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.drawEllipse">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">drawEllipse</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>w</em>, <em>h</em>, <em>rotation</em>, <em>ctx</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.drawEllipse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.gaussian_blur">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">gaussian_blur</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.gaussian_blur" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.get_direction">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">get_direction</code><span class="sig-paren">(</span><em>vector_1</em>, <em>vector_2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.get_direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.get_eigen">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">get_eigen</code><span class="sig-paren">(</span><em>i</em>, <em>j</em>, <em>Sx2</em>, <em>Sy2</em>, <em>Sxy</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.get_eigen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.get_eigen_matrix">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">get_eigen_matrix</code><span class="sig-paren">(</span><em>harris_result</em>, <em>Sx2</em>, <em>Sy2</em>, <em>Sxy</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.get_eigen_matrix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.get_eigen_value">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">get_eigen_value</code><span class="sig-paren">(</span><em>harris_result</em>, <em>Sx2</em>, <em>Sy2</em>, <em>Sxy</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.get_eigen_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is just for editor point finder
+:param harris_result: harris_value result
+:param Sx2: Sobel X square
+:param Sy2: Sobel Y square
+:param Sxy: Sobel X*Y
+:return: Eigen value matrix for area calculation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.harris_measure">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">harris_measure</code><span class="sig-paren">(</span><em>Sx2</em>, <em>Sy2</em>, <em>Sxy</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.harris_measure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.harris_value">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">harris_value</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.harris_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is just for editing point finder to calculate compatibility
+:param img: source gray scale image
+:return: the eigen value matrix for are calculation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.harris_visual">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">harris_visual</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.harris_visual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.produce_ellipse_image">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">produce_ellipse_image</code><span class="sig-paren">(</span><em>src</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.produce_ellipse_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.produce_ellipse_video">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">produce_ellipse_video</code><span class="sig-paren">(</span><em>src</em>, <em>output</em>, <em>frame_rate</em>, <em>res1</em>, <em>res2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.produce_ellipse_video" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.sobel_filter">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">sobel_filter</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.sobel_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.ellipse.visualize">
+<code class="descclassname">editing_system.ellipse.</code><code class="descname">visualize</code><span class="sig-paren">(</span><em>eigen_value_matrix</em>, <em>eigen_vector_matrix</em>, <em>harris_result</em>, <em>harris_mask</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.ellipse.visualize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.epf">
+<span id="editing-system-epf-module"></span><h2>editing_system.epf module<a class="headerlink" href="#module-editing_system.epf" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.epf.build_edit_frame_dict">
+<code class="descclassname">editing_system.epf.</code><code class="descname">build_edit_frame_dict</code><span class="sig-paren">(</span><em>vid_path</em>, <em>to_edit</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.build_edit_frame_dict" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vid_path</strong> – The full path to the video</li>
+<li><strong>to_edit</strong> – the editing pair stored in the database of that video</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dictionary with editing pair as key and its corresponding frames in the video as value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_ellipse">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_ellipse</code><span class="sig-paren">(</span><em>imgs</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_ellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the image ellipse compatibility by comparing generated ellipse area
+:param img1: The frame read from first video
+:param img2: The frame read from second video
+:return: a float suggesting the compatibility, smaller the better</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_frame_cluster">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_frame_cluster</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_generator</em>, <em>key_1</em>, <em>vid2_name</em>, <em>vid2_generator</em>, <em>key_2</em>, <em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_frame_cluster" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_frame_generator_gradient">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_frame_generator_gradient</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_generator</em>, <em>key_1</em>, <em>vid2_name</em>, <em>vid2_generator</em>, <em>key_2</em>, <em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_frame_generator_gradient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_frame_list_gradient">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_frame_list_gradient</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>frame_list1</em>, <em>key_1</em>, <em>vid2_name</em>, <em>frame_list2</em>, <em>key_2</em>, <em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_frame_list_gradient" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_gradient">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_gradient</code><span class="sig-paren">(</span><em>imgs</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the image gradient compatibility with jit enabled methods
+:param img1: The frame read from first video
+:param img2: The frame read from second video
+:return: a vector with both magnitude and direction, smaller the better</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.compare_wave">
+<code class="descclassname">editing_system.epf.</code><code class="descname">compare_wave</code><span class="sig-paren">(</span><em>imgs</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.compare_wave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate fourier transformation compatibility score by comparing result
+generated by synthesis on both images
+:param img1: The frame read from first video
+:param img2: The frame read from second video
+:return: the compatibility score</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.editing_compare_frame_cluster">
+<code class="descclassname">editing_system.epf.</code><code class="descname">editing_compare_frame_cluster</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_generator</em>, <em>key_1</em>, <em>vid2_name</em>, <em>vid2_generator</em>, <em>key_2</em>, <em>ff_memory</em>, <em>total_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.editing_compare_frame_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>The actual editing method comparing two videos by clustering contents and run three DA methods
+:param vid1_name: Name of the video
+:param vid1_generator: Video’s frame generator
+:param key_1: from which editing point
+:param vid2_name: same above
+:param vid2_generator: same above
+:param key_2: same above
+:param ff_memory: editing book keeper, keep track of all the results
+:param total_memory: the total machine memory to avoid repetitive computations
+:return: updated ff_memory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.epf_with_generators">
+<code class="descclassname">editing_system.epf.</code><code class="descname">epf_with_generators</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_edit_source</em>, <em>vid2_name</em>, <em>vid2_edit_source</em>, <em>ff_memory</em>, <em>total_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.epf_with_generators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Treat this function as a dispatcher of the editing compare frame cluster function
+:param vid1_name: parameter for making ff_memory key
+:param vid1_edit_source: [[vid1 editing pairs], vid1 generator]
+:param vid2_name: parameter for making ff_memory key
+:param vid2_edit_source: [[vid2 editing pairs], vid2_generator]
+:param ff_memory: ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results
+:param total_memory: the total machine memory to avoid repetitive computations
+:return: updated ff_memory</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.generate_ellipse_compatibility_score">
+<code class="descclassname">editing_system.epf.</code><code class="descname">generate_ellipse_compatibility_score</code><span class="sig-paren">(</span><em>eigen_value_matrix_1</em>, <em>eigen_value_matrix_2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.generate_ellipse_compatibility_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate corner detection compatibility score by calculating and compare
+ellipse areas for each pixel on both images
+:param eigen_value_matrix_1: image shape with depth 2 for image 1
+:param eigen_value_matrix_2: image shape with depth 2 for image 2
+:return: a float number suggesting ellipse compatibility</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.generate_gradient_similarity_vector">
+<code class="descclassname">editing_system.epf.</code><code class="descname">generate_gradient_similarity_vector</code><span class="sig-paren">(</span><em>intensity_1</em>, <em>intensity_2</em>, <em>direction_1</em>, <em>direction_2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.generate_gradient_similarity_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is for Gradient. Based on both images’ edge vectors’ directions and intensity we can have a compatibility vector
+:param intensity_1: Gradient Intensity for pic 1
+:param intensity_2: Gradient Intensity for pic 2
+:param direction_1: Gradient Direction for pic 1
+:param direction_2: Gradient Direction for pic 2
+:return: a similarity vector suggesting compatibility</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.gradient_epf">
+<code class="descclassname">editing_system.epf.</code><code class="descname">gradient_epf</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_edit_frame_dict</em>, <em>vid2_name</em>, <em>vid2_edit_frame_dict</em>, <em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.gradient_epf" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vid1_name</strong> – parameter for making ff_memory key</li>
+<li><strong>vid1_edit_frame_dict</strong> – will be used for calculations</li>
+<li><strong>vid2_name</strong> – parameter for making ff_memory key</li>
+<li><strong>vid2_edit_frame_dict</strong> – will be used for calculations</li>
+<li><strong>ff_memory</strong> – ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the lowest vector and its coordinate along with updated ff_memory for gradient</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.gradient_epf_with_generators">
+<code class="descclassname">editing_system.epf.</code><code class="descname">gradient_epf_with_generators</code><span class="sig-paren">(</span><em>vid1_name</em>, <em>vid1_edit_source</em>, <em>vid2_name</em>, <em>vid2_edit_source</em>, <em>ff_memory</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.gradient_epf_with_generators" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>vid1_name</strong> – parameter for making ff_memory key</li>
+<li><strong>vid1_edit_source</strong> – [[vid1 editing pairs], vid1 generator]</li>
+<li><strong>vid2_name</strong> – parameter for making ff_memory key</li>
+<li><strong>vid2_edit_source</strong> – [[vid2 editing pairs], vid2_generator]</li>
+<li><strong>ff_memory</strong> – ff_memory stands for frames-frames memory, it is used for book keeping/storing comparison results</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the lowest vector and its coordinate along with updated ff_memory for gradient</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.in_range">
+<code class="descclassname">editing_system.epf.</code><code class="descname">in_range</code><span class="sig-paren">(</span><em>frame_number</em>, <em>range_pair</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.in_range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.epf.vector_magnitude">
+<code class="descclassname">editing_system.epf.</code><code class="descname">vector_magnitude</code><span class="sig-paren">(</span><em>pair</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.epf.vector_magnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.filewatcher">
+<span id="editing-system-filewatcher-module"></span><h2>editing_system.filewatcher module<a class="headerlink" href="#module-editing_system.filewatcher" title="Permalink to this headline">¶</a></h2>
+<p>Code for File Watcher Module in editing system</p>
+<dl class="class">
+<dt id="editing_system.filewatcher.File_Wathcher">
+<em class="property">class </em><code class="descclassname">editing_system.filewatcher.</code><code class="descname">File_Wathcher</code><span class="sig-paren">(</span><em>connection</em>, <em>queues</em>, <em>callbacks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="editing_system.filewatcher.File_Wathcher.get_consumers">
+<code class="descname">get_consumers</code><span class="sig-paren">(</span><em>Consumer</em>, <em>channel</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher.get_consumers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.filewatcher.File_Wathcher.get_metadatas">
+<code class="descname">get_metadatas</code><span class="sig-paren">(</span><em>new_vid_names</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher.get_metadatas" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>new_vid_names</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the newly created metadata to be inserted into database
+One important thing to notice is that in this moment the to_edit range and metadata_score have not been
+calculated
+I also made the assumption that JSON data is always accompanied by video data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="editing_system.filewatcher.File_Wathcher.process_message">
+<code class="descname">process_message</code><span class="sig-paren">(</span><em>body</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.filewatcher.File_Wathcher.publish_message">
+<code class="descname">publish_message</code><span class="sig-paren">(</span><em>routing_key</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher.publish_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.filewatcher.File_Wathcher.upload_metadata">
+<code class="descname">upload_metadata</code><span class="sig-paren">(</span><em>metadatas</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.File_Wathcher.upload_metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.filewatcher.is_video">
+<code class="descclassname">editing_system.filewatcher.</code><code class="descname">is_video</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.is_video" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.filewatcher.main">
+<code class="descclassname">editing_system.filewatcher.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.filewatcher.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.frame_cluster">
+<span id="editing-system-frame-cluster-module"></span><h2>editing_system.frame_cluster module<a class="headerlink" href="#module-editing_system.frame_cluster" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.frame_cluster.adaptive_cluster">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">adaptive_cluster</code><span class="sig-paren">(</span><em>camera</em>, <em>threshold</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.adaptive_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> – File path to the video</li>
+<li><strong>threshold</strong> – The threshold we are going to use to see if two images are similiar</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">clustered frames</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.adaptive_cluster_with_range">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">adaptive_cluster_with_range</code><span class="sig-paren">(</span><em>camera</em>, <em>threshold</em>, <em>editing_pair</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.adaptive_cluster_with_range" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> – File path to the video</li>
+<li><strong>threshold</strong> – The threshold we are going to use to see if two images are similiar</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">clustered frames</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.cluster_video_frames_entropy">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">cluster_video_frames_entropy</code><span class="sig-paren">(</span><em>camera</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.cluster_video_frames_entropy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_path</strong> – Path of the video to cluster</li>
+<li><strong>n</strong> – tolerance of std, how many tolerance we think it belongs to another cluster</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">clustered frames</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.cluster_with_threshold">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">cluster_with_threshold</code><span class="sig-paren">(</span><em>camera</em>, <em>threshold</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.cluster_with_threshold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.cluster_with_threshold_range">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">cluster_with_threshold_range</code><span class="sig-paren">(</span><em>camera</em>, <em>threshold</em>, <em>editing_pair</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.cluster_with_threshold_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cluster the video clips specified in editing pair with threshold
+:param editing_pair: editing pair passed in from databse
+:return: clustered frames</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.get_block_time_range">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">get_block_time_range</code><span class="sig-paren">(</span><em>clusters</em>, <em>cluster_index</em>, <em>fps</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.get_block_time_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the time range of a block from clusters based upon fps
+:param clusters: clustered video
+:param cluster_index: which index this block belongs to
+:param fps: FPS of the video
+:return: the time range for pydub to use</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.get_image_difference">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">get_image_difference</code><span class="sig-paren">(</span><em>image_1</em>, <em>image_2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.get_image_difference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.frame_cluster.sample_clustered_frames">
+<code class="descclassname">editing_system.frame_cluster.</code><code class="descname">sample_clustered_frames</code><span class="sig-paren">(</span><em>frames_clusters</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.frame_cluster.sample_clustered_frames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.gradient">
+<span id="editing-system-gradient-module"></span><h2>editing_system.gradient module<a class="headerlink" href="#module-editing_system.gradient" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.gradient.change_color">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">change_color</code><span class="sig-paren">(</span><em>result</em>, <em>gradient_intensity</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.change_color" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.follow_dir">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">follow_dir</code><span class="sig-paren">(</span><em>row</em>, <em>collumn</em>, <em>raw_direction_indegree</em>, <em>prev_dir</em>, <em>check_mask</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.follow_dir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.gaussian_blur">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">gaussian_blur</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.gaussian_blur" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.get_gradients">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">get_gradients</code><span class="sig-paren">(</span><em>sobelx</em>, <em>sobely</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.get_gradients" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.get_gradients_with_jit">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">get_gradients_with_jit</code><span class="sig-paren">(</span><em>sobelx</em>, <em>sobely</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.get_gradients_with_jit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.hit_boundary">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">hit_boundary</code><span class="sig-paren">(</span><em>row</em>, <em>collumn</em>, <em>check_mask</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.hit_boundary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.is_neg_zero">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">is_neg_zero</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.is_neg_zero" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.is_negative">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">is_negative</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.is_negative" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.mapping_direction_for_jit">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">mapping_direction_for_jit</code><span class="sig-paren">(</span><em>raw_direction_indegree</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.mapping_direction_for_jit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.produce_gradient_video">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">produce_gradient_video</code><span class="sig-paren">(</span><em>src</em>, <em>output</em>, <em>framerate</em>, <em>res1</em>, <em>res2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.produce_gradient_video" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.showPic">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">showPic</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.showPic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.sobel_filter">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">sobel_filter</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.sobel_filter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.test_gradientDir">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">test_gradientDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.test_gradientDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.gradient.visualize">
+<code class="descclassname">editing_system.gradient.</code><code class="descname">visualize</code><span class="sig-paren">(</span><em>img</em>, <em>gradient_intensity</em>, <em>raw_direction_indegree</em>, <em>color_dir_map</em>, <em>background_color</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.gradient.visualize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.initializer">
+<span id="editing-system-initializer-module"></span><h2>editing_system.initializer module<a class="headerlink" href="#module-editing_system.initializer" title="Permalink to this headline">¶</a></h2>
+<p>Code for Initializer module in editing system</p>
+<dl class="class">
+<dt id="editing_system.initializer.Initializer">
+<em class="property">class </em><code class="descclassname">editing_system.initializer.</code><code class="descname">Initializer</code><span class="sig-paren">(</span><em>connection</em>, <em>queues</em>, <em>callbacks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.initializer.Initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="editing_system.initializer.Initializer.get_consumers">
+<code class="descname">get_consumers</code><span class="sig-paren">(</span><em>Consumer</em>, <em>channel</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.initializer.Initializer.get_consumers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.initializer.Initializer.initialize_publish">
+<code class="descname">initialize_publish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.initializer.Initializer.initialize_publish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.initializer.Initializer.process_message">
+<code class="descname">process_message</code><span class="sig-paren">(</span><em>body</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.initializer.Initializer.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.initializer.main">
+<code class="descclassname">editing_system.initializer.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.initializer.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.message_publisher">
+<span id="editing-system-message-publisher-module"></span><h2>editing_system.message_publisher module<a class="headerlink" href="#module-editing_system.message_publisher" title="Permalink to this headline">¶</a></h2>
+<p>A helper class for publishing messages to 
+exchange</p>
+<dl class="class">
+<dt id="editing_system.message_publisher.Message_publisher">
+<em class="property">class </em><code class="descclassname">editing_system.message_publisher.</code><code class="descname">Message_publisher</code><span class="sig-paren">(</span><em>connection</em>, <em>exchange</em>, <em>routing_key</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.message_publisher.Message_publisher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="editing_system.message_publisher.Message_publisher.publishMessage">
+<code class="descname">publishMessage</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.message_publisher.Message_publisher.publishMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.metadata_worker">
+<span id="editing-system-metadata-worker-module"></span><h2>editing_system.metadata_worker module<a class="headerlink" href="#module-editing_system.metadata_worker" title="Permalink to this headline">¶</a></h2>
+<p>Code for metadata worker in the editing system</p>
+<dl class="class">
+<dt id="editing_system.metadata_worker.MetadataWorker">
+<em class="property">class </em><code class="descclassname">editing_system.metadata_worker.</code><code class="descname">MetadataWorker</code><span class="sig-paren">(</span><em>connection</em>, <em>queues</em>, <em>callbacks=None</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.metadata_worker.MetadataWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sphinx.ext.autodoc.importer._MockObject</span></code></p>
+<dl class="method">
+<dt id="editing_system.metadata_worker.MetadataWorker.get_consumers">
+<code class="descname">get_consumers</code><span class="sig-paren">(</span><em>Consumer</em>, <em>channel</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.metadata_worker.MetadataWorker.get_consumers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.metadata_worker.MetadataWorker.process_message">
+<code class="descname">process_message</code><span class="sig-paren">(</span><em>body</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.metadata_worker.MetadataWorker.process_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="editing_system.metadata_worker.MetadataWorker.publish_message">
+<code class="descname">publish_message</code><span class="sig-paren">(</span><em>routing_key</em>, <em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.metadata_worker.MetadataWorker.publish_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.metadata_worker.main">
+<code class="descclassname">editing_system.metadata_worker.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.metadata_worker.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.produce_result">
+<span id="editing-system-produce-result-module"></span><h2>editing_system.produce_result module<a class="headerlink" href="#module-editing_system.produce_result" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.produce_result.generate_clip_cluster_key">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_clip_cluster_key</code><span class="sig-paren">(</span><em>vid_name</em>, <em>clip_range</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_clip_cluster_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function for generate_video_with_range
+Generate key for clustered_clip
+:param vid_name: The name of the video where the block comes from
+:param clip_range: The range specified in the editing block
+:return: the key for clustered clips</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_cut_images">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_cut_images</code><span class="sig-paren">(</span><em>assemble_blocks</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_cut_images" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate cut images between two editing blocks
+:param assemble_blocks: abstract data result from editing</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_frame_ellipse">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_frame_ellipse</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_frame_ellipse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate ellipse image for current frame
+:param frame: the frame read from video
+:return: generated ellipse image</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_frame_gradient">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_frame_gradient</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_frame_gradient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate one gradient DA visualization frame
+:param frame: input frame from original video
+:return: visualized frame</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_frame_wave">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_frame_wave</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_frame_wave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_video">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_video</code><span class="sig-paren">(</span><em>assemble_blocks</em>, <em>output</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_video" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate result video and progress video from assemble_blocks class
+:param assemble_blocks: abstract data result from editing
+:param output: output name for the video</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_video_with_range">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_video_with_range</code><span class="sig-paren">(</span><em>assemble_blocks</em>, <em>output</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_video_with_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate result video and progress video from assemble_blocks class
+:param assemble_blocks: abstract data result from editing
+:param output: output name for the video</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_video_with_visuals">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_video_with_visuals</code><span class="sig-paren">(</span><em>assemble_blocks</em>, <em>output</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_video_with_visuals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate result videos with visual bridges
+:param assemble_blocks: abstract data result from editing
+:param output: output name for the video</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.generate_video_with_visuals_with_range">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">generate_video_with_visuals_with_range</code><span class="sig-paren">(</span><em>assemble_blocks</em>, <em>output</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.generate_video_with_visuals_with_range" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate result videos with visual bridges
+:param assemble_blocks: abstract data result from editing
+:param output: output name for the video</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.test_da_methods_with_image">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">test_da_methods_with_image</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.test_da_methods_with_image" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.test_with_black">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">test_with_black</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.test_with_black" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.visual_function_dispatcher">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">visual_function_dispatcher</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.visual_function_dispatcher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the corresponding visual generation method
+:param method: method name string
+:return: visual generation method</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.produce_result.write_frames_with_visual">
+<code class="descclassname">editing_system.produce_result.</code><code class="descname">write_frames_with_visual</code><span class="sig-paren">(</span><em>result</em>, <em>assemble_blocks</em>, <em>cluster</em>, <em>current_progress</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.produce_result.write_frames_with_visual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write frames from cluster to the result with DA bridges
+:param result: The result handle
+:param assemble_blocks: the abstract data result from editing
+:param current_progress: index of the current block</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.range_finder">
+<span id="editing-system-range-finder-module"></span><h2>editing_system.range_finder module<a class="headerlink" href="#module-editing_system.range_finder" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.range_finder.calcEntropy">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">calcEntropy</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.calcEntropy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.range_finder.get_entropy_list">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">get_entropy_list</code><span class="sig-paren">(</span><em>video_name</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.get_entropy_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.range_finder.get_range_pair">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">get_range_pair</code><span class="sig-paren">(</span><em>editing_point</em>, <em>frames_left</em>, <em>total_num_frames</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.get_range_pair" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.range_finder.range_filter">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">range_filter</code><span class="sig-paren">(</span><em>range_result</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.range_filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make sure that there is no too short editing range
+:param range_result: Result generated by the range_finder
+:return: filtered range result</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.range_finder.range_finder">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">range_finder</code><span class="sig-paren">(</span><em>video_name</em>, <em>battery_level</em>, <em>percent_to_use</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.range_finder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate editing points determined by the frame’s entropy value
+:param video_name: the metadata worker will find range and editing point for this video
+:param battery_level: the battery level metadata associated with the video
+:param percent_to_use: the total percent of frames we are gonna grab from this clip, should be less than one
+:return: A bunch of ranges that will be used for video editor</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.range_finder.sort_dictionary">
+<code class="descclassname">editing_system.range_finder.</code><code class="descname">sort_dictionary</code><span class="sig-paren">(</span><em>dictionary_to_sort</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.range_finder.sort_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system.wave">
+<span id="editing-system-wave-module"></span><h2>editing_system.wave module<a class="headerlink" href="#module-editing_system.wave" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="editing_system.wave.create_grid_flip">
+<code class="descclassname">editing_system.wave.</code><code class="descname">create_grid_flip</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.create_grid_flip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.easy_visualize">
+<code class="descclassname">editing_system.wave.</code><code class="descname">easy_visualize</code><span class="sig-paren">(</span><em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.easy_visualize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.fft">
+<code class="descclassname">editing_system.wave.</code><code class="descname">fft</code><span class="sig-paren">(</span><em>img</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.fft" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.generate_wave">
+<code class="descclassname">editing_system.wave.</code><code class="descname">generate_wave</code><span class="sig-paren">(</span><em>img</em>, <em>limit_number</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.generate_wave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Based upon the input image and limit number, generate restored fourier transform 3D wave
+:param img: Input image
+:param limit_number: How many individual waves we need to combine
+:return: Generated waves</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.produce_wave_video">
+<code class="descclassname">editing_system.wave.</code><code class="descname">produce_wave_video</code><span class="sig-paren">(</span><em>src</em>, <em>output</em>, <em>frame_rate</em>, <em>res1</em>, <em>res2</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.produce_wave_video" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.synthesis">
+<code class="descclassname">editing_system.wave.</code><code class="descname">synthesis</code><span class="sig-paren">(</span><em>x_freq</em>, <em>y_freq</em>, <em>complex_a</em>, <em>complex_b</em>, <em>row_size</em>, <em>col_size</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.synthesis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="editing_system.wave.synthesis_with_jit">
+<code class="descclassname">editing_system.wave.</code><code class="descname">synthesis_with_jit</code><span class="sig-paren">(</span><em>x_freq</em>, <em>y_freq</em>, <em>complex_a</em>, <em>complex_b</em>, <em>row_size</em>, <em>col_size</em>, <em>x_data</em>, <em>y_data</em><span class="sig-paren">)</span><a class="headerlink" href="#editing_system.wave.synthesis_with_jit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-editing_system">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-editing_system" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">editing_system package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-editing_system.audio_helper">editing_system.audio_helper module</a></li>
+<li><a class="reference internal" href="#module-editing_system.da_worker">editing_system.da_worker module</a></li>
+<li><a class="reference internal" href="#module-editing_system.editing">editing_system.editing module</a></li>
+<li><a class="reference internal" href="#module-editing_system.editing_structures">editing_system.editing_structures module</a></li>
+<li><a class="reference internal" href="#module-editing_system.editing_worker">editing_system.editing_worker module</a></li>
+<li><a class="reference internal" href="#module-editing_system.ellipse">editing_system.ellipse module</a></li>
+<li><a class="reference internal" href="#module-editing_system.epf">editing_system.epf module</a></li>
+<li><a class="reference internal" href="#module-editing_system.filewatcher">editing_system.filewatcher module</a></li>
+<li><a class="reference internal" href="#module-editing_system.frame_cluster">editing_system.frame_cluster module</a></li>
+<li><a class="reference internal" href="#module-editing_system.gradient">editing_system.gradient module</a></li>
+<li><a class="reference internal" href="#module-editing_system.initializer">editing_system.initializer module</a></li>
+<li><a class="reference internal" href="#module-editing_system.message_publisher">editing_system.message_publisher module</a></li>
+<li><a class="reference internal" href="#module-editing_system.metadata_worker">editing_system.metadata_worker module</a></li>
+<li><a class="reference internal" href="#module-editing_system.produce_result">editing_system.produce_result module</a></li>
+<li><a class="reference internal" href="#module-editing_system.range_finder">editing_system.range_finder module</a></li>
+<li><a class="reference internal" href="#module-editing_system.wave">editing_system.wave module</a></li>
+<li><a class="reference internal" href="#module-editing_system">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/editing_system.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Rui An.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.7.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/editing_system.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

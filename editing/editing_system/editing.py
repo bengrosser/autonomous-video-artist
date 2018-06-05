@@ -34,8 +34,8 @@ def load_generator(vid_path):
 # Method Editing System will use
 def editing_import(num_videos):
     """
-    :param num_videos: number of videos to import to the editing worker
     Load generators for the top num_videos metadata scores video clips
+    :param num_videos: number of videos to import to the editing worker
     :return: the dictionary with format {vid_name: [[editing_pairs], generator]}
     """
     imported_video_sources = {}

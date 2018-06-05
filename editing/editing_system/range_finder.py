@@ -75,11 +75,11 @@ def range_filter(range_result):
 
 def range_finder(video_name, battery_level, percent_to_use):
     """
+    Generate editing points determined by the frame's entropy value
     :param video_name: the metadata worker will find range and editing point for this video
     :param battery_level: the battery level metadata associated with the video
     :param percent_to_use: the total percent of frames we are gonna grab from this clip, should be less than one
     :return: A bunch of ranges that will be used for video editor
-    The editing point is determined by the frame's entropy value
     """
     video_entropy_dict = get_entropy_list(video_name)
     sorted_video_entropy_dict = sort_dictionary(video_entropy_dict)
