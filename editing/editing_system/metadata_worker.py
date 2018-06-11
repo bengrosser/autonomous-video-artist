@@ -1,7 +1,3 @@
-"""
-Code for metadata worker in the editing system
-"""
-
 from kombu import Connection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
 import message_publisher
