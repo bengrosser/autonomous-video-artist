@@ -298,17 +298,18 @@ def video_quality_check(imported_videos_sources):
     return True, None
 
 
+#TODO: Change the API end point
 def generate_vid_name():
-    send_url = 'http://freegeoip.net/json'
-    r = requests.get(send_url)
-    j = json.loads(r.text)
-    lat = j['latitude']
-    lon = j['longitude']
-    lat = str(lat)
-    lon = str(lon)
+    # send_url = 'http://freegeoip.net/json'
+    # r = requests.get(send_url)
+    # j = json.loads(r.text)
+    # lat = j['latitude']
+    # lon = j['longitude']
+    # lat = str(lat)
+    # lon = str(lon)
     current_time_stamp = time.time()
     date = str(datetime.datetime.fromtimestamp(current_time_stamp).isoformat())
-    vid_name = date + "_" + lat + "_" + lon + ".mp4"
+    vid_name = date + ".mp4"
     return vid_name
 
 

@@ -8,6 +8,7 @@ import sys
 import message_publisher
 import time
 import cPickle
+import age_sorting_helper
 from editing_structures import EditingBlock, AssembledBlocks
 from produce_result import generate_video_with_range, generate_video_with_visuals_with_range
 from kombu import Connection, Exchange, Queue
@@ -26,17 +27,9 @@ class EditingWorker(ConsumerMixin):
         self.ff_memory = {}  # EditingWorker will keep track of the editing progress by saving ff_memory
         self.num_blocks = 100  # Used for the editing blocks to assemble blocks together
         self.storage_path = "./editing_result/" # Used to store the editing result
+        self.total_age_weight = 10 # Used to make sure that new videos have higher priorities in the editing process
         if not callbacks:
             self.callbacks = [self.process_message, ]
-
-    @staticmethod
-    def get_top_names(top_num):
-        command = 'SELECT file_name FROM Metadata ORDER BY metadata_score DESC LIMIT ' + str(top_num)
-        connection = sqlite3.connect('Editing.db')
-        cursor = connection.cursor()
-        cursor.execute(command)
-        current_top = cursor.fetchall()
-        return current_top
 
     def top_updated(self, top_num):
         """
@@ -44,7 +37,7 @@ class EditingWorker(ConsumerMixin):
         :param top_num: how many numbers of video metadata to check
         :return: whether metadata is updated
         """
-        current_top = self.get_top_names(top_num)
+        current_top = age_sorting_helper.get_top_names(top_num, self.total_age_weight)
         current_top = set(current_top)
         editing_top = set(self.top_meta_file_names)
         if current_top == editing_top:
