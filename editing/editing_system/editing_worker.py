@@ -57,7 +57,7 @@ class EditingWorker(ConsumerMixin):
     @staticmethod
     def top_non_zero(top_num):
         """
-        Check and make sure that all the top ten scores are non-zero
+        Check and make sure that all the top_num scores are non-zero
         :param top_num: how many numbers of video metadata to check
         :return: whether there is zero in top ten Metascore
         """
@@ -93,34 +93,59 @@ class EditingWorker(ConsumerMixin):
         connection.commit()
         connection.close()
 
-    def database_check(self):
+    def database_check(self, meta_data_files):
         """
         Check whether there are none values in the top meta scores in the database
         :return: True indicating editing can go on False other wise
         """
-        imported_videos_sources = editing.editing_import(self.num_videos_to_use)
+        imported_videos_sources = editing.editing_import(meta_data_files)
         if editing.no_none_in_editing_range(imported_videos_sources):
             return True
         else:
             return False
 
+    def select_from_data_base_by_name(self, top_name_list):
+        result_list = []
+        connection = sqlite3.connect('Editing.db')
+        for name in top_name_list:
+            marker = (name, )
+            cursor = connection.cursor()
+            cursor.execute("SELECT * FROM Metadata WHERE file_name = ?", marker)
+            name_entry = cursor.fetchone()
+            result_list.append(name_entry)
+        connection.close()
+        return result_list
+
     def edit_videos(self):
         """
         Edit videos when there is metascore and there is no none in the editing range update in the database
         """
-        editing_data_good_to_go = self.database_check()
+        top_non_zero = False
+        if self.top_non_zero(self.num_videos_to_use):
+            self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, 2.0)
+            top_non_zero = True
+        else:
+            while not top_non_zero:
+                time.sleep(2)
+                print "Wait for Metadata worker to finish the score generation"
+                top_non_zero = self.top_non_zero(self.num_videos_to_use)
+
+        top_data = self.select_from_data_base_by_name(self.top_meta_file_names)
+        editing_data_good_to_go = self.database_check(top_data)
         while not editing_data_good_to_go:
             print "Wait for Metadata worker to finish the range generation"
-            time.sleep(30)
-            editing_data_good_to_go = self.database_check()
+            time.sleep(5)
+            top_data = self.select_from_data_base_by_name(self.top_meta_file_names)
+            editing_data_good_to_go = self.database_check(top_data)
         print "-----------------data are good to go for the editing-----------"
         new_memory = {}
         if self.top_non_zero(self.num_videos_to_use):
-            self.top_meta_file_names = self.get_top_names(self.num_videos_to_use)
+            # self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, 2.0)
             self.enough_data = True
+            top_meta_data = self.select_from_data_base_by_name(self.top_meta_file_names)
             print "------------------- start editing videos ------------------"
             new_memory, vid_name, first_key, method = editing.edit_videos(self.num_videos_to_use, new_memory,
-                                                                          self.num_blocks, self.ff_memory)
+                                                                          self.num_blocks, self.ff_memory, top_meta_data)
             output_path = self.storage_path + vid_name
             self.upload_memory(new_memory, vid_name)
             print "--------------Finished Upload Memory to Database Related To", vid_name, "------------------"

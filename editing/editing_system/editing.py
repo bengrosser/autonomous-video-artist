@@ -32,22 +32,22 @@ def load_generator(vid_path):
 
 
 # Method Editing System will use
-def editing_import(num_videos):
+def editing_import(vid_metadata_list):
     """
     Load generators for the top num_videos metadata scores video clips
-    :param num_videos: number of videos to import to the editing worker
+    :param vid_metadata_list: the top metadata
     :return: the dictionary with format {vid_name: [[editing_pairs], generator]}
     """
     imported_video_sources = {}
-    command = 'SELECT * FROM Metadata ORDER BY metadata_score DESC LIMIT ' + str(num_videos)
-    connection = sqlite3.connect('Editing.db')
-    cursor = connection.cursor()
-    cursor.execute(command)
-    vid_metadata_list = cursor.fetchall()
     for vid_metadata in vid_metadata_list:
         vid_name = vid_metadata[0]
         vid_path = vid_metadata[1]
         editing_pairs = vid_metadata[len(vid_metadata) - 1]
+        print "inside editing import---------------"
+        print len(vid_metadata)
+        print vid_name
+        print vid_path
+        print editing_pairs
         vid_generator = load_generator(vid_path)
         imported_video_sources[vid_name] = [editing_pairs, vid_generator]
     return imported_video_sources
@@ -328,7 +328,7 @@ def no_none_in_editing_range(imported_videos_sources):
 
 
 # Method used by EditingWorker
-def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
+def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory, top_meta_data):
     """
     Editing videos based upon the Metadata score from the database
     :param num_videos: Number of videos we want to import to the editor
@@ -339,7 +339,7 @@ def edit_videos(num_videos, new_memory, num_blocks, accumulated_memory):
     """
     vid_name = generate_vid_name() # With time stamp and geo locatoin
     start_time = time.time()
-    imported_videos_sources = editing_import(num_videos)
+    imported_videos_sources = editing_import(top_meta_data)
     for vid_name, edit_info in imported_videos_sources.iteritems():
         editing_pairs = edit_info[0]
         editing_pairs = ast.literal_eval(editing_pairs)
