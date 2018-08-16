@@ -10,6 +10,8 @@
 
 using namespace std;
 
+static const double pi = 4*atan(1);
+
 
 class AutoNav
 {
@@ -18,12 +20,12 @@ class AutoNav
 		ros::Publisher velocity;
 		bool move_forward;
 		float LIDAR_ERR;
-		
+
 	public:
 		AutoNav(ros::NodeHandle& handle):node(handle), velocity(node.advertise<geometry_msgs::Twist>("cmd_vel", 10), move_forward(true), LIDAR_ERR(0.05))
 		{
 			ros::MultiThreadedSpinner threads(2);
-			
+
 			ros::Subscriber scan = node.subscribe<sensor_msgs::LaserScan>("/scan", 10, &AutoNav::LaserInfo, this);
 			ros::Timer pilot = node.createTimer(ros::Duration(0.1), &AutoNav::pilot, this);
 			threads.spin();
@@ -63,6 +65,10 @@ class AutoNav
 				decision.linear.x = 0.0;
 				decision.angular.z = 0.0;
 				velocity.publish(decision);
+				tf::StampedTransform transform;
+				tf::Quaternion q = transform.getRotation();
+				double yaw = tf::getYaw(q);
+
 				int random = rand()%2;
 				if(random == 0){
 					int prev = 20;
@@ -72,17 +78,19 @@ class AutoNav
 						if(scan->ranges[i] > LIDAR_ERR && scan->ranges[i] < 0.3)
 							prev = i;
 					}
-					
+					double target = ((float)prev+20.0)/180.0*pi;
+					while(yaw < target)
 				}
 				else{
 
 				}
+				move_forward = true;
 			}
 		}
 
 		void pilot(const ros::TimerEvent& time)
 		{
-			
+
 		}
 }
 
@@ -91,10 +99,10 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "navigation");
 	ros::NodeHandle node("navigation");
-	
-	
+
+
 	AutoNav turtlebot(node);
 
-	
+
 	return 0;
 }
