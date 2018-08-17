@@ -68,7 +68,7 @@ class AutoNav
 			else{
 				vector<float>::iterator it = min_element(scan_filter.begin(), scan_filter.end());
 				cout<<"min element: "<<*it<<endl;
-				if(*it < 0.3){
+				if(*it < 0.6){
 					move_forward = false;
 				}
 				else{
