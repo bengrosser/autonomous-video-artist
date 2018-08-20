@@ -36,7 +36,6 @@ class DAvideoWorker(ConsumerMixin):
                 os.makedirs(src_root_dir_path)
             output_path = src_root_dir_path + "/gradient_video.mp4"
             gradient.produce_gradient_video(src_name, output_path, framerate, res1, res2)
-        print "Finished producing gradient videos"
 
     @staticmethod
     def generate_ellipse_videos(vids_names):
@@ -54,7 +53,6 @@ class DAvideoWorker(ConsumerMixin):
                 os.makedirs(src_root_dir_path)
             output_path = src_root_dir_path + "/ellipse_video.mp4"
             ellipse.produce_ellipse_video(src_name, output_path, framerate, res1, res2)
-        print "Finished producing ellipse videos"
 
     @staticmethod
     def generate_wave_videos(vids_names):
@@ -72,7 +70,6 @@ class DAvideoWorker(ConsumerMixin):
                 os.makedirs(src_root_dir_path)
             output_path = src_root_dir_path + "/wave_video.mp4"
             wave.produce_wave_video(src_name, output_path, framerate, res1, res2)
-        print "Finished producing wave videos"
 
     def publish_message(self, routing_key, message):
         exchange = Exchange('editing_exchange', type='direct')
@@ -83,10 +80,13 @@ class DAvideoWorker(ConsumerMixin):
     def process_message(self, body, message):
         new_added_vids_name = body["ready_files"]
         print "Got the message. Start to produce DA videos"
-        self.generate_ellipse_videos(new_added_vids_name)
-        print "Finished Producing Ellipse Video"
+        print "Start Producing Gradient Video"
         self.generate_gradient_videos(new_added_vids_name)
         print "Finished Producing Gradient Video"
+        print "Start Producing Ellipse Video"
+        self.generate_ellipse_videos(new_added_vids_name)
+        print "Finished Producing Ellipse Video"
+        print "Start Producing Wave Video"
         self.generate_wave_videos(new_added_vids_name)
         print "Finished Producing Wave Video"
 

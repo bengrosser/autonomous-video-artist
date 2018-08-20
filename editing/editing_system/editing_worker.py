@@ -122,7 +122,7 @@ class EditingWorker(ConsumerMixin):
         """
         top_non_zero = False
         if self.top_non_zero(self.num_videos_to_use):
-            self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, 2.0)
+            self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, self.total_age_weight)
             top_non_zero = True
         else:
             while not top_non_zero:

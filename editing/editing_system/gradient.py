@@ -9,9 +9,9 @@ import time
 from numba import jit
 
 sys.setrecursionlimit(100000)
-dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)} 
+dir_map = {"90":(1,0),"-90":(-1,0),"1":(0,1),"-1":(0,-1), "-45":(-1,-1), "45":(1,1)}
 color_map = {"90":0,"-90":1,"1":2,"-1":3,
-        "-45":4, "45":5} 
+        "-45":4, "45":5}
 
 
 def is_neg_zero(n):
@@ -105,18 +105,18 @@ def hit_boundary(row, collumn, check_mask):
     row_limit, collumn_limit = np.shape(check_mask)
     row_limit -= 1
     collumn_limit -= 1
-    if(row > row_limit or collumn > collumn_limit or 
+    if(row > row_limit or collumn > collumn_limit or
             row < 0 or collumn < 0):
-        return True 
-    else: 
-        return False 
+        return True
+    else:
+        return False
 
 
 def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
     temp_dir = -1*prev_dir
     temp_dir = int(temp_dir)
     go_row, go_collumn = dir_map[str(temp_dir)]
-    if hit_boundary(row, collumn, check_mask):     
+    if hit_boundary(row, collumn, check_mask):
         return (row+go_row, collumn+go_collumn)
     if check_mask[row][collumn]:
         return (row+go_row, collumn+go_collumn)
@@ -131,7 +131,7 @@ def follow_dir(row, collumn, raw_direction_indegree, prev_dir, check_mask):
 
 
 def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, background_color):
-    x, y = np.shape(img) 
+    x, y = np.shape(img)
     white = np.zeros((x,y,3), np.uint8)
     colors = color_dir_map
     for i in range(x):
@@ -146,7 +146,7 @@ def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, ba
                 start_dir = raw_direction_indegree[i][j]
                 if start_dir < 0:
                     continue
-                end_x, end_y = follow_dir(i, j, raw_direction_indegree, start_dir, 
+                end_x, end_y = follow_dir(i, j, raw_direction_indegree, start_dir,
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 cv2.line(white, (end_y, end_x), (j,i), color, 2)
@@ -158,14 +158,14 @@ def visualize(img, gradient_intensity, raw_direction_indegree, color_dir_map, ba
                 start_dir = raw_direction_indegree[i][j]
                 if start_dir > 0:
                     continue
-                end_x, end_y = follow_dir(i, j, raw_direction_indegree, start_dir, 
+                end_x, end_y = follow_dir(i, j, raw_direction_indegree, start_dir,
                         check_mask)
                 color = colors[color_map[str(int(start_dir))]].tolist()
                 cv2.line(white, (end_y, end_x), (j,i), color, 2)
     # cv2.imwrite("result.jpg", white)
     return white
 
-#Change the color space from BGR to HSV taking consideration of intensity 
+#Change the color space from BGR to HSV taking consideration of intensity
 def change_color(result, gradient_intensity):
     hsv = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
     row, collumn = np.shape(gradient_intensity)
@@ -174,7 +174,7 @@ def change_color(result, gradient_intensity):
         for j in range(collumn):
             hsv[i][j][2] = gradient_intensity[i][j]
     return hsv
-            
+
 #Testing functions
 def test_gradientDir():
     the_dir = np.array([[45,1,1],[90,45,1],[90,1,45]])
@@ -184,8 +184,8 @@ def test_gradientDir():
 
 
 def produce_gradient_video(src, output, framerate, res1, res2):
-    # src_path = "./data/video/" + src
-    camera = cv2.VideoCapture(src)
+    src_path = "./videos/" + src
+    camera = cv2.VideoCapture(src_path)
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     frame_rate = float(framerate)
@@ -193,29 +193,23 @@ def produce_gradient_video(src, output, framerate, res1, res2):
     out = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
     background_color = (0, 0, 0)
     color_dir_map = np.array([[0,190,200],[200,70,70],[51,204,233],[120,80,220],[220,0,80],[200,200,60]])
-    count = 1
     start_time = time.time()
     while True:
         grabbed, frame = camera.read()
-        if grabbed and count < 2160:
+        if grabbed:
             gradient_time = time.time()
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             img_blur = gaussian_blur(img.copy())
             sobelx, sobely = sobel_filter(img_blur)
             gradient_intensity, raw_direction_indegree = get_gradients_with_jit(sobelx, sobely)
             result = visualize(img_blur, gradient_intensity, raw_direction_indegree, color_dir_map, background_color)
-            frame_time = float(count/24.0)
             hsv = change_color(result, gradient_intensity)
             final_result = cv2.cvtColor(hsv , cv2.COLOR_HSV2RGB)
             out.write(final_result)
-            print "Finished this frame spends", time.time()-gradient_time, "seconds"
-            print "finished", count, "frames"
-            count += 1
             # if cv2.waitKey(1) & 0xFF == ord('q'):
             #     break
         else:
             print("No video feed available")
-            print "spending ", (time.time()-start_time), "seconds"
             break
     camera.release()
     out.release()

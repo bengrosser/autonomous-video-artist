@@ -201,9 +201,7 @@ def produce_ellipse_video(src, output, frame_rate, res1, res2):
             result_matrix = temp_result_matrix[:,:,0:3]
             out.write(result_matrix)
         else:
-            print("No video feed available")
             break
-    print "Production Finished"
     end_time = time.time()
     camera.release()
     out.release()

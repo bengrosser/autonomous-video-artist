@@ -118,9 +118,7 @@ def produce_wave_video(src, output, frame_rate, res1, res2):
             visualized_result = easy_visualize(frame)
             out.write(visualized_result)
         else:
-            print("No video feed available")
             break
-    print "Production Finished"
     end_time = time.time()
     camera.release()
     out.release()
