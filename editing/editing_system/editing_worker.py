@@ -157,7 +157,10 @@ class EditingWorker(ConsumerMixin):
             used_keys.append(first_key)
             assembled_blocks = AssembledBlocks(block_1, block_2, new_memory, used_keys)
             assembled_blocks.assemble_blocks(self.num_blocks)
-            generate_video_with_range(assembled_blocks, output_path)
+            src_path = "./videos/"
+            frame_rate = float(30)
+            resolution = (int(640), int(480))
+            generate_video_with_range(assembled_blocks, frame_rate, resolution, src_path, output_path)
             print "--------------Finished Producing Video To Path", output_path, "------------"
         else:
             print "There are still zero values in the database"

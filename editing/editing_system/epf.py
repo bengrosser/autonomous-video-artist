@@ -210,7 +210,7 @@ def compare_frame_list_gradient(vid1_name, frame_list1, key_1, vid2_name, frame_
 
 # TODO: Read from the key instead of from the whole generator
 # Use this function in the editing process
-def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, vid2_generator, key_2, ff_memory, total_memory):
+def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, vid2_generator, key_2, ff_memory, total_memory, length_pair):
     """
     The actual editing method comparing two videos by clustering contents and run three DA methods
     :param vid1_name: Name of the video
@@ -221,6 +221,7 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     :param key_2: same above
     :param ff_memory: editing book keeper, keep track of all the results
     :param total_memory: the total machine memory to avoid repetitive computations
+    :param length_pair: Control the length of the clusters
     :return: updated ff_memory
     """
     clustering_start_time = time.time()
@@ -229,8 +230,8 @@ def editing_compare_frame_cluster(vid1_name, vid1_generator, key_1, vid2_name, v
     # Preemptive, reset both of the generator
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
     vid2_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
-    clustered_vid1, vid1_threshold = adaptive_cluster_with_range(vid1_generator, vid1_threshold, key_1)
-    clustered_vid2, vid2_threshold = adaptive_cluster_with_range(vid2_generator, vid2_threshold, key_2)
+    clustered_vid1, vid1_threshold = adaptive_cluster_with_range(vid1_generator, vid1_threshold, key_1, length_pair)
+    clustered_vid2, vid2_threshold = adaptive_cluster_with_range(vid2_generator, vid2_threshold, key_2, length_pair)
     sampled_frames_cluster1 = sample_clustered_frames(clustered_vid1)
     sampled_frames_cluster2 = sample_clustered_frames(clustered_vid2)
     vid1_generator.set(cv2.CAP_PROP_POS_FRAMES, 0)
@@ -475,6 +476,7 @@ def epf_with_generators(vid1_name, vid1_edit_source, vid2_name, vid2_edit_source
     :param total_memory: the total machine memory to avoid repetitive computations
     :return: updated ff_memory
     """
+    length_pair = (3,8)
     vid1_generator = vid1_edit_source[1]
     vid2_generator = vid2_edit_source[1]
     for vid1_editing_pair in vid1_edit_source[0]:
@@ -482,7 +484,7 @@ def epf_with_generators(vid1_name, vid1_edit_source, vid2_name, vid2_edit_source
             # Keep Updating the ff_memory
             ff_memory = editing_compare_frame_cluster(vid1_name, vid1_generator, vid1_editing_pair, vid2_name,
                                                       vid2_generator,
-                                                      vid2_editing_pair, ff_memory, total_memory)
+                                                      vid2_editing_pair, ff_memory, total_memory, length_pair)
     return ff_memory
 
 # def editing_point_finder(vid1, vid2):

@@ -278,16 +278,19 @@ def generate_clip_cluster_key(vid_name, clip_range):
 
 
 # TODO: Automatically generate the size of the frame
-def generate_video_with_range(assemble_blocks, output):
+def generate_video_with_range(assemble_blocks, frame_rate, resolution, src_path, output):
     """
     Generate result video and progress video from assemble_blocks class
     :param assemble_blocks: abstract data result from editing
+    :param frame_rate: frame rate of the source video
+    :param resolution: resolution of the source video
+    :param src_path: where to read the original video
     :param output: output name for the video
     """
     start_time = time.time()
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    frame_rate = float(30)
-    resolution = (int(640), int(480))
+    # frame_rate = float(30)
+    # resolution = (int(640), int(480))
     edited_result = cv2.VideoWriter(output, fourcc, frame_rate, resolution)
     clustered_clips = {}
     for editing_block in assemble_blocks.editing_blocks:
@@ -298,7 +301,8 @@ def generate_video_with_range(assemble_blocks, output):
         block_range = editing_block.clip_range
         clip_key = generate_clip_cluster_key(block_vid_name, block_range)
         if clip_key not in clustered_clips:
-            file_name = "./videos/" + block_vid_name
+            # file_name = "./videos/" + block_vid_name
+            file_name = src_path + block_vid_name
             camera = cv2.VideoCapture(file_name)
             cluster_start_time = time.time()
             clustered_video = cluster_with_threshold_range(camera, block_threshold, block_range)
