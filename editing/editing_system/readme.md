@@ -12,12 +12,16 @@ Editing System has the following required dependencies:
 * [Numba](https://numba.pydata.org/) v0.37.0 or higher
 * [RabbitMQ](https://www.rabbitmq.com/#getstarted) v3.6.1 or higher
 * [Kombu](https://pypi.org/project/kombu/) v3.0.35 or higher
-* [librabbitmq](https://pypi.org/project/librabbitmq/) v1.6.1 or higher
 * [matplotlib](https://matplotlib.org/) v2.2.x (For Python 2.7)
 * [cairo](http://brewformulas.org/Cairo) Using Homebrew to install Cairo
 * [pycairo](https://pypi.org/project/pycairo/) Python Wrapper for Cairo
 
 ### Modules
+
+Before starting to run all the modules, please make sure you are running the rabbitmq server. If not, please run:
+```
+rabbitmq server start
+```
 
 #### Initializer
 

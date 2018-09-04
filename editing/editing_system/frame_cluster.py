@@ -151,18 +151,21 @@ def cluster_with_threshold_range(camera, threshold, editing_pair):
     return result_frames_clusters
 
 
-# Current threshold range is (3, 8)
-def adaptive_cluster_with_range(camera, threshold, editing_pair):
+# Current threshold range for integrated test is set at (3, 8)
+def adaptive_cluster_with_range(camera, threshold, editing_pair, length_pair):
     """
     :param file_path: File path to the video
     :param threshold: The threshold we are going to use to see if two images are similiar
+    :param length_pair: The ideal length range of the result cluster
     :return: clustered frames
     """
     # camera = cv2.VideoCapture(file_path)
     # result_frames_clusters = []
     # cluster_frames = []
     # prev_frame = None
+
     print "Clustering with range", editing_pair
+    print "Length in the range", length_pair
     if camera is None:
         print "It can't be none here"
         return
@@ -183,13 +186,13 @@ def adaptive_cluster_with_range(camera, threshold, editing_pair):
             print "Have", len(result_frames_clusters), "clusters"
             return result_frames_clusters, threshold
         else:
-            if result_len > 8:
+            if result_len > length_pair[1]:
                 print "Add threshold value", threshold
                 print "Have", len(result_frames_clusters), "clusters"
                 threshold += 0.05
                 # result_frames_clusters = []
                 # cluster_frames = []
-            elif result_len < 3:
+            elif result_len < length_pair[0]:
                 print "Reduce threshold value", threshold
                 print "Have", len(result_frames_clusters), "clusters"
                 if threshold > 0.03:

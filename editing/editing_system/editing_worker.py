@@ -122,7 +122,7 @@ class EditingWorker(ConsumerMixin):
         """
         top_non_zero = False
         if self.top_non_zero(self.num_videos_to_use):
-            self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, 2.0)
+            self.top_meta_file_names = age_sorting_helper.get_top_names(self.num_videos_to_use, self.total_age_weight)
             top_non_zero = True
         else:
             while not top_non_zero:
@@ -157,7 +157,10 @@ class EditingWorker(ConsumerMixin):
             used_keys.append(first_key)
             assembled_blocks = AssembledBlocks(block_1, block_2, new_memory, used_keys)
             assembled_blocks.assemble_blocks(self.num_blocks)
-            generate_video_with_range(assembled_blocks, output_path)
+            src_path = "./videos/"
+            frame_rate = float(30)
+            resolution = (int(640), int(480))
+            generate_video_with_range(assembled_blocks, frame_rate, resolution, src_path, output_path)
             print "--------------Finished Producing Video To Path", output_path, "------------"
         else:
             print "There are still zero values in the database"
